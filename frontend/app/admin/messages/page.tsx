@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Trash2, Mail, MailOpen, Phone, ExternalLink, MessageSquare, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { messagesAPI } from '@/lib/api';
+import { getMessages, markMessageRead, deleteMessage } from '@/lib/db';
 
 interface Message {
   _id: string;
@@ -56,8 +56,8 @@ export default function MessagesAdminPage() {
   const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await messagesAPI.getAll({ limit: '100' });
-      setItems(data.data);
+      const data = await getMessages({ limit: 100 });
+      setItems(data);
     } catch {
       toast.error('Erreur de chargement');
     } finally {
@@ -78,7 +78,7 @@ export default function MessagesAdminPage() {
   const handleMarkRead = async (id: string) => {
     setMarking(id);
     try {
-      await messagesAPI.markRead(id);
+      await markMessageRead(id);
       setItems(prev => prev.map(i => i._id === id ? { ...i, isRead: true } : i));
       if (selected?._id === id) {
         setSelected(prev => prev ? { ...prev, isRead: true } : null);
@@ -94,12 +94,12 @@ export default function MessagesAdminPage() {
     if (!confirm('Supprimer ce message ?')) return;
     setDeleting(id);
     try {
-      await messagesAPI.delete(id);
+      await deleteMessage(id);
       toast.success('Supprimé !');
       setItems(prev => prev.filter(i => i._id !== id));
       if (selected?._id === id) setSelected(null);
     } catch (err: unknown) {
-      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur');
+      toast.error((err as Error)?.message || 'Erreur');
     } finally {
       setDeleting(null);
     }

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { eventsAPI } from '@/lib/api';
+import { getEvents, getFeaturedEvents, getUpcomingEvents, getEvent } from '@/lib/db';
 import type { Event } from '@/types';
 
 interface EventsState {
@@ -24,33 +24,28 @@ const initialState: EventsState = {
 
 export const fetchEvents = createAsyncThunk(
   'events/fetchAll',
-  async (params?: object) => {
-    const { data } = await eventsAPI.getAll(params);
-    return data;
+  async (params?: { limit?: number; category?: string; search?: string }) => {
+    const items = await getEvents({ limit: params?.limit, category: params?.category, search: params?.search });
+    return { data: items, pagination: { total: items.length, page: 1, pages: 1 } };
   }
 );
 
 export const fetchFeaturedEvents = createAsyncThunk(
   'events/fetchFeatured',
-  async () => {
-    const { data } = await eventsAPI.getFeatured();
-    return data.data as Event[];
-  }
+  async () => getFeaturedEvents(8)
 );
 
 export const fetchUpcomingEvents = createAsyncThunk(
   'events/fetchUpcoming',
-  async () => {
-    const { data } = await eventsAPI.getUpcoming();
-    return data.data as Event[];
-  }
+  async () => getUpcomingEvents(8)
 );
 
 export const fetchEventBySlug = createAsyncThunk(
   'events/fetchOne',
   async (slug: string) => {
-    const { data } = await eventsAPI.getOne(slug);
-    return data.data as Event;
+    const event = await getEvent(slug);
+    if (!event) throw new Error('Event not found');
+    return event;
   }
 );
 
@@ -68,7 +63,7 @@ const eventsSlice = createSlice({
       .addCase(fetchEvents.fulfilled,(state, { payload }) => {
         state.isLoading  = false;
         state.items      = payload.data;
-        state.pagination = payload.pagination || state.pagination;
+        state.pagination = payload.pagination;
       })
       .addCase(fetchEvents.rejected, (state, { error }) => {
         state.isLoading = false;

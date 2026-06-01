@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { Star, MapPin, Search, Phone, ExternalLink, Clock, UtensilsCrossed } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn, restaurantCategoryLabels } from '@/lib/utils';
-import { restaurantsAPI } from '@/lib/api';
+import { getRestaurants } from '@/lib/db';
 import type { Restaurant } from '@/types';
 
 const CATEGORIES = [
@@ -37,11 +37,8 @@ export default function RestaurantsPage() {
   const [search, setSearch]           = useState('');
 
   useEffect(() => {
-    restaurantsAPI.getAll({ limit: '50' })
-      .then((res) => {
-        const data = res.data?.data ?? [];
-        setRestaurants(Array.isArray(data) ? data : []);
-      })
+    getRestaurants({ limit: 50 })
+      .then(setRestaurants)
       .catch(() => setRestaurants([]))
       .finally(() => setLoading(false));
   }, []);

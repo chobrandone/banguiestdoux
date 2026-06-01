@@ -1,85 +1,77 @@
+/**
+ * Generic Supabase data-fetching hooks.
+ * These replace the previous Express-API-based hooks.
+ */
 import { useState, useEffect, useCallback } from 'react';
-import type { AxiosRequestConfig } from 'axios';
-import api from '@/lib/api';
+import { supabase } from '@/lib/supabase';
 
-interface UseApiState<T> {
+interface UseSupabaseState<T> {
   data:      T | null;
   isLoading: boolean;
   error:     string | null;
 }
 
-/* Generic fetch hook */
-export function useApi<T>(url: string, params?: object, deps: unknown[] = []) {
-  const [state, setState] = useState<UseApiState<T>>({ data: null, isLoading: true, error: null });
+/** Fetch a list of rows from a Supabase table. */
+export function useTable<T>(
+  table: string,
+  opts: { limit?: number; match?: Record<string, unknown>; order?: string } = {}
+) {
+  const [state, setState] = useState<UseSupabaseState<T[]>>({
+    data: null, isLoading: true, error: null,
+  });
 
   const fetch = useCallback(async () => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     try {
-      const { data } = await api.get<{ success: boolean; data: T }>(url, { params });
-      setState({ data: data.data, isLoading: false, error: null });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let q: any = supabase.from(table).select('*');
+      if (opts.match) {
+        Object.entries(opts.match).forEach(([col, val]) => { q = q.eq(col, val); });
+      }
+      if (opts.order) q = q.order(opts.order, { ascending: false });
+      if (opts.limit)  q = q.limit(opts.limit);
+      const { data, error } = await q;
+      if (error) throw error;
+      setState({ data: data as T[], isLoading: false, error: null });
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur';
-      setState({ data: null, isLoading: false, error: msg });
+      setState({ data: null, isLoading: false, error: (err as Error).message || 'Erreur' });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [url, JSON.stringify(params), ...deps]);
+  }, [table, JSON.stringify(opts)]);
 
   useEffect(() => { fetch(); }, [fetch]);
 
   return { ...state, refetch: fetch };
 }
 
-/* Mutation hook */
-export function useMutation<TData, TPayload>(
-  method: 'post' | 'put' | 'delete' | 'patch',
-  url: string,
-  config?: AxiosRequestConfig
-) {
+/** Simple mutation: insert/update/delete a row in a Supabase table. */
+export function useSupabaseMutation<TPayload extends object>(table: string) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError]         = useState<string | null>(null);
 
-  const mutate = useCallback(async (payload?: TPayload): Promise<TData | null> => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const { data } = await api[method]<{ success: boolean; data: TData }>(url, payload, config);
-      return data.data;
-    } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur';
-      setError(msg);
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [method, url, config]);
+  const insert = useCallback(async (payload: TPayload) => {
+    setIsLoading(true); setError(null);
+    const { data, error } = await supabase.from(table).insert([payload]).select().single();
+    setIsLoading(false);
+    if (error) { setError(error.message); return null; }
+    return data;
+  }, [table]);
 
-  return { mutate, isLoading, error };
-}
+  const update = useCallback(async (id: string, payload: Partial<TPayload>) => {
+    setIsLoading(true); setError(null);
+    const { data, error } = await supabase.from(table).update(payload).eq('id', id).select().single();
+    setIsLoading(false);
+    if (error) { setError(error.message); return null; }
+    return data;
+  }, [table]);
 
-/* Infinite scroll hook */
-export function useInfiniteApi<T>(baseUrl: string, limit = 12) {
-  const [items, setItems]     = useState<T[]>([]);
-  const [page, setPage]       = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+  const remove = useCallback(async (id: string) => {
+    setIsLoading(true); setError(null);
+    const { error } = await supabase.from(table).delete().eq('id', id);
+    setIsLoading(false);
+    if (error) { setError(error.message); return false; }
+    return true;
+  }, [table]);
 
-  const load = useCallback(async (p = 1, reset = false) => {
-    setIsLoading(true);
-    try {
-      const { data } = await api.get(baseUrl, { params: { page: p, limit } });
-      const items = data.data as T[];
-      setItems(prev => reset ? items : [...prev, ...items]);
-      setHasMore(p < (data.pagination?.pages || 1));
-      setPage(p);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [baseUrl, limit]);
-
-  useEffect(() => { load(1, true); }, [load]);
-
-  const loadMore = () => { if (hasMore && !isLoading) load(page + 1); };
-  const reset    = () => { load(1, true); };
-
-  return { items, isLoading, hasMore, loadMore, reset };
+  return { insert, update, remove, isLoading, error };
 }

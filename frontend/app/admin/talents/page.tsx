@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Pencil, Trash2, Star, Search, X, UserCircle, Instagram, Facebook } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { talentsAPI } from '@/lib/api';
+import { supabase } from '@/lib/supabase';
+import { getTalents, deleteRow, toTalent } from '@/lib/db';
 
 interface Talent {
   _id: string;
@@ -97,8 +98,8 @@ export default function TalentsAdminPage() {
   const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await talentsAPI.getAllAdmin({ limit: '200' });
-      setItems(data.data);
+      const data = await getTalents({ all: true, limit: 200 });
+      setItems(data);
     } catch {
       toast.error('Erreur de chargement');
     } finally {
@@ -137,21 +138,34 @@ export default function TalentsAdminPage() {
     setForm(EMPTY_FORM);
   };
 
+  const buildRow = (f: FormData) => ({
+    name: f.name, title: f.title || null,
+    slug: f.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+    category: f.category, bio: f.bio || null,
+    image: f.image || null, instagram: f.instagram || null,
+    facebook: f.facebook || null, video_url: f.videoUrl || null,
+    is_featured: f.isFeatured, is_published: f.isPublished,
+    gallery: [], tags: [],
+  });
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
       if (editing) {
-        await talentsAPI.update(editing._id, form);
+        const { data, error } = await supabase.from('talents').update(buildRow(form)).eq('id', editing._id).select().single();
+        if (error) throw error;
+        setItems(prev => prev.map(i => i._id === editing._id ? toTalent(data) : i));
         toast.success('Mis à jour !');
       } else {
-        await talentsAPI.create(form);
+        const { data, error } = await supabase.from('talents').insert([buildRow(form)]).select().single();
+        if (error) throw error;
+        setItems(prev => [toTalent(data), ...prev]);
         toast.success('Créé !');
       }
-      fetchItems();
       closeModal();
     } catch (err: unknown) {
-      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur');
+      toast.error((err as Error)?.message || 'Erreur');
     } finally {
       setSaving(false);
     }
@@ -161,19 +175,21 @@ export default function TalentsAdminPage() {
     if (!confirm('Supprimer ce talent ?')) return;
     setDeleting(id);
     try {
-      await talentsAPI.delete(id);
+      await deleteRow('talents', id);
       toast.success('Supprimé !');
       setItems(prev => prev.filter(i => i._id !== id));
     } catch (err: unknown) {
-      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur');
+      toast.error((err as Error)?.message || 'Erreur');
     } finally {
       setDeleting(null);
     }
   };
 
   const handleToggle = async (item: Talent, field: 'isPublished' | 'isFeatured') => {
+    const dbCol = field === 'isPublished' ? 'is_published' : 'is_featured';
     try {
-      await talentsAPI.update(item._id, { [field]: !item[field] });
+      const { error } = await supabase.from('talents').update({ [dbCol]: !item[field] }).eq('id', item._id);
+      if (error) throw error;
       setItems(prev => prev.map(i => i._id === item._id ? { ...i, [field]: !i[field] } : i));
     } catch {
       toast.error('Erreur');

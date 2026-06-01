@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Play, Download, ChevronLeft, ChevronRight, ZoomIn, Images } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
-import { galleryAPI } from '@/lib/api';
+import { getGallery } from '@/lib/db';
 import type { GalleryItem } from '@/types';
 
 const CATEGORIES = [
@@ -25,11 +25,8 @@ export default function GalleryPage() {
   const [lightboxIdx,  setLightboxIdx]  = useState<number | null>(null);
 
   useEffect(() => {
-    galleryAPI.getAll({ limit: '50' })
-      .then((res) => {
-        const data = res.data?.data ?? [];
-        setItems(Array.isArray(data) ? data : []);
-      })
+    getGallery({ limit: 50 })
+      .then(setItems)
       .catch(() => setItems([]))
       .finally(() => setLoading(false));
   }, []);

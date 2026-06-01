@@ -1,45 +1,29 @@
-'use client';
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
+import AdminShell from '@/components/admin/AdminShell';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
-import AdminSidebar from '@/components/admin/AdminSidebar';
-import AdminHeader  from '@/components/admin/AdminHeader';
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const supabase = await createClient();
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { isAdmin, isLoading } = useAuth();
-  const router = useRouter();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // SSR auth check — validates JWT server-side, no client-side flash
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-  useEffect(() => {
-    if (!isLoading && !isAdmin) router.push('/addmin');
-  }, [isAdmin, isLoading, router]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-night flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-2 border-gold/20 border-t-gold rounded-full animate-spin" />
-          <p className="text-beige/50 text-sm">Chargement...</p>
-        </div>
-      </div>
-    );
+  if (authError || !user) {
+    redirect('/addmin');
   }
 
-  if (!isAdmin) return null;
+  // Check role from profiles table (authoritative source for roles in this app)
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
 
-  return (
-    <div className="min-h-screen bg-[#0F0F0F] flex">
-      <AdminSidebar
-        mobileOpen={mobileMenuOpen}
-        onMobileClose={() => setMobileMenuOpen(false)}
-      />
-      <div className="flex-1 flex flex-col min-w-0 lg:ml-64">
-        <AdminHeader onMenuToggle={() => setMobileMenuOpen(true)} />
-        <main className="flex-1 p-4 lg:p-8 overflow-auto">
-          {children}
-        </main>
-      </div>
-    </div>
-  );
+  const isAdmin = profile?.role === 'admin' || profile?.role === 'superadmin';
+
+  if (!isAdmin) {
+    redirect('/addmin');
+  }
+
+  return <AdminShell>{children}</AdminShell>;
 }

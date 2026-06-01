@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Pencil, Trash2, Star, Search, X, ImageIcon, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { productsAPI } from '@/lib/api';
+import { supabase } from '@/lib/supabase';
+import { deleteRow } from '@/lib/db';
 import { formatPrice } from '@/lib/utils';
 
 interface Product {
@@ -104,11 +105,49 @@ export default function ShopAdminPage() {
   const ic = 'w-full px-4 py-3 bg-[#0A0A0A] border border-white/10 rounded-xl text-sm text-beige placeholder:text-beige/30 outline-none focus:border-gold/50 transition-all';
   const lc = 'block text-xs font-semibold text-beige/50 uppercase tracking-wider mb-1.5';
 
+  const adminToProduct = (row: Record<string, unknown>): Product => ({
+    _id:          String(row.id),
+    name:         String(row.name || ''),
+    category:     String(row.category || ''),
+    description:  row.description ? String(row.description) : undefined,
+    price:        Number(row.price) || 0,
+    comparePrice: row.compare_price ? Number(row.compare_price) : undefined,
+    images:       Array.isArray(row.images) ? (row.images as string[]) : [],
+    sizes:        Array.isArray(row.sizes) ? (row.sizes as string[]) : [],
+    stock:        Number(row.stock) || 0,
+    isFeatured:   Boolean(row.is_featured),
+    isLimited:    Boolean(row.is_limited),
+    isActive:     Boolean(row.is_active),
+    createdAt:    String(row.created_at || ''),
+  });
+
+  const buildRow = (f: FormData) => ({
+    name:          f.name.trim(),
+    slug:          f.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+    category:      f.category,
+    description:   f.description || null,
+    price:         f.price,
+    compare_price: f.comparePrice || null,
+    images:        f.images.filter(img => img.trim() !== ''),
+    sizes:         [],
+    colors:        [],
+    stock:         f.stock,
+    is_featured:   f.isFeatured,
+    is_limited:    f.isLimited,
+    is_active:     f.isActive,
+    tags:          [],
+  });
+
   const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await productsAPI.getAllAdmin({ limit: '200' });
-      setItems(data.data);
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(200);
+      if (error) throw error;
+      setItems((data || []).map(adminToProduct));
     } catch {
       toast.error('Erreur de chargement');
     } finally {
@@ -150,22 +189,32 @@ export default function ShopAdminPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    const payload = {
-      ...form,
-      images: form.images.filter(img => img.trim() !== ''),
-    };
+    const row = buildRow(form);
     try {
       if (editing) {
-        await productsAPI.update(editing._id, payload);
+        const { data, error } = await supabase
+          .from('products')
+          .update(row)
+          .eq('id', editing._id)
+          .select()
+          .single();
+        if (error) throw error;
+        setItems(prev => prev.map(i => i._id === editing._id ? adminToProduct(data) : i));
         toast.success('Mis à jour !');
       } else {
-        await productsAPI.create(payload);
+        const { data, error } = await supabase
+          .from('products')
+          .insert([row])
+          .select()
+          .single();
+        if (error) throw error;
+        setItems(prev => [adminToProduct(data), ...prev]);
         toast.success('Créé !');
       }
-      fetchItems();
       closeModal();
     } catch (err: unknown) {
-      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur');
+      const msg = (err as { message?: string })?.message || 'Erreur';
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
@@ -175,20 +224,32 @@ export default function ShopAdminPage() {
     if (!confirm('Supprimer ce produit ?')) return;
     setDeleting(id);
     try {
-      await productsAPI.delete(id);
+      await deleteRow('products', id);
       toast.success('Supprimé !');
       setItems(prev => prev.filter(i => i._id !== id));
     } catch (err: unknown) {
-      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur');
+      toast.error((err as { message?: string })?.message || 'Erreur');
     } finally {
       setDeleting(null);
     }
   };
 
+  const toggleColMap: Record<'isActive' | 'isFeatured' | 'isLimited', string> = {
+    isActive:   'is_active',
+    isFeatured: 'is_featured',
+    isLimited:  'is_limited',
+  };
+
   const handleToggle = async (item: Product, field: 'isActive' | 'isFeatured' | 'isLimited') => {
+    const dbCol = toggleColMap[field];
+    const newVal = !item[field];
     try {
-      await productsAPI.update(item._id, { [field]: !item[field] });
-      setItems(prev => prev.map(i => i._id === item._id ? { ...i, [field]: !i[field] } : i));
+      const { error } = await supabase
+        .from('products')
+        .update({ [dbCol]: newVal })
+        .eq('id', item._id);
+      if (error) throw error;
+      setItems(prev => prev.map(i => i._id === item._id ? { ...i, [field]: newVal } : i));
     } catch {
       toast.error('Erreur');
     }

@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Pencil, Trash2, Star, Search, X, ExternalLink, Building2 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { partnersAPI } from '@/lib/api';
+import { supabase } from '@/lib/supabase';
+import { deleteRow } from '@/lib/db';
 
 interface Partner {
   _id: string;
@@ -73,11 +74,36 @@ export default function PartnersAdminPage() {
   const ic = 'w-full px-4 py-3 bg-[#0A0A0A] border border-white/10 rounded-xl text-sm text-beige placeholder:text-beige/30 outline-none focus:border-gold/50 transition-all';
   const lc = 'block text-xs font-semibold text-beige/50 uppercase tracking-wider mb-1.5';
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const adminToPartner = (row: any): Partner => ({
+    _id:        String(row.id),
+    name:       String(row.name || ''),
+    logo:       row.logo || undefined,
+    website:    row.website || undefined,
+    category:   row.category || 'sponsor',
+    isFeatured: Boolean(row.is_active),
+    createdAt:  String(row.created_at || ''),
+  });
+
+  const buildRow = (f: FormData) => ({
+    name:       f.name.trim(),
+    logo:       f.logo || null,
+    website:    f.website || null,
+    category:   f.category,
+    is_active:  f.isFeatured,
+    sort_order: 0,
+  });
+
   const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await partnersAPI.getAll({ limit: '200' });
-      setItems(data.data);
+      const { data, error } = await supabase
+        .from('partners')
+        .select('*')
+        .order('sort_order', { ascending: true })
+        .limit(200);
+      if (error) throw error;
+      setItems((data || []).map(adminToPartner));
     } catch {
       toast.error('Erreur de chargement');
     } finally {
@@ -114,18 +140,31 @@ export default function PartnersAdminPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    const row = buildRow(form);
     try {
       if (editing) {
-        await partnersAPI.update(editing._id, form);
+        const { data, error } = await supabase
+          .from('partners')
+          .update(row)
+          .eq('id', editing._id)
+          .select()
+          .single();
+        if (error) throw error;
+        setItems(prev => prev.map(i => i._id === editing._id ? adminToPartner(data) : i));
         toast.success('Mis à jour !');
       } else {
-        await partnersAPI.create(form);
+        const { data, error } = await supabase
+          .from('partners')
+          .insert([row])
+          .select()
+          .single();
+        if (error) throw error;
+        setItems(prev => [...prev, adminToPartner(data)]);
         toast.success('Créé !');
       }
-      fetchItems();
       closeModal();
     } catch (err: unknown) {
-      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur');
+      toast.error((err as { message?: string })?.message || 'Erreur');
     } finally {
       setSaving(false);
     }
@@ -135,20 +174,25 @@ export default function PartnersAdminPage() {
     if (!confirm('Supprimer ce partenaire ?')) return;
     setDeleting(id);
     try {
-      await partnersAPI.delete(id);
+      await deleteRow('partners', id);
       toast.success('Supprimé !');
       setItems(prev => prev.filter(i => i._id !== id));
     } catch (err: unknown) {
-      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur');
+      toast.error((err as { message?: string })?.message || 'Erreur');
     } finally {
       setDeleting(null);
     }
   };
 
   const handleToggleFeatured = async (item: Partner) => {
+    const newVal = !item.isFeatured;
     try {
-      await partnersAPI.update(item._id, { isFeatured: !item.isFeatured });
-      setItems(prev => prev.map(i => i._id === item._id ? { ...i, isFeatured: !i.isFeatured } : i));
+      const { error } = await supabase
+        .from('partners')
+        .update({ is_active: newVal })
+        .eq('id', item._id);
+      if (error) throw error;
+      setItems(prev => prev.map(i => i._id === item._id ? { ...i, isFeatured: newVal } : i));
     } catch {
       toast.error('Erreur');
     }

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { restaurantsAPI } from '@/lib/api';
+import { getRestaurants, getFeaturedRestaurants, getRestaurant } from '@/lib/db';
 import type { Restaurant } from '@/types';
 
 interface RestaurantsState {
@@ -16,25 +16,21 @@ const initialState: RestaurantsState = {
 
 export const fetchRestaurants = createAsyncThunk(
   'restaurants/fetchAll',
-  async (params?: object) => {
-    const { data } = await restaurantsAPI.getAll(params);
-    return data.data as Restaurant[];
-  }
+  async (params?: { limit?: number; category?: string; search?: string }) =>
+    getRestaurants({ limit: params?.limit, category: params?.category, search: params?.search })
 );
 
 export const fetchFeaturedRestaurants = createAsyncThunk(
   'restaurants/fetchFeatured',
-  async () => {
-    const { data } = await restaurantsAPI.getFeatured();
-    return data.data as Restaurant[];
-  }
+  async () => getFeaturedRestaurants(4)
 );
 
 export const fetchRestaurantBySlug = createAsyncThunk(
   'restaurants/fetchOne',
   async (slug: string) => {
-    const { data } = await restaurantsAPI.getOne(slug);
-    return data.data as Restaurant;
+    const r = await getRestaurant(slug);
+    if (!r) throw new Error('Restaurant not found');
+    return r;
   }
 );
 

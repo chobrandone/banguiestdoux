@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Pencil, Trash2, Star, Search, X, ImageIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { restaurantsAPI } from '@/lib/api';
+import { supabase } from '@/lib/supabase';
+import { getRestaurants, deleteRow, toRestaurant } from '@/lib/db';
 
 interface Restaurant {
   _id: string;
@@ -113,8 +114,8 @@ export default function RestaurantsAdminPage() {
   const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await restaurantsAPI.getAllAdmin({ limit: '200' });
-      setItems(data.data);
+      const data = await getRestaurants({ all: true, limit: 200 });
+      setItems(data);
     } catch {
       toast.error('Erreur de chargement');
     } finally {
@@ -155,21 +156,33 @@ export default function RestaurantsAdminPage() {
     setForm(EMPTY_FORM);
   };
 
+  const buildRow = (f: FormData) => ({
+    name: f.name, category: f.category, description: f.description || null,
+    address: f.address, phone: f.phone || null, email: f.email || null,
+    website: f.website || null, instagram: f.instagram || null, image: f.image || null,
+    price_range: f.priceRange, is_featured: f.isFeatured, is_published: f.isPublished,
+    slug: f.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+    rating: 0, review_count: 0, gallery: [], opening_hours: [], tags: [], cuisine: [],
+  });
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
       if (editing) {
-        await restaurantsAPI.update(editing._id, form);
+        const { data, error } = await supabase.from('restaurants').update(buildRow(form)).eq('id', editing._id).select().single();
+        if (error) throw error;
+        setItems(prev => prev.map(i => i._id === editing._id ? toRestaurant(data) : i));
         toast.success('Mis à jour !');
       } else {
-        await restaurantsAPI.create(form);
+        const { data, error } = await supabase.from('restaurants').insert([buildRow(form)]).select().single();
+        if (error) throw error;
+        setItems(prev => [toRestaurant(data), ...prev]);
         toast.success('Créé !');
       }
-      fetchItems();
       closeModal();
     } catch (err: unknown) {
-      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur');
+      toast.error((err as Error)?.message || 'Erreur');
     } finally {
       setSaving(false);
     }
@@ -179,19 +192,21 @@ export default function RestaurantsAdminPage() {
     if (!confirm('Supprimer ce restaurant ?')) return;
     setDeleting(id);
     try {
-      await restaurantsAPI.delete(id);
+      await deleteRow('restaurants', id);
       toast.success('Supprimé !');
       setItems(prev => prev.filter(i => i._id !== id));
     } catch (err: unknown) {
-      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur');
+      toast.error((err as Error)?.message || 'Erreur');
     } finally {
       setDeleting(null);
     }
   };
 
   const handleToggle = async (item: Restaurant, field: 'isPublished' | 'isFeatured') => {
+    const dbCol = field === 'isPublished' ? 'is_published' : 'is_featured';
     try {
-      await restaurantsAPI.update(item._id, { [field]: !item[field] });
+      const { error } = await supabase.from('restaurants').update({ [dbCol]: !item[field] }).eq('id', item._id);
+      if (error) throw error;
       setItems(prev => prev.map(i => i._id === item._id ? { ...i, [field]: !i[field] } : i));
     } catch {
       toast.error('Erreur');

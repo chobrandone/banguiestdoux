@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Pencil, Trash2, Star, Search, X, ImageIcon, Video, Film } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { galleryAPI } from '@/lib/api';
+import { supabase } from '@/lib/supabase';
+import { getGallery, deleteRow, toGalleryItem } from '@/lib/db';
 
 interface GalleryItem {
   _id: string;
@@ -81,8 +82,8 @@ export default function GalleryAdminPage() {
   const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await galleryAPI.getAll({ limit: '200' });
-      setItems(data.data);
+      const data = await getGallery({ limit: 200 });
+      setItems(data);
     } catch {
       toast.error('Erreur de chargement');
     } finally {
@@ -117,21 +118,30 @@ export default function GalleryAdminPage() {
     setForm(EMPTY_FORM);
   };
 
+  const buildRow = (f: FormData) => ({
+    title: f.title || null, type: f.type, url: f.url,
+    thumbnail: f.thumbnail || null, category: f.category,
+    is_featured: f.isFeatured, tags: [],
+  });
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
       if (editing) {
-        await galleryAPI.update(editing._id, form);
+        const { data, error } = await supabase.from('gallery').update(buildRow(form)).eq('id', editing._id).select().single();
+        if (error) throw error;
+        setItems(prev => prev.map(i => i._id === editing._id ? toGalleryItem(data) : i));
         toast.success('Mis à jour !');
       } else {
-        await galleryAPI.create(form);
+        const { data, error } = await supabase.from('gallery').insert([buildRow(form)]).select().single();
+        if (error) throw error;
+        setItems(prev => [toGalleryItem(data), ...prev]);
         toast.success('Créé !');
       }
-      fetchItems();
       closeModal();
     } catch (err: unknown) {
-      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur');
+      toast.error((err as Error)?.message || 'Erreur');
     } finally {
       setSaving(false);
     }
@@ -141,11 +151,11 @@ export default function GalleryAdminPage() {
     if (!confirm('Supprimer cet élément ?')) return;
     setDeleting(id);
     try {
-      await galleryAPI.delete(id);
+      await deleteRow('gallery', id);
       toast.success('Supprimé !');
       setItems(prev => prev.filter(i => i._id !== id));
     } catch (err: unknown) {
-      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur');
+      toast.error((err as Error)?.message || 'Erreur');
     } finally {
       setDeleting(null);
     }
@@ -153,7 +163,8 @@ export default function GalleryAdminPage() {
 
   const handleToggleFeatured = async (item: GalleryItem) => {
     try {
-      await galleryAPI.update(item._id, { isFeatured: !item.isFeatured });
+      const { error } = await supabase.from('gallery').update({ is_featured: !item.isFeatured }).eq('id', item._id);
+      if (error) throw error;
       setItems(prev => prev.map(i => i._id === item._id ? { ...i, isFeatured: !i.isFeatured } : i));
     } catch {
       toast.error('Erreur');

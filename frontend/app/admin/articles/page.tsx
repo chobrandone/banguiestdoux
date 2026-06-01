@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Pencil, Trash2, Star, Search, X, ImageIcon, Eye, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { articlesAPI } from '@/lib/api';
+import { supabase } from '@/lib/supabase';
+import { getArticles, deleteRow, toArticle } from '@/lib/db';
 
 interface Article {
   _id: string;
@@ -92,8 +93,8 @@ export default function ArticlesAdminPage() {
   const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await articlesAPI.getAllAdmin({ limit: '200' });
-      setItems(data.data);
+      const data = await getArticles({ all: true, limit: 200 });
+      setItems(data);
     } catch {
       toast.error('Erreur de chargement');
     } finally {
@@ -129,21 +130,35 @@ export default function ArticlesAdminPage() {
     setForm(EMPTY_FORM);
   };
 
+  const buildRow = (f: FormData) => ({
+    title: f.title,
+    slug: f.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+    excerpt: f.excerpt, content: f.content,
+    category: f.category, image: f.image || null,
+    is_featured: f.isFeatured, is_published: f.isPublished,
+    gallery: [], tags: [],
+    read_time: Math.max(1, Math.ceil(f.content.split(' ').length / 200)),
+    views: 0, published_at: new Date().toISOString(),
+  });
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
       if (editing) {
-        await articlesAPI.update(editing._id, form);
+        const { data, error } = await supabase.from('articles').update(buildRow(form)).eq('id', editing._id).select().single();
+        if (error) throw error;
+        setItems(prev => prev.map(i => i._id === editing._id ? toArticle(data) : i));
         toast.success('Mis à jour !');
       } else {
-        await articlesAPI.create(form);
+        const { data, error } = await supabase.from('articles').insert([buildRow(form)]).select().single();
+        if (error) throw error;
+        setItems(prev => [toArticle(data), ...prev]);
         toast.success('Créé !');
       }
-      fetchItems();
       closeModal();
     } catch (err: unknown) {
-      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur');
+      toast.error((err as Error)?.message || 'Erreur');
     } finally {
       setSaving(false);
     }
@@ -153,19 +168,21 @@ export default function ArticlesAdminPage() {
     if (!confirm('Supprimer cet article ?')) return;
     setDeleting(id);
     try {
-      await articlesAPI.delete(id);
+      await deleteRow('articles', id);
       toast.success('Supprimé !');
       setItems(prev => prev.filter(i => i._id !== id));
     } catch (err: unknown) {
-      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur');
+      toast.error((err as Error)?.message || 'Erreur');
     } finally {
       setDeleting(null);
     }
   };
 
   const handleToggle = async (item: Article, field: 'isPublished' | 'isFeatured') => {
+    const dbCol = field === 'isPublished' ? 'is_published' : 'is_featured';
     try {
-      await articlesAPI.update(item._id, { [field]: !item[field] });
+      const { error } = await supabase.from('articles').update({ [dbCol]: !item[field] }).eq('id', item._id);
+      if (error) throw error;
       setItems(prev => prev.map(i => i._id === item._id ? { ...i, [field]: !i[field] } : i));
     } catch {
       toast.error('Erreur');

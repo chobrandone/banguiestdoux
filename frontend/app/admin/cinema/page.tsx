@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Pencil, Trash2, Star, Search, X, ImageIcon, Eye, Clock, Film } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { articlesAPI } from '@/lib/api';
+import { supabase } from '@/lib/supabase';
+import { deleteRow } from '@/lib/db';
 
 interface CinemaArticle {
   _id: string;
@@ -90,13 +91,45 @@ export default function CinemaAdminPage() {
   const ic = 'w-full px-4 py-3 bg-[#0A0A0A] border border-white/10 rounded-xl text-sm text-beige placeholder:text-beige/30 outline-none focus:border-gold/50 transition-all';
   const lc = 'block text-xs font-semibold text-beige/50 uppercase tracking-wider mb-1.5';
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const toCinemaArticle = (row: any): CinemaArticle => ({
+    _id:         String(row.id),
+    title:       String(row.title || ''),
+    category:    String(row.category || 'cinema'),
+    excerpt:     row.excerpt || undefined,
+    content:     row.content || undefined,
+    image:       row.image || undefined,
+    isFeatured:  Boolean(row.is_featured),
+    isPublished: Boolean(row.is_published),
+    views:       Number(row.views) || 0,
+    readTime:    Number(row.read_time) || undefined,
+    createdAt:   String(row.created_at || ''),
+  });
+
+  const buildRow = (f: FormData) => ({
+    title:       f.title.trim(),
+    slug:        f.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+    category:    'cinema',
+    excerpt:     f.excerpt || null,
+    content:     f.content || null,
+    image:       f.image || null,
+    is_featured: f.isFeatured,
+    is_published: f.isPublished,
+    read_time:   f.content ? Math.max(1, Math.ceil(f.content.split(' ').length / 200)) : 1,
+    published_at: f.isPublished ? new Date().toISOString() : null,
+  });
+
   const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await articlesAPI.getAllAdmin({ limit: '200' });
-      const raw: CinemaArticle[] = data.data || [];
-      // Filter client-side: cinema or culture category
-      setAllItems(raw.filter(a => a.category === 'cinema' || a.category === 'culture'));
+      const { data, error } = await supabase
+        .from('articles')
+        .select('*')
+        .in('category', ['cinema', 'culture'])
+        .order('created_at', { ascending: false })
+        .limit(200);
+      if (error) throw error;
+      setAllItems((data || []).map(toCinemaArticle));
     } catch {
       toast.error('Erreur de chargement');
     } finally {
@@ -138,30 +171,31 @@ export default function CinemaAdminPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    const payload = {
-      title: form.title,
-      category: 'cinema' as const,
-      excerpt: form.excerpt,
-      content: form.content,
-      image: form.image,
-      isFeatured: form.isFeatured,
-      isPublished: form.isPublished,
-      // Store subtitle in content metadata if needed
-      ...(form.subtitle ? { subtitle: form.subtitle } : {}),
-      ...(form.genre ? { genre: form.genre } : {}),
-    };
+    const row = buildRow(form);
     try {
       if (editing) {
-        await articlesAPI.update(editing._id, payload);
+        const { data, error } = await supabase
+          .from('articles')
+          .update(row)
+          .eq('id', editing._id)
+          .select()
+          .single();
+        if (error) throw error;
+        setAllItems(prev => prev.map(i => i._id === editing._id ? toCinemaArticle(data) : i));
         toast.success('Mis à jour !');
       } else {
-        await articlesAPI.create(payload);
+        const { data, error } = await supabase
+          .from('articles')
+          .insert([row])
+          .select()
+          .single();
+        if (error) throw error;
+        setAllItems(prev => [toCinemaArticle(data), ...prev]);
         toast.success('Créé !');
       }
-      fetchItems();
       closeModal();
     } catch (err: unknown) {
-      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur');
+      toast.error((err as { message?: string })?.message || 'Erreur');
     } finally {
       setSaving(false);
     }
@@ -171,20 +205,31 @@ export default function CinemaAdminPage() {
     if (!confirm('Supprimer cet article cinéma ?')) return;
     setDeleting(id);
     try {
-      await articlesAPI.delete(id);
+      await deleteRow('articles', id);
       toast.success('Supprimé !');
       setAllItems(prev => prev.filter(i => i._id !== id));
     } catch (err: unknown) {
-      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur');
+      toast.error((err as { message?: string })?.message || 'Erreur');
     } finally {
       setDeleting(null);
     }
   };
 
+  const toggleColMap: Record<'isPublished' | 'isFeatured', string> = {
+    isPublished: 'is_published',
+    isFeatured:  'is_featured',
+  };
+
   const handleToggle = async (item: CinemaArticle, field: 'isPublished' | 'isFeatured') => {
+    const dbCol = toggleColMap[field];
+    const newVal = !item[field];
     try {
-      await articlesAPI.update(item._id, { [field]: !item[field] });
-      setAllItems(prev => prev.map(i => i._id === item._id ? { ...i, [field]: !i[field] } : i));
+      const { error } = await supabase
+        .from('articles')
+        .update({ [dbCol]: newVal })
+        .eq('id', item._id);
+      if (error) throw error;
+      setAllItems(prev => prev.map(i => i._id === item._id ? { ...i, [field]: newVal } : i));
     } catch {
       toast.error('Erreur');
     }

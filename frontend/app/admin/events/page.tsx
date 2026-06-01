@@ -3,17 +3,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Search, Edit2, Trash2, Star, X, Calendar, MapPin } from 'lucide-react';
-import { eventsAPI } from '@/lib/api';
+import { supabase } from '@/lib/supabase';
+import { getEvents, deleteRow, toEvent } from '@/lib/db';
 import { formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import type { Event } from '@/types';
 
-interface Event {
-  _id: string; title: string; category: string; date: string; time?: string;
-  location: string; address?: string; description?: string; image?: string;
-  ticketPrice?: number; isFree: boolean; isFeatured: boolean; isPublished: boolean;
-  capacity?: number; rsvpCount?: number; createdAt: string;
-}
-type EventForm = { title:string; category:string; date:string; time:string; location:string; address:string; description:string; image:string; ticketPrice:number; isFree:boolean; isFeatured:boolean; isPublished:boolean; capacity:number };
+type EventForm = {
+  title: string; category: string; date: string; time: string;
+  location: string; address: string; description: string; image: string;
+  ticketPrice: number; isFree: boolean; isFeatured: boolean; isPublished: boolean; capacity: number;
+};
 
 const CATS = [
   { value:'concerts',fr:'Concerts' }, { value:'festivals',fr:'Festivals' },
@@ -40,6 +40,29 @@ function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) =>
   );
 }
 
+/** Convert camelCase form → snake_case Supabase columns */
+function formToRow(form: EventForm) {
+  return {
+    title:        form.title,
+    category:     form.category,
+    event_date:   form.date ? new Date(form.date).toISOString() : null,
+    event_time:   form.time || null,
+    location:     form.location,
+    address:      form.address || null,
+    description:  form.description || null,
+    image:        form.image || null,
+    ticket_price: form.ticketPrice,
+    is_free:      form.isFree,
+    is_featured:  form.isFeatured,
+    is_published: form.isPublished,
+    capacity:     form.capacity || null,
+    slug:         form.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+    gallery:      [],
+    tags:         [],
+    rsvp_count:   0,
+  };
+}
+
 export default function AdminEventsPage() {
   const [items,     setItems]     = useState<Event[]>([]);
   const [loading,   setLoading]   = useState(true);
@@ -52,9 +75,14 @@ export default function AdminEventsPage() {
 
   const fetchItems = useCallback(async () => {
     setLoading(true);
-    try { const { data } = await eventsAPI.getAllAdmin({ limit: '200' }); setItems(data.data); }
-    catch { toast.error('Erreur de chargement'); }
-    finally { setLoading(false); }
+    try {
+      const data = await getEvents({ all: true, limit: 200 });
+      setItems(data);
+    } catch {
+      toast.error('Erreur de chargement');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => { fetchItems(); }, [fetchItems]);
@@ -62,7 +90,22 @@ export default function AdminEventsPage() {
   const openCreate = () => { setEditing(null); setForm(EMPTY); setShowModal(true); };
   const openEdit   = (item: Event) => {
     setEditing(item);
-    setForm({ title:item.title, category:item.category, date:item.date?.slice(0,10)||'', time:item.time||'', location:item.location, address:item.address||'', description:item.description||'', image:item.image||'', ticketPrice:item.ticketPrice||0, isFree:item.isFree, isFeatured:item.isFeatured, isPublished:item.isPublished, capacity:item.capacity||0 });
+    setForm({
+      title:       item.title,
+      category:    item.category,
+      date:        item.date?.slice(0, 10) || '',
+      time:        item.time || '',
+      location:    item.location,
+      address:     item.address || '',
+      description: item.description || '',
+      image:       item.image || '',
+      ticketPrice: item.ticketPrice || 0,
+      isFree:      item.isFree,
+      isFeatured:  item.isFeatured,
+      // @ts-expect-error — isPublished not in Event type but present in DB
+      isPublished: item.isPublished ?? true,
+      capacity:    item.capacity || 0,
+    });
     setShowModal(true);
   };
   const closeModal = () => { setShowModal(false); setEditing(null); };
@@ -72,27 +115,57 @@ export default function AdminEventsPage() {
     if (!form.title || !form.date || !form.location) { toast.error('Titre, date et lieu requis'); return; }
     setSaving(true);
     try {
-      if (editing) { await eventsAPI.update(editing._id, form); toast.success('Mis à jour !'); }
-      else { await eventsAPI.create(form); toast.success('Événement créé !'); }
-      fetchItems(); closeModal();
-    } catch (err: unknown) { toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur'); }
-    finally { setSaving(false); }
+      const row = formToRow(form);
+      if (editing) {
+        const { data, error } = await supabase
+          .from('events')
+          .update(row)
+          .eq('id', editing._id)
+          .select()
+          .single();
+        if (error) throw error;
+        setItems(prev => prev.map(i => i._id === editing._id ? toEvent(data) : i));
+        toast.success('Mis à jour !');
+      } else {
+        const { data, error } = await supabase
+          .from('events')
+          .insert([row])
+          .select()
+          .single();
+        if (error) throw error;
+        setItems(prev => [toEvent(data), ...prev]);
+        toast.success('Événement créé !');
+      }
+      closeModal();
+    } catch (err: unknown) {
+      toast.error((err as Error)?.message || 'Erreur');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('Supprimer cet événement ?')) return;
-    try { await eventsAPI.delete(id); setItems(prev => prev.filter(i => i._id !== id)); toast.success('Supprimé'); }
-    catch { toast.error('Erreur'); }
+    try {
+      await deleteRow('events', id);
+      setItems(prev => prev.filter(i => i._id !== id));
+      toast.success('Supprimé');
+    } catch { toast.error('Erreur'); }
   };
 
-  const toggleField = async (id: string, field: string, value: boolean) => {
-    setItems(prev => prev.map(i => i._id === id ? { ...i, [field]: value } : i));
-    try { await eventsAPI.update(id, { [field]: value }); }
-    catch { setItems(prev => prev.map(i => i._id === id ? { ...i, [field]: !value } : i)); toast.error('Erreur'); }
+  const toggleField = async (id: string, dbCol: string, uiField: string, value: boolean) => {
+    setItems(prev => prev.map(i => i._id === id ? { ...i, [uiField]: value } : i));
+    try {
+      const { error } = await supabase.from('events').update({ [dbCol]: value }).eq('id', id);
+      if (error) throw error;
+    } catch {
+      setItems(prev => prev.map(i => i._id === id ? { ...i, [uiField]: !value } : i));
+      toast.error('Erreur');
+    }
   };
 
   const fld = (key: keyof EventForm) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
-    setForm(prev => ({ ...prev, [key]: (key==='ticketPrice'||key==='capacity') ? Number(e.target.value) : e.target.value }));
+    setForm(prev => ({ ...prev, [key]: (key === 'ticketPrice' || key === 'capacity') ? Number(e.target.value) : e.target.value }));
 
   const visible = items.filter(i => {
     if (catFilter !== 'all' && i.category !== catFilter) return false;
@@ -100,7 +173,13 @@ export default function AdminEventsPage() {
     return true;
   });
 
-  const stats = { total:items.length, published:items.filter(i=>i.isPublished).length, upcoming:items.filter(i=>new Date(i.date)>=new Date()).length, featured:items.filter(i=>i.isFeatured).length };
+  const stats = {
+    total:     items.length,
+    // @ts-expect-error
+    published: items.filter(i => i.isPublished).length,
+    upcoming:  items.filter(i => new Date(i.date) >= new Date()).length,
+    featured:  items.filter(i => i.isFeatured).length,
+  };
 
   return (
     <div className="space-y-6 text-beige">
@@ -123,10 +202,10 @@ export default function AdminEventsPage() {
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-beige/30" />
-          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher..."
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher..."
             className="w-full pl-9 pr-4 py-2.5 bg-[#141414] border border-white/10 rounded-xl text-sm text-beige placeholder:text-beige/30 outline-none focus:border-gold/50" />
         </div>
-        <select value={catFilter} onChange={e=>setCatFilter(e.target.value)} className="px-4 py-2.5 bg-[#141414] border border-white/10 rounded-xl text-sm text-beige outline-none">
+        <select value={catFilter} onChange={e => setCatFilter(e.target.value)} className="px-4 py-2.5 bg-[#141414] border border-white/10 rounded-xl text-sm text-beige outline-none">
           <option value="all">Toutes catégories</option>
           {CATS.map(c => <option key={c.value} value={c.value}>{c.fr}</option>)}
         </select>
@@ -136,18 +215,18 @@ export default function AdminEventsPage() {
         {loading ? (
           <div className="py-16 flex items-center justify-center"><div className="w-8 h-8 border-2 border-gold/20 border-t-gold rounded-full animate-spin" /></div>
         ) : visible.length === 0 ? (
-          <div className="py-16 text-center"><Calendar className="w-10 h-10 text-beige/10 mx-auto mb-2" /><p className="text-beige/30 text-sm">{items.length===0?'Aucun événement. Créez le premier !':'Aucun résultat.'}</p></div>
+          <div className="py-16 text-center"><Calendar className="w-10 h-10 text-beige/10 mx-auto mb-2" /><p className="text-beige/30 text-sm">{items.length === 0 ? 'Aucun événement. Créez le premier !' : 'Aucun résultat.'}</p></div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead><tr className="border-b border-white/5">
-                {['Événement','Catégorie','Date','Prix','Statut','Vedette','Actions'].map(h => (
+                {['Événement', 'Catégorie', 'Date', 'Prix', 'Statut', 'Vedette', 'Actions'].map(h => (
                   <th key={h} className="px-4 py-3.5 text-left text-xs font-semibold text-beige/30 uppercase tracking-wider whitespace-nowrap">{h}</th>
                 ))}
               </tr></thead>
               <tbody className="divide-y divide-white/5">
                 {visible.map((item, i) => (
-                  <motion.tr key={item._id} initial={{opacity:0}} animate={{opacity:1}} transition={{delay:i*0.03}} className="hover:bg-white/2 transition-colors">
+                  <motion.tr key={item._id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.03 }} className="hover:bg-white/2 transition-colors">
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-3">
                         {item.image ? (
@@ -163,26 +242,32 @@ export default function AdminEventsPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3.5">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${CAT_COLORS[item.category]||'bg-beige/10 text-beige/60'}`}>
-                        {CATS.find(c=>c.value===item.category)?.fr||item.category}
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${CAT_COLORS[item.category] || 'bg-beige/10 text-beige/60'}`}>
+                        {CATS.find(c => c.value === item.category)?.fr || item.category}
                       </span>
                     </td>
-                    <td className="px-4 py-3.5 text-beige/60 text-xs whitespace-nowrap">{new Date(item.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'})}</td>
-                    <td className="px-4 py-3.5"><span className="text-sm font-semibold text-beige">{item.isFree?'Gratuit':item.ticketPrice?formatPrice(item.ticketPrice,'XAF'):'—'}</span></td>
+                    <td className="px-4 py-3.5 text-beige/60 text-xs whitespace-nowrap">{new Date(item.date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
+                    <td className="px-4 py-3.5"><span className="text-sm font-semibold text-beige">{item.isFree ? 'Gratuit' : item.ticketPrice ? formatPrice(item.ticketPrice, 'XAF') : '—'}</span></td>
                     <td className="px-4 py-3.5">
-                      <button onClick={()=>toggleField(item._id,'isPublished',!item.isPublished)} className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${item.isPublished?'bg-green-500/15 text-green-400':'bg-beige/10 text-beige/40'}`}>
-                        {item.isPublished?'Publié':'Brouillon'}
+                      <button
+                        // @ts-expect-error
+                        onClick={() => toggleField(item._id, 'is_published', 'isPublished', !item.isPublished)}
+                        // @ts-expect-error
+                        className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${item.isPublished ? 'bg-green-500/15 text-green-400' : 'bg-beige/10 text-beige/40'}`}
+                      >
+                        {/* @ts-expect-error */}
+                        {item.isPublished ? 'Publié' : 'Brouillon'}
                       </button>
                     </td>
                     <td className="px-4 py-3.5">
-                      <button onClick={()=>toggleField(item._id,'isFeatured',!item.isFeatured)}>
-                        <Star className={`w-4 h-4 transition-colors ${item.isFeatured?'text-gold fill-gold':'text-beige/20'}`} />
+                      <button onClick={() => toggleField(item._id, 'is_featured', 'isFeatured', !item.isFeatured)}>
+                        <Star className={`w-4 h-4 transition-colors ${item.isFeatured ? 'text-gold fill-gold' : 'text-beige/20'}`} />
                       </button>
                     </td>
                     <td className="px-4 py-3.5">
                       <div className="flex gap-1">
-                        <button onClick={()=>openEdit(item)} className="w-7 h-7 flex items-center justify-center rounded-lg text-beige/30 hover:text-gold hover:bg-gold/10 transition-all"><Edit2 className="w-3.5 h-3.5" /></button>
-                        <button onClick={()=>handleDelete(item._id)} className="w-7 h-7 flex items-center justify-center rounded-lg text-beige/30 hover:text-red-400 hover:bg-red-500/10 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => openEdit(item)} className="w-7 h-7 flex items-center justify-center rounded-lg text-beige/30 hover:text-gold hover:bg-gold/10 transition-all"><Edit2 className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => handleDelete(item._id)} className="w-7 h-7 flex items-center justify-center rounded-lg text-beige/30 hover:text-red-400 hover:bg-red-500/10 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
                       </div>
                     </td>
                   </motion.tr>
@@ -196,39 +281,39 @@ export default function AdminEventsPage() {
       <AnimatePresence>
         {showModal && (
           <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-            <motion.div initial={{opacity:0,scale:0.95}} animate={{opacity:1,scale:1}} exit={{opacity:0,scale:0.95}}
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
               className="bg-[#141414] border border-white/10 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between p-6 border-b border-white/5">
-                <h3 className="font-display text-xl font-bold text-beige">{editing?'Modifier l\'événement':'Nouvel événement'}</h3>
+                <h3 className="font-display text-xl font-bold text-beige">{editing ? "Modifier l'événement" : 'Nouvel événement'}</h3>
                 <button onClick={closeModal} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 text-beige/40 hover:text-beige"><X className="w-5 h-5" /></button>
               </div>
               <form onSubmit={handleSave} className="p-6 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="md:col-span-2"><label className={lc}>Titre *</label><input value={form.title} onChange={fld('title')} required placeholder="Nom de l'événement" className={ic} /></div>
-                  <div><label className={lc}>Catégorie</label><select value={form.category} onChange={fld('category')} className={ic}>{CATS.map(c=><option key={c.value} value={c.value}>{c.fr}</option>)}</select></div>
+                  <div><label className={lc}>Catégorie</label><select value={form.category} onChange={fld('category')} className={ic}>{CATS.map(c => <option key={c.value} value={c.value}>{c.fr}</option>)}</select></div>
                   <div><label className={lc}>Date *</label><input type="date" value={form.date} onChange={fld('date')} required className={ic} /></div>
                   <div><label className={lc}>Heure</label><input type="time" value={form.time} onChange={fld('time')} className={ic} /></div>
                   <div><label className={lc}>Lieu *</label><input value={form.location} onChange={fld('location')} required placeholder="Nom du lieu" className={ic} /></div>
                   <div className="md:col-span-2"><label className={lc}>Adresse</label><input value={form.address} onChange={fld('address')} placeholder="Adresse complète, Bangui" className={ic} /></div>
-                  <div className="md:col-span-2"><label className={lc}>Description</label><textarea value={form.description} onChange={fld('description')} rows={3} placeholder="Description de l'événement..." className={ic+' resize-none'} /></div>
+                  <div className="md:col-span-2"><label className={lc}>Description</label><textarea value={form.description} onChange={fld('description')} rows={3} placeholder="Description de l'événement..." className={ic + ' resize-none'} /></div>
                   <div className="md:col-span-2">
                     <label className={lc}>Image (URL)</label>
                     <input value={form.image} onChange={fld('image')} placeholder="https://images.unsplash.com/..." className={ic} />
                     {form.image && (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={form.image} alt="" className="mt-2 h-28 w-full object-cover rounded-xl" onError={e=>(e.currentTarget.style.display='none')} />
+                      <img src={form.image} alt="" className="mt-2 h-28 w-full object-cover rounded-xl" onError={e => (e.currentTarget.style.display = 'none')} />
                     )}
                   </div>
                   <div><label className={lc}>Prix (XAF)</label><input type="number" value={form.ticketPrice} onChange={fld('ticketPrice')} min="0" className={ic} /></div>
                   <div><label className={lc}>Capacité (0 = illimitée)</label><input type="number" value={form.capacity} onChange={fld('capacity')} min="0" className={ic} /></div>
-                  <div className="flex items-center justify-between p-3 bg-[#0A0A0A] rounded-xl"><span className="text-sm text-beige/70">Entrée gratuite</span><Toggle value={form.isFree} onChange={v=>setForm(p=>({...p,isFree:v}))} /></div>
-                  <div className="flex items-center justify-between p-3 bg-[#0A0A0A] rounded-xl"><span className="text-sm text-beige/70">En vedette</span><Toggle value={form.isFeatured} onChange={v=>setForm(p=>({...p,isFeatured:v}))} /></div>
-                  <div className="flex items-center justify-between p-3 bg-[#0A0A0A] rounded-xl md:col-span-2"><span className="text-sm text-beige/70">Publié (visible sur le site)</span><Toggle value={form.isPublished} onChange={v=>setForm(p=>({...p,isPublished:v}))} /></div>
+                  <div className="flex items-center justify-between p-3 bg-[#0A0A0A] rounded-xl"><span className="text-sm text-beige/70">Entrée gratuite</span><Toggle value={form.isFree} onChange={v => setForm(p => ({ ...p, isFree: v }))} /></div>
+                  <div className="flex items-center justify-between p-3 bg-[#0A0A0A] rounded-xl"><span className="text-sm text-beige/70">En vedette</span><Toggle value={form.isFeatured} onChange={v => setForm(p => ({ ...p, isFeatured: v }))} /></div>
+                  <div className="flex items-center justify-between p-3 bg-[#0A0A0A] rounded-xl md:col-span-2"><span className="text-sm text-beige/70">Publié (visible sur le site)</span><Toggle value={form.isPublished} onChange={v => setForm(p => ({ ...p, isPublished: v }))} /></div>
                 </div>
                 <div className="flex gap-3 pt-2">
                   <button type="submit" disabled={saving} className="flex-1 py-3 bg-gold text-night font-semibold text-sm rounded-xl hover:bg-gold/90 disabled:opacity-50 flex items-center justify-center gap-2">
-                    {saving&&<div className="w-4 h-4 border-2 border-night/30 border-t-night rounded-full animate-spin" />}
-                    {saving?'Enregistrement...':editing?'Mettre à jour':'Créer l\'événement'}
+                    {saving && <div className="w-4 h-4 border-2 border-night/30 border-t-night rounded-full animate-spin" />}
+                    {saving ? 'Enregistrement...' : editing ? 'Mettre à jour' : "Créer l'événement"}
                   </button>
                   <button type="button" onClick={closeModal} className="px-6 py-3 border border-white/10 text-beige/60 text-sm rounded-xl hover:bg-white/5">Annuler</button>
                 </div>

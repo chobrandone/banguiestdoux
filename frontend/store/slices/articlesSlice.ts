@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { articlesAPI } from '@/lib/api';
+import { getArticles, getFeaturedArticles, getArticle } from '@/lib/db';
 import type { Article } from '@/types';
 
 interface ArticlesState {
@@ -16,25 +16,21 @@ const initialState: ArticlesState = {
 
 export const fetchArticles = createAsyncThunk(
   'articles/fetchAll',
-  async (params?: object) => {
-    const { data } = await articlesAPI.getAll(params);
-    return data.data as Article[];
-  }
+  async (params?: { limit?: number; category?: string; search?: string }) =>
+    getArticles({ limit: params?.limit, category: params?.category, search: params?.search })
 );
 
 export const fetchFeaturedArticles = createAsyncThunk(
   'articles/fetchFeatured',
-  async () => {
-    const { data } = await articlesAPI.getFeatured();
-    return data.data as Article[];
-  }
+  async () => getFeaturedArticles(4)
 );
 
 export const fetchArticleBySlug = createAsyncThunk(
   'articles/fetchOne',
   async (slug: string) => {
-    const { data } = await articlesAPI.getOne(slug);
-    return data.data as Article;
+    const a = await getArticle(slug);
+    if (!a) throw new Error('Article not found');
+    return a;
   }
 );
 

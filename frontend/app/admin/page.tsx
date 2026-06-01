@@ -10,7 +10,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { ordersAPI } from '@/lib/api';
+import { getOrders, getDashboardStats } from '@/lib/db';
+import type { DashboardStats } from '@/lib/db';
 import { formatPrice } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -78,30 +79,34 @@ const quickActions = [
 
 export default function AdminDashboard() {
   const { user } = useAuth();
-  const [orders,  setOrders]  = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [orders,     setOrders]     = useState<Order[]>([]);
+  const [dbStats,    setDbStats]    = useState<DashboardStats | null>(null);
+  const [loading,    setLoading]    = useState(true);
 
   useEffect(() => {
-    ordersAPI.getAll({ limit: '10', page: '1' })
-      .then(({ data }) => setOrders(data.data))
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    Promise.all([
+      getOrders({ limit: 10 }),
+      getDashboardStats(),
+    ]).then(([ordersData, statsData]) => {
+      setOrders(ordersData);
+      setDbStats(statsData);
+    }).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
   const orderStats = {
-    total:     orders.length,
-    pending:   orders.filter(o => o.status === 'pending').length,
+    total:     dbStats?.totalOrders ?? orders.length,
+    pending:   dbStats?.pendingOrders ?? orders.filter(o => o.status === 'pending').length,
     delivered: orders.filter(o => o.status === 'delivered').length,
-    revenue:   orders.filter(o => o.status !== 'cancelled').reduce((s, o) => s + o.total, 0),
+    revenue:   dbStats?.totalRevenue ?? orders.filter(o => o.status !== 'cancelled').reduce((s, o) => s + o.total, 0),
   };
 
   const stats = [
-    { label: 'Visiteurs ce mois', value: '8,940',                           change: +23.5, icon: Eye,          color: 'text-blue-400',   bg: 'bg-blue-500/10'   },
-    { label: 'Événements actifs', value: '24',                              change: +12,   icon: Calendar,     color: 'text-gold',       bg: 'bg-gold/10'       },
-    { label: 'Commandes',         value: String(orderStats.total),          change: +34.2, icon: ShoppingBag,  color: 'text-purple-400', bg: 'bg-purple-500/10' },
-    { label: 'En attente',        value: String(orderStats.pending),        change: 0,     icon: Package,      color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
-    { label: 'Restaurants',       value: '30+',                             change: +8,    icon: Utensils,     color: 'text-green-400',  bg: 'bg-green-500/10'  },
-    { label: 'Revenus',           value: formatPrice(orderStats.revenue, 'XAF'), change: +15.7, icon: TrendingUp, color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
+    { label: 'Visiteurs ce mois', value: '8,940',                                change: +23.5, icon: Eye,         color: 'text-blue-400',   bg: 'bg-blue-500/10'   },
+    { label: 'Événements actifs', value: String(dbStats?.totalEvents ?? '—'),     change: +12,   icon: Calendar,    color: 'text-gold',       bg: 'bg-gold/10'       },
+    { label: 'Commandes',         value: String(orderStats.total),                change: +34.2, icon: ShoppingBag, color: 'text-purple-400', bg: 'bg-purple-500/10' },
+    { label: 'En attente',        value: String(orderStats.pending),              change: 0,     icon: Package,     color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
+    { label: 'Restaurants',       value: String(dbStats?.totalRestaurants ?? '—'),change: +8,    icon: Utensils,    color: 'text-green-400',  bg: 'bg-green-500/10'  },
+    { label: 'Revenus',           value: formatPrice(orderStats.revenue, 'XAF'),  change: +15.7, icon: TrendingUp,  color: 'text-cyan-400',   bg: 'bg-cyan-500/10'   },
   ];
 
   return (

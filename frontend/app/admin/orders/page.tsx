@@ -6,7 +6,7 @@ import {
   ShoppingBag, Search, RefreshCw, User, Phone, Mail,
   Clock, CheckCircle2, XCircle, Truck, Package, Eye,
 } from 'lucide-react';
-import { ordersAPI } from '@/lib/api';
+import { getOrders, updateOrderStatus as updateOrderStatusDB } from '@/lib/db';
 import { formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
@@ -49,10 +49,9 @@ export default function AdminOrdersPage() {
   const fetchOrders = useCallback(async () => {
     setLoading(true);
     try {
-      const params: Record<string, string> = { limit: '100' };
-      if (filter !== 'all') params.status = filter;
-      const { data } = await ordersAPI.getAll(params);
-      setOrders(data.data);
+      const data = await getOrders({ limit: 100 });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setOrders(filter === 'all' ? data as any : (data as any).filter((o: any) => o.status === filter));
     } catch {
       toast.error('Impossible de charger les commandes');
     } finally {
@@ -65,7 +64,7 @@ export default function AdminOrdersPage() {
   const updateStatus = async (orderId: string, status: OrderStatus) => {
     setUpdating(orderId);
     try {
-      await ordersAPI.updateStatus(orderId, status);
+      await updateOrderStatusDB(orderId, status);
       setOrders(prev => prev.map(o => o._id === orderId ? { ...o, status } : o));
       if (selected?._id === orderId) setSelected(prev => prev ? { ...prev, status } : null);
       toast.success('Statut mis à jour');

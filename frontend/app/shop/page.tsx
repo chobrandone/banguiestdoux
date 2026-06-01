@@ -8,7 +8,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { cn, formatPrice } from '@/lib/utils';
 import type { Product } from '@/types';
-import { productsAPI } from '@/lib/api';
+import { getProducts } from '@/lib/db';
 import toast from 'react-hot-toast';
 
 const CATS = [
@@ -30,11 +30,8 @@ export default function ShopPage() {
   const [wishlist, setWishlist]       = useState<string[]>([]);
 
   useEffect(() => {
-    productsAPI.getAll({ limit: '50' })
-      .then((res) => {
-        const data = res.data?.data ?? [];
-        setProducts(Array.isArray(data) ? data : []);
-      })
+    getProducts({ limit: 50 })
+      .then(setProducts)
       .catch(() => setProducts([]))
       .finally(() => setLoading(false));
   }, []);

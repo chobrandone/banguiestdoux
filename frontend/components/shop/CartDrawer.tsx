@@ -9,7 +9,7 @@ import {
 import { useCart } from '@/contexts/CartContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { formatPrice } from '@/lib/utils';
-import { ordersAPI } from '@/lib/api';
+import { supabase } from '@/lib/supabase';
 import toast from 'react-hot-toast';
 
 interface CheckoutForm {
@@ -50,31 +50,41 @@ export default function CartDrawer() {
 
     setLoading(true);
     try {
-      const payload = {
-        items: items.map(i => ({
-          product:  i.product._id,
-          quantity: i.quantity,
-          size:     i.size,
-          color:    i.color,
-        })),
-        customerName:   form.name.trim(),
-        customerPhone:  form.phone.trim(),
-        customerEmail:  form.email.trim(),
-        shippingAddress: form.address ? {
-          fullName: form.name.trim(),
-          street:   form.address.trim(),
-          phone:    form.phone.trim(),
-        } : undefined,
-      };
+      const subtotal  = total;
+      const shipping  = shippingCost;
+      const orderTot  = orderTotal;
 
-      const { data } = await ordersAPI.createGuest(payload);
-      setOrderId(data.data._id || '');
+      const { data: order, error } = await supabase
+        .from('orders')
+        .insert([{
+          customer_name:    form.name.trim(),
+          customer_phone:   form.phone.trim(),
+          customer_email:   form.email.trim(),
+          guest_email:      form.email.trim(),
+          shipping_address: form.address
+            ? { fullName: form.name.trim(), street: form.address.trim(), phone: form.phone.trim() }
+            : {},
+          subtotal,
+          shipping_cost: shipping,
+          total:         orderTot,
+          status:        'pending',
+          payment_method: 'cash',
+          payment_status: 'pending',
+          notes: items.map(i =>
+            `${i.product.name} x${i.quantity}${i.size ? ` (${i.size})` : ''}${i.color ? ` [${i.color}]` : ''}`
+          ).join('; '),
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setOrderId(String(order?.id || ''));
       clearCart();
       setStep('success');
       toast.success('Commande passée avec succès !');
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-        || 'Erreur lors de la commande';
+      const msg = (err as { message?: string })?.message || 'Erreur lors de la commande';
       toast.error(msg);
     } finally {
       setLoading(false);

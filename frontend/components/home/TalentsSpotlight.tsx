@@ -1,39 +1,59 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowRight, Play, Instagram } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { getFeaturedTalents } from '@/lib/db';
+import type { Talent } from '@/types';
 
-const talents = [
+/* ─── Fallback seed data ────────────────────────── */
+const seedTalents: Talent[] = [
   {
     _id: '1', slug: 'kessy-ekomo', name: 'Kessy EKOMO',
-    title: { fr: 'Artiste & Influenceuse', en: 'Artist & Influencer' },
+    title: 'Artiste & Influenceuse', titleFr: 'Artiste & Influenceuse',
+    bio: '', category: 'influencer', isFeatured: true, createdAt: '',
     image: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600',
-    category: 'influencer', hasVideo: true, instagram: '@kessy.ekomo',
+    videoUrl: 'https://youtube.com', instagram: '@kessy.ekomo',
   },
   {
     _id: '2', slug: 'milene', name: 'Milene',
-    title: { fr: 'Chanteuse & Créatrice', en: 'Singer & Creator' },
+    title: 'Chanteuse & Créatrice', titleFr: 'Chanteuse & Créatrice',
+    bio: '', category: 'musician', isFeatured: true, createdAt: '',
     image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600',
-    category: 'musician', hasVideo: true, instagram: '@milene_music',
+    videoUrl: 'https://youtube.com', instagram: '@milene_music',
   },
   {
-    _id: '3', slug: 'talent-3', name: 'Chef Arouna',
-    title: { fr: 'Chef Cuisinier', en: 'Head Chef' },
+    _id: '3', slug: 'chef-arouna', name: 'Chef Arouna',
+    title: 'Chef Cuisinier', titleFr: 'Chef Cuisinier',
+    bio: '', category: 'chef', isFeatured: true, createdAt: '',
     image: 'https://images.unsplash.com/photo-1566554273541-37a9ca77b91f?w=600',
-    category: 'chef', hasVideo: false, instagram: '@chef.arouna',
+    instagram: '@chef.arouna',
   },
   {
-    _id: '4', slug: 'talent-4', name: 'DJ Sango',
-    title: { fr: 'DJ & Producteur', en: 'DJ & Producer' },
+    _id: '4', slug: 'dj-sango', name: 'DJ Sango',
+    title: 'DJ & Producteur', titleFr: 'DJ & Producteur',
+    bio: '', category: 'artist', isFeatured: true, createdAt: '',
     image: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600',
-    category: 'artist', hasVideo: true, instagram: '@dj.sango',
+    videoUrl: 'https://youtube.com', instagram: '@dj.sango',
   },
 ];
 
 export default function TalentsSpotlight() {
   const { lang, t } = useLanguage();
+  const [talents,   setTalents]   = useState<Talent[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    getFeaturedTalents(4)
+      .then((data) => setTalents(data.length ? data : seedTalents))
+      .catch(() => setTalents(seedTalents))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const featured = isLoading ? seedTalents : (talents.length ? talents : seedTalents);
+  const spotlightTalent = featured[0];
 
   return (
     <section className="section-py bg-night dark:bg-black relative overflow-hidden" id="talents">
@@ -62,7 +82,7 @@ export default function TalentsSpotlight() {
 
         {/* Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          {talents.map((talent, i) => (
+          {(isLoading ? seedTalents : featured).map((talent, i) => (
             <motion.div
               key={talent._id}
               initial={{ opacity: 0, y: 30 }}
@@ -80,8 +100,7 @@ export default function TalentsSpotlight() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
 
-                  {/* Video indicator */}
-                  {talent.hasVideo && (
+                  {talent.videoUrl && (
                     <div className="absolute top-3 right-3">
                       <div className="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white group-hover:bg-gold group-hover:border-gold transition-all">
                         <Play className="w-3 h-3 fill-current ml-0.5" />
@@ -89,21 +108,21 @@ export default function TalentsSpotlight() {
                     </div>
                   )}
 
-                  {/* Hover overlay */}
                   <div className="absolute inset-0 bg-gold/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                  {/* Content */}
                   <div className="absolute bottom-0 left-0 right-0 p-4">
                     <h3 className="font-display text-lg font-bold text-white group-hover:text-gold transition-colors">
                       {talent.name}
                     </h3>
                     <p className="text-white/60 text-xs mb-2">
-                      {lang === 'fr' ? talent.title.fr : talent.title.en}
+                      {lang === 'fr' ? (talent.titleFr || talent.title) : talent.title}
                     </p>
-                    <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                      <Instagram className="w-3 h-3 text-gold" />
-                      <span className="text-[11px] text-gold">{talent.instagram}</span>
-                    </div>
+                    {talent.instagram && (
+                      <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                        <Instagram className="w-3 h-3 text-gold" />
+                        <span className="text-[11px] text-gold">{talent.instagram}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </Link>
@@ -112,49 +131,44 @@ export default function TalentsSpotlight() {
         </div>
 
         {/* Featured interview banner */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mt-12 rounded-3xl overflow-hidden relative"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 min-h-[280px]">
-            {/* Image */}
-            <div className="relative h-64 md:h-auto">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=800"
-                alt="Interview"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent to-night/80" />
-            </div>
-
-            {/* Content */}
-            <div className="bg-night-50 p-8 md:p-10 flex flex-col justify-center">
-              <span className="label-editorial mb-3">Interview Exclusive</span>
-              <h3 className="font-display text-2xl md:text-3xl font-bold text-beige mb-4 leading-tight">
-                {lang === 'fr'
-                  ? '"Bangui m\'a tout donné" — Kessy EKOMO'
-                  : '"Bangui gave me everything" — Kessy EKOMO'}
-              </h3>
-              <p className="text-beige/50 text-sm mb-6 leading-relaxed">
-                {lang === 'fr'
-                  ? "Rencontre avec l'une des figures montantes de la scène créative de Bangui."
-                  : "A meeting with one of Bangui's rising creative scene figures."}
-              </p>
-              <div className="flex items-center gap-4">
-                <Link href="/talents/kessy-ekomo" className="btn-gold">
-                  <Play className="w-4 h-4 fill-current" />
-                  {lang === 'fr' ? 'Voir l\'interview' : 'Watch interview'}
-                </Link>
-                <Link href="/talents" className="text-gold text-sm font-semibold flex items-center gap-1 hover:gap-2 transition-all">
-                  {t('section.talents.title')} <ArrowRight className="w-4 h-4" />
-                </Link>
+        {spotlightTalent && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mt-12 rounded-3xl overflow-hidden relative"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 min-h-[280px]">
+              <div className="relative h-64 md:h-auto">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={spotlightTalent.image} alt="Interview" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent to-night/80" />
+              </div>
+              <div className="bg-night-50 p-8 md:p-10 flex flex-col justify-center">
+                <span className="label-editorial mb-3">Interview Exclusive</span>
+                <h3 className="font-display text-2xl md:text-3xl font-bold text-beige mb-4 leading-tight">
+                  {lang === 'fr'
+                    ? `"Bangui m'a tout donné" — ${spotlightTalent.name}`
+                    : `"Bangui gave me everything" — ${spotlightTalent.name}`}
+                </h3>
+                <p className="text-beige/50 text-sm mb-6 leading-relaxed">
+                  {lang === 'fr'
+                    ? "Rencontre avec l'une des figures montantes de la scène créative de Bangui."
+                    : "A meeting with one of Bangui's rising creative scene figures."}
+                </p>
+                <div className="flex items-center gap-4">
+                  <Link href={`/talents/${spotlightTalent.slug}`} className="btn-gold">
+                    <Play className="w-4 h-4 fill-current" />
+                    {lang === 'fr' ? "Voir l'interview" : 'Watch interview'}
+                  </Link>
+                  <Link href="/talents" className="text-gold text-sm font-semibold flex items-center gap-1 hover:gap-2 transition-all">
+                    {t('section.talents.title')} <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
               </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        )}
       </div>
     </section>
   );

@@ -7,7 +7,7 @@ import {
   TrendingUp, MessageSquare, Clock, CheckCircle, XCircle, Loader2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { analyticsAPI, ordersAPI, eventsAPI } from '@/lib/api';
+import { getDashboardStats, getOrders, getEvents } from '@/lib/db';
 import { formatPrice } from '@/lib/utils';
 
 interface DashboardStats {
@@ -23,7 +23,6 @@ interface DashboardStats {
 interface Order {
   _id: string;
   customerName?: string;
-  customer?: { name: string };
   total: number;
   status: string;
   createdAt: string;
@@ -32,7 +31,7 @@ interface Order {
 interface EventStat {
   _id: string;
   title: string;
-  attendees?: number;
+  rsvpCount?: number;
   createdAt: string;
 }
 
@@ -78,21 +77,36 @@ export default function AnalyticsAdminPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [dashRes, ordersRes, eventsRes] = await Promise.allSettled([
-        analyticsAPI.getDashboard(),
-        ordersAPI.getAll({ limit: '5' }),
-        eventsAPI.getAllAdmin({ limit: '5' }),
+      const [dbStats, orders, events] = await Promise.all([
+        getDashboardStats(),
+        getOrders({ limit: 5 }),
+        getEvents({ limit: 5 }),
       ]);
 
-      if (dashRes.status === 'fulfilled') {
-        setStats(dashRes.value.data.data || dashRes.value.data);
+      if (dbStats) {
+        setStats({
+          totalEvents:      dbStats.totalEvents,
+          totalRestaurants: dbStats.totalRestaurants,
+          totalUsers:       dbStats.totalUsers,
+          totalOrders:      dbStats.totalOrders,
+          totalRevenue:     dbStats.totalRevenue,
+          unreadMessages:   dbStats.unreadMessages,
+          pendingOrders:    dbStats.pendingOrders,
+        });
       }
-      if (ordersRes.status === 'fulfilled') {
-        setRecentOrders(ordersRes.value.data.data || []);
-      }
-      if (eventsRes.status === 'fulfilled') {
-        setTopEvents(eventsRes.value.data.data || []);
-      }
+      setRecentOrders(orders.map(o => ({
+        _id:          o._id,
+        customerName: o.customerName,
+        total:        o.total,
+        status:       o.status,
+        createdAt:    o.createdAt,
+      })));
+      setTopEvents(events.map(e => ({
+        _id:       e._id,
+        title:     e.title,
+        rsvpCount: e.rsvpCount,
+        createdAt: e.createdAt,
+      })));
     } catch {
       toast.error('Erreur de chargement');
     } finally {
@@ -103,7 +117,7 @@ export default function AnalyticsAdminPage() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const getOrderCustomerName = (order: Order) =>
-    order.customerName || order.customer?.name || 'Client';
+    order.customerName || 'Client';
 
   const statCards = stats ? [
     {
@@ -277,10 +291,10 @@ export default function AnalyticsAdminPage() {
                         <p className="text-xs text-beige/30 mt-0.5">{formatRelativeDate(event.createdAt)}</p>
                       </div>
                     </div>
-                    {event.attendees !== undefined && (
+                    {event.rsvpCount !== undefined && event.rsvpCount > 0 && (
                       <div className="flex items-center gap-1.5 text-xs text-beige/50">
                         <Users size={12} />
-                        <span>{event.attendees}</span>
+                        <span>{event.rsvpCount}</span>
                       </div>
                     )}
                   </motion.div>

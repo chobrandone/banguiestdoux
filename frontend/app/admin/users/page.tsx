@@ -4,12 +4,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Users, ShieldCheck, Shield, User } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { authAPI } from '@/lib/api';
+import { supabase } from '@/lib/supabase';
 
 interface UserRecord {
   _id: string;
   name: string;
-  email: string;
+  email?: string;
   role: string;
   phone?: string;
   isActive: boolean;
@@ -79,8 +79,23 @@ export default function UsersAdminPage() {
   const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await authAPI.getUsers({ limit: '100' });
-      setItems(data.data);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setItems((data || []).map((row: any): UserRecord => ({
+        _id:       String(row.id),
+        name:      String(row.name || 'Anonyme'),
+        email:     row.email || undefined,
+        role:      String(row.role || 'user'),
+        phone:     row.phone || undefined,
+        isActive:  Boolean(row.is_active),
+        lastLogin: row.last_login || undefined,
+        createdAt: String(row.created_at || ''),
+      })));
     } catch {
       toast.error('Erreur de chargement');
     } finally {
@@ -93,7 +108,7 @@ export default function UsersAdminPage() {
   const filtered = items.filter(u => {
     const matchSearch =
       u.name.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase());
+      (u.email || '').toLowerCase().includes(search.toLowerCase());
     const matchRole =
       roleFilter === 'all' ||
       (roleFilter === 'admin' && (u.role === 'admin' || u.role === 'superadmin')) ||
@@ -218,7 +233,7 @@ export default function UsersAdminPage() {
                             </div>
                             <div>
                               <p className="text-sm font-medium text-beige">{user.name}</p>
-                              <p className="text-xs text-beige/40 mt-0.5">{user.email}</p>
+                              {user.email && <p className="text-xs text-beige/40 mt-0.5">{user.email}</p>}
                             </div>
                           </div>
                         </td>

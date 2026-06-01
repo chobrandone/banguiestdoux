@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Send, CheckCircle2, Instagram, Facebook, Youtube } from 'lucide-react';
 import { FaTiktok, FaWhatsapp } from 'react-icons/fa';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { messagesAPI } from '@/lib/api';
+import { sendMessage } from '@/lib/db';
 import toast from 'react-hot-toast';
 
 export default function NewsletterSection() {
@@ -19,7 +19,7 @@ export default function NewsletterSection() {
     if (!email) return;
     setIsLoading(true);
     try {
-      await messagesAPI.send({ email, subject: 'Newsletter Subscription', message: 'Subscribe' });
+      await sendMessage({ name: email.split('@')[0], email, subject: 'Newsletter', message: 'Inscription newsletter' });
       setSubscribed(true);
       toast.success('Merci pour votre abonnement !');
     } catch {

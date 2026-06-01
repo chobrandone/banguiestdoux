@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { Play, Instagram, ArrowRight, Star, Users } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
-import { talentsAPI } from '@/lib/api';
+import { getTalents } from '@/lib/db';
 import type { Talent } from '@/types';
 
 const CATS = [
@@ -26,11 +26,8 @@ export default function TalentsPage() {
   const [selectedCat, setSelectedCat] = useState('all');
 
   useEffect(() => {
-    talentsAPI.getAll({ limit: '50' })
-      .then((res) => {
-        const data = res.data?.data ?? [];
-        setTalents(Array.isArray(data) ? data : []);
-      })
+    getTalents({ limit: 50 })
+      .then(setTalents)
       .catch(() => setTalents([]))
       .finally(() => setLoading(false));
   }, []);

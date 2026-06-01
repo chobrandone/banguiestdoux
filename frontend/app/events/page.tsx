@@ -6,7 +6,7 @@ import { Calendar, MapPin, Search, Filter, Grid3X3, List, ChevronRight, Ticket, 
 import Link from 'next/link';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { formatDate, eventCategoryLabels, cn } from '@/lib/utils';
-import { eventsAPI } from '@/lib/api';
+import { getEvents } from '@/lib/db';
 import type { Event } from '@/types';
 
 const CATEGORIES = [
@@ -32,11 +32,8 @@ export default function EventsPage() {
   const [search, setSearch]           = useState('');
 
   useEffect(() => {
-    eventsAPI.getAll({ limit: '50' })
-      .then((res) => {
-        const data = res.data?.data ?? [];
-        setEvents(Array.isArray(data) ? data : []);
-      })
+    getEvents({ limit: 50 })
+      .then(setEvents)
       .catch(() => setEvents([]))
       .finally(() => setLoading(false));
   }, []);
