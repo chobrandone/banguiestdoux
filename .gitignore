@@ -20,6 +20,9 @@ dist/
 .env.development.local
 .env.test.local
 .env.production.local
+# .env.production is intentionally tracked (public NEXT_PUBLIC_ vars only)
+!.env.production
+!frontend/.env.production
 
 # Debug
 npm-debug.log*
