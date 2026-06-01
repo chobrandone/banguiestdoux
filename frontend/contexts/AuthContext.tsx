@@ -1,134 +1,167 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { authAPI } from '@/lib/api';
-import { storage } from '@/lib/utils';
-import type { User } from '@/types';
+import { supabase } from '@/lib/supabase';
+import type { Profile } from '@/lib/supabase';
+import type { Session, User as SupabaseUser } from '@supabase/supabase-js';
 import toast from 'react-hot-toast';
 
+/* ─── Types ──────────────────────────────────────── */
+export interface AuthUser extends Profile {
+  email: string;
+  access_token: string;
+}
+
 interface AuthContextType {
-  user: User | null;
-  isLoading: boolean;
+  user:            AuthUser | null;
+  session:         Session | null;
+  isLoading:       boolean;
   isAuthenticated: boolean;
-  isAdmin: boolean;
-  login: (email: string, password: string) => Promise<User | null>;
+  isAdmin:         boolean;
+  login:    (email: string, password: string) => Promise<AuthUser | null>;
   register: (name: string, email: string, password: string) => Promise<boolean>;
-  logout: () => void;
-  updateUser: (user: User) => void;
+  logout:   () => Promise<void>;
+  updateUser: (u: Partial<AuthUser>) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
-  user: null,
-  isLoading: true,
-  isAuthenticated: false,
-  isAdmin: false,
+  user: null, session: null, isLoading: true,
+  isAuthenticated: false, isAdmin: false,
   login: async () => null,
   register: async () => false,
-  logout: () => {},
+  logout: async () => {},
   updateUser: () => {},
 });
 
-/* ─── Dev-mode demo admin (no backend needed) ──── */
-const DEMO_ADMIN: User = {
-  _id:       'demo-admin-001',
-  name:      'Super Admin',
-  email:     'admin@banguiestdoux.com',
-  role:      'superadmin',
-  token:     'demo-token',
-  createdAt: new Date().toISOString(),
-};
-const DEMO_PASSWORD = 'Admin@2025!';
+/* ─── Helpers ────────────────────────────────────── */
+async function fetchProfile(uid: string): Promise<Profile | null> {
+  const { data } = await supabase
+    .from('profiles').select('*').eq('id', uid).single();
+  return data;
+}
 
-const isNetworkError = (err: unknown) => {
-  const e = err as { code?: string; response?: unknown };
-  return !e.response;
-};
+function buildAuthUser(sbUser: SupabaseUser, profile: Profile, token: string): AuthUser {
+  return { ...profile, email: sbUser.email!, access_token: token };
+}
 
+/* ─── Provider ───────────────────────────────────── */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser]       = useState<User | null>(null);
+  const [user,      setUser]      = useState<AuthUser | null>(null);
+  const [session,   setSession]   = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   /* ─── Restore session on mount ──────────────────── */
   useEffect(() => {
-    const savedUser  = storage.get('bed_user') as User | null;
-    const savedToken = storage.get('bed_token') as string | null;
-
-    if (savedUser && savedToken) {
-      setUser(savedUser);
-      authAPI.me()
-        .then(({ data }) => setUser(data.data))
-        .catch((err) => {
-          /* Keep session alive when backend is unreachable */
-          if (!isNetworkError(err)) {
-            storage.remove('bed_user');
-            storage.remove('bed_token');
-            setUser(null);
-          }
-        })
-        .finally(() => setIsLoading(false));
-    } else {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const login = useCallback(async (email: string, password: string): Promise<User | null> => {
-    try {
-      const { data } = await authAPI.login({ email, password });
-      const userData: User = data.data;
-      storage.set('bed_token', userData.token);
-      storage.set('bed_user', userData);
-      setUser(userData);
-      toast.success('Bienvenue !');
-      return userData;
-    } catch (err: unknown) {
-      /* ── Dev fallback: allow demo credentials offline ── */
-      if (isNetworkError(err) && process.env.NODE_ENV === 'development') {
-        if (email === DEMO_ADMIN.email && password === DEMO_PASSWORD) {
-          storage.set('bed_token', DEMO_ADMIN.token);
-          storage.set('bed_user', DEMO_ADMIN);
-          setUser(DEMO_ADMIN);
-          toast.success('Bienvenue (mode démo) !');
-          return DEMO_ADMIN;
+    /* Get existing session */
+    supabase.auth.getSession().then(async ({ data: { session: s } }) => {
+      if (s) {
+        const profile = await fetchProfile(s.user.id);
+        if (profile) {
+          setUser(buildAuthUser(s.user, profile, s.access_token));
+          setSession(s);
         }
       }
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-        || (isNetworkError(err) ? 'Serveur inaccessible – vérifiez que le backend est démarré' : 'Erreur de connexion');
-      toast.error(msg);
+      setIsLoading(false);
+    });
+
+    /* Listen for auth changes (login, logout, token refresh) */
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, s) => {
+        if (s) {
+          const profile = await fetchProfile(s.user.id);
+          if (profile) {
+            setUser(buildAuthUser(s.user, profile, s.access_token));
+          }
+          setSession(s);
+        } else {
+          setUser(null);
+          setSession(null);
+        }
+        setIsLoading(false);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  /* ─── Login ──────────────────────────────────────── */
+  const login = useCallback(async (email: string, password: string): Promise<AuthUser | null> => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        toast.error('Identifiants incorrects');
+        return null;
+      }
+
+      const profile = await fetchProfile(data.user.id);
+      if (!profile?.is_active) {
+        await supabase.auth.signOut();
+        toast.error('Compte désactivé');
+        return null;
+      }
+
+      const authUser = buildAuthUser(data.user, profile!, data.session.access_token);
+      setUser(authUser);
+      setSession(data.session);
+      toast.success('Bienvenue !');
+      return authUser;
+    } catch {
+      toast.error('Erreur de connexion');
       return null;
     }
   }, []);
 
+  /* ─── Register ───────────────────────────────────── */
   const register = useCallback(async (name: string, email: string, password: string): Promise<boolean> => {
     try {
-      const { data } = await authAPI.register({ name, email, password });
-      const userData: User = data.data;
-      storage.set('bed_token', userData.token);
-      storage.set('bed_user', userData);
-      setUser(userData);
-      toast.success('Compte créé !');
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { name } },
+      });
+
+      if (error) {
+        toast.error(error.message.includes('already')
+          ? 'Email déjà utilisé'
+          : error.message);
+        return false;
+      }
+
+      /* If email confirmation is disabled, session is returned immediately */
+      if (data.session) {
+        const profile = await fetchProfile(data.user!.id);
+        if (profile) {
+          setUser(buildAuthUser(data.user!, profile, data.session.access_token));
+          setSession(data.session);
+        }
+        toast.success('Compte créé !');
+      } else {
+        toast.success('Vérifiez votre email pour confirmer votre compte.');
+      }
       return true;
-    } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur';
-      toast.error(msg);
+    } catch {
+      toast.error('Erreur lors de la création du compte');
       return false;
     }
   }, []);
 
-  const logout = useCallback(() => {
-    storage.remove('bed_token');
-    storage.remove('bed_user');
+  /* ─── Logout ─────────────────────────────────────── */
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
     setUser(null);
+    setSession(null);
     toast.success('Déconnecté');
   }, []);
 
-  const updateUser = useCallback((u: User) => {
-    setUser(u);
-    storage.set('bed_user', u);
+  /* ─── Update local user state ────────────────────── */
+  const updateUser = useCallback((u: Partial<AuthUser>) => {
+    setUser(prev => prev ? { ...prev, ...u } : null);
   }, []);
 
   return (
     <AuthContext.Provider value={{
       user,
+      session,
       isLoading,
       isAuthenticated: !!user,
       isAdmin: user?.role === 'admin' || user?.role === 'superadmin',

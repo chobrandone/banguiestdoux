@@ -1,8 +1,5 @@
 require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
-const mongoose = require('mongoose');
-
-const Event      = require('../models/Event');
-const Restaurant = require('../models/Restaurant');
+const supabase = require('../config/supabase');
 const Article    = require('../models/Article');
 const Gallery    = require('../models/Gallery');
 const Talent     = require('../models/Talent');

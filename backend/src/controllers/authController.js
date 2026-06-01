@@ -1,32 +1,32 @@
-const User = require('../models/User');
-const { validationResult } = require('express-validator');
-
-/* ─── Helper: send token response ───────────────── */
-const sendTokenResponse = (user, statusCode, res) => {
-  const token = user.getSignedToken();
-  const userResponse = {
-    _id:   user._id,
-    name:  user.name,
-    email: user.email,
-    role:  user.role,
-    avatar:user.avatar,
-    token,
-  };
-  res.status(statusCode).json({ success: true, data: userResponse });
-};
+const supabase = require('../config/supabase');
 
 /* ─── POST /api/auth/register ───────────────────── */
 exports.register = async (req, res, next) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ success: false, message: errors.array()[0].msg });
-
     const { name, email, password } = req.body;
-    const exists = await User.findOne({ email });
-    if (exists) return res.status(400).json({ success: false, message: 'Email déjà utilisé' });
+    if (!name || !email || !password) {
+      return res.status(400).json({ success: false, message: 'Tous les champs sont requis' });
+    }
 
-    const user = await User.create({ name, email, password });
-    sendTokenResponse(user, 201, res);
+    const { data, error } = await supabase.auth.admin.createUser({
+      email,
+      password,
+      user_metadata: { name },
+      email_confirm: true,
+    });
+
+    if (error) {
+      const msg = error.message.includes('already registered')
+        ? 'Email déjà utilisé'
+        : error.message;
+      return res.status(400).json({ success: false, message: msg });
+    }
+
+    /* Fetch profile created by trigger */
+    const { data: profile } = await supabase
+      .from('profiles').select('*').eq('id', data.user.id).single();
+
+    res.status(201).json({ success: true, data: { ...data.user, ...profile }, message: 'Compte créé' });
   } catch (err) { next(err); }
 };
 
@@ -34,27 +34,50 @@ exports.register = async (req, res, next) => {
 exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ success: false, message: 'Email et mot de passe requis' });
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'Email et mot de passe requis' });
+    }
 
-    const user = await User.findOne({ email }).select('+password');
-    if (!user) return res.status(401).json({ success: false, message: 'Identifiants incorrects' });
-    if (!user.isActive) return res.status(401).json({ success: false, message: 'Compte désactivé' });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-    const isMatch = await user.matchPassword(password);
-    if (!isMatch) return res.status(401).json({ success: false, message: 'Identifiants incorrects' });
+    if (error) {
+      return res.status(401).json({ success: false, message: 'Identifiants incorrects' });
+    }
 
-    user.lastLogin = new Date();
-    await user.save({ validateBeforeSave: false });
+    /* Fetch profile for role info */
+    const { data: profile } = await supabase
+      .from('profiles').select('*').eq('id', data.user.id).single();
 
-    sendTokenResponse(user, 200, res);
+    if (!profile?.is_active) {
+      return res.status(401).json({ success: false, message: 'Compte désactivé' });
+    }
+
+    /* Update last_login */
+    await supabase.from('profiles').update({ last_login: new Date().toISOString() }).eq('id', data.user.id);
+
+    res.json({
+      success: true,
+      data: {
+        id:           data.user.id,
+        email:        data.user.email,
+        name:         profile.name,
+        role:         profile.role,
+        avatar:       profile.avatar,
+        access_token: data.session.access_token,
+        refresh_token:data.session.refresh_token,
+        expires_at:   data.session.expires_at,
+        token:        data.session.access_token, // compatibility alias
+      },
+    });
   } catch (err) { next(err); }
 };
 
 /* ─── GET /api/auth/me ──────────────────────────── */
 exports.getMe = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.id);
-    res.json({ success: true, data: user });
+    const { data: profile } = await supabase
+      .from('profiles').select('*').eq('id', req.user.id).single();
+    res.json({ success: true, data: { ...req.user, ...profile } });
   } catch (err) { next(err); }
 };
 
@@ -62,26 +85,28 @@ exports.getMe = async (req, res, next) => {
 exports.updateProfile = async (req, res, next) => {
   try {
     const { name, phone, avatar } = req.body;
-    const user = await User.findByIdAndUpdate(
-      req.user.id,
-      { name, phone, avatar },
-      { new: true, runValidators: true }
-    );
-    res.json({ success: true, data: user });
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ name, phone, avatar })
+      .eq('id', req.user.id)
+      .select()
+      .single();
+
+    if (error) return res.status(400).json({ success: false, message: error.message });
+    res.json({ success: true, data });
   } catch (err) { next(err); }
 };
 
 /* ─── PUT /api/auth/password ────────────────────── */
 exports.updatePassword = async (req, res, next) => {
   try {
-    const { currentPassword, newPassword } = req.body;
-    const user = await User.findById(req.user.id).select('+password');
-    if (!(await user.matchPassword(currentPassword))) {
-      return res.status(401).json({ success: false, message: 'Mot de passe actuel incorrect' });
+    const { newPassword } = req.body;
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: 'Mot de passe trop court (6 caractères min)' });
     }
-    user.password = newPassword;
-    await user.save();
-    sendTokenResponse(user, 200, res);
+    const { error } = await supabase.auth.admin.updateUserById(req.user.id, { password: newPassword });
+    if (error) return res.status(400).json({ success: false, message: error.message });
+    res.json({ success: true, message: 'Mot de passe mis à jour' });
   } catch (err) { next(err); }
 };
 
@@ -95,9 +120,35 @@ exports.getUsers = async (req, res, next) => {
   try {
     const page  = parseInt(req.query.page)  || 1;
     const limit = parseInt(req.query.limit) || 20;
-    const skip  = (page - 1) * limit;
-    const total = await User.countDocuments();
-    const users = await User.find().sort('-createdAt').skip(skip).limit(limit);
-    res.json({ success: true, data: users, pagination: { total, page, limit, pages: Math.ceil(total/limit) } });
+    const from  = (page - 1) * limit;
+    const to    = from + limit - 1;
+
+    const { data, error, count } = await supabase
+      .from('profiles')
+      .select('*', { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .range(from, to);
+
+    if (error) return res.status(400).json({ success: false, message: error.message });
+
+    res.json({
+      success: true,
+      data,
+      pagination: { total: count, page, limit, pages: Math.ceil(count / limit) },
+    });
+  } catch (err) { next(err); }
+};
+
+/* ─── PUT /api/auth/users/:id/role (superadmin) ─── */
+exports.updateUserRole = async (req, res, next) => {
+  try {
+    const { role } = req.body;
+    if (!['user','admin','superadmin'].includes(role)) {
+      return res.status(400).json({ success: false, message: 'Rôle invalide' });
+    }
+    const { data, error } = await supabase
+      .from('profiles').update({ role }).eq('id', req.params.id).select().single();
+    if (error) return res.status(400).json({ success: false, message: error.message });
+    res.json({ success: true, data, message: 'Rôle mis à jour' });
   } catch (err) { next(err); }
 };

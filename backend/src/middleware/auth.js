@@ -1,30 +1,41 @@
-const jwt  = require('jsonwebtoken');
-const User = require('../models/User');
+const supabase = require('../config/supabase');
 
-/* ─── Protect route (requires valid JWT) ──────────── */
+/* ─── Verify Supabase JWT & load profile ─────────── */
 exports.protect = async (req, res, next) => {
-  let token;
-
-  if (req.headers.authorization?.startsWith('Bearer ')) {
-    token = req.headers.authorization.split(' ')[1];
-  }
-
-  if (!token) {
+  const header = req.headers.authorization;
+  if (!header?.startsWith('Bearer ')) {
     return res.status(401).json({ success: false, message: 'Non autorisé – token manquant' });
   }
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select('-password');
+  const token = header.split(' ')[1];
 
-    if (!user || !user.isActive) {
-      return res.status(401).json({ success: false, message: 'Compte désactivé ou introuvable' });
+  try {
+    /* Verify JWT with Supabase */
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+
+    if (error || !user) {
+      return res.status(401).json({ success: false, message: 'Token invalide ou expiré' });
     }
 
-    req.user = user;
+    /* Fetch profile (role, is_active, etc.) */
+    const { data: profile, error: profileErr } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    if (profileErr || !profile) {
+      return res.status(401).json({ success: false, message: 'Profil introuvable' });
+    }
+
+    if (!profile.is_active) {
+      return res.status(401).json({ success: false, message: 'Compte désactivé' });
+    }
+
+    req.user = { ...user, ...profile };
     next();
   } catch (err) {
-    return res.status(401).json({ success: false, message: 'Token invalide ou expiré' });
+    return res.status(401).json({ success: false, message: 'Erreur d\'authentification' });
   }
 };
 
@@ -39,16 +50,18 @@ exports.authorize = (...roles) => (req, res, next) => {
   next();
 };
 
-/* ─── Optional auth (populate req.user if token exists) */
+/* ─── Optional auth ────────────────────────────────── */
 exports.optionalAuth = async (req, res, next) => {
-  let token;
-  if (req.headers.authorization?.startsWith('Bearer ')) {
-    token = req.headers.authorization.split(' ')[1];
-  }
-  if (token) {
+  const header = req.headers.authorization;
+  if (header?.startsWith('Bearer ')) {
+    const token = header.split(' ')[1];
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = await User.findById(decoded.id).select('-password');
+      const { data: { user } } = await supabase.auth.getUser(token);
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles').select('*').eq('id', user.id).single();
+        req.user = profile ? { ...user, ...profile } : user;
+      }
     } catch {}
   }
   next();

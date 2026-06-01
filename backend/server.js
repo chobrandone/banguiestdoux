@@ -1,17 +1,13 @@
 require('dotenv').config();
-const express    = require('express');
-const cors       = require('cors');
-const helmet     = require('helmet');
-const morgan     = require('morgan');
+const express     = require('express');
+const cors        = require('cors');
+const helmet      = require('helmet');
+const morgan      = require('morgan');
 const compression = require('compression');
-const rateLimit  = require('express-rate-limit');
-const connectDB  = require('./src/config/database');
+const rateLimit   = require('express-rate-limit');
 const errorHandler = require('./src/middleware/errorHandler');
 
 const app = express();
-
-/* ─── Connect to MongoDB ─────────────────────────── */
-connectDB();
 
 /* ─── Security & Performance ─────────────────────── */
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
@@ -48,9 +44,6 @@ const authLimiter = rateLimit({
 app.use('/api', limiter);
 app.use('/api/auth', authLimiter);
 
-/* ─── Static files ───────────────────────────────── */
-app.use('/uploads', express.static('uploads'));
-
 /* ─── Routes ─────────────────────────────────────── */
 app.use('/api/auth',        require('./src/routes/auth'));
 app.use('/api/events',      require('./src/routes/events'));
@@ -70,6 +63,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     success: true,
     message: 'Bangui est Doux API is running 🌟',
+    database: 'Supabase PostgreSQL',
     environment: process.env.NODE_ENV,
     timestamp: new Date().toISOString(),
   });
@@ -87,7 +81,7 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`\n🌟 Bangui est Doux API running on port ${PORT}`);
-  console.log(`📡 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`📡 Database: Supabase PostgreSQL`);
   console.log(`🔗 http://localhost:${PORT}/api/health\n`);
 });
 
