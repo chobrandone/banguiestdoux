@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Required for Hostinger / custom server deployments
+  output: 'standalone',
   images: {
     domains: [
       'firebasestorage.googleapis.com',
@@ -8,11 +10,9 @@ const nextConfig = {
       'images.unsplash.com',
       'via.placeholder.com',
       'source.unsplash.com',
+      'mhuryekpudxqyhuwnffu.supabase.co',
     ],
     formats: ['image/avif', 'image/webp'],
-  },
-  experimental: {
-    optimizeCss: true,
   },
   async headers() {
     return [
