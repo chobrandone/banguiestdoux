@@ -74,7 +74,9 @@ export async function uploadWithProgress(
     const ext      = file.name.split('.').pop();
     const filePath = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const anonKey    = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const anonKey    =
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
     const xhr = new XMLHttpRequest();
     xhr.open('POST', `${supabaseUrl}/storage/v1/object/${bucket}/${filePath}`);

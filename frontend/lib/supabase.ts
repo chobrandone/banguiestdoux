@@ -1,17 +1,22 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl  = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+// Support both the new publishable key name and the legacy anon key alias
+const supabaseKey =
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-if (!supabaseUrl || !supabaseAnon) {
-  throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY');
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error(
+    'Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY'
+  );
 }
 
 /**
  * Browser / client-side Supabase client.
- * Uses the anon key — RLS policies apply.
+ * Uses the publishable key — RLS policies apply.
  */
-export const supabase = createClient(supabaseUrl, supabaseAnon, {
+export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
