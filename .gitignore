@@ -1,4 +1,4 @@
-﻿# Dependencies
+# Dependencies
 node_modules/
 .pnp
 .pnp.js
@@ -6,25 +6,24 @@ node_modules/
 # Testing
 coverage/
 
-# Next.js
-frontend/.next/
-frontend/out/
+# Next.js build output (generated on server by npm run build)
+.next/
+out/
 
 # Production builds
 build/
 dist/
 
-# Environment variables
+# Environment variables — local secrets never committed
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
-# .env.production is intentionally tracked (public NEXT_PUBLIC_ vars only — no secrets)
+
+# These are intentionally tracked (NEXT_PUBLIC_ vars only — no secrets)
 !.env.production
-!frontend/.env.production
 !backend/.env.production
-# hostinger.env is the upload template — tracked because it contains no real secrets
 !hostinger.env
 
 # Debug
