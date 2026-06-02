@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Disable SWC minifier — use Terser instead (required on shared hosting
+  // where the SWC native Rust binary cannot initialize its thread pool)
+  swcMinify: false,
   images: {
     domains: [
       'firebasestorage.googleapis.com',
