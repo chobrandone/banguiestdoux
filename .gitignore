@@ -24,6 +24,8 @@ dist/
 !.env.production
 !frontend/.env.production
 !backend/.env.production
+# hostinger.env is the upload template — tracked because it contains no real secrets
+!hostinger.env
 
 # Debug
 npm-debug.log*
