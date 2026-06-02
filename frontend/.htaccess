@@ -1,15 +1,8 @@
-# ── Hostinger Node.js / Passenger configuration ───────────────────────────────
-PassengerNodejs /usr/local/bin/node
-PassengerStartupFile server.js
-PassengerAppType node
+# Passenger is configured via Hostinger hPanel — no directives needed here.
+# This file only handles HTTPS redirect; everything else goes through Node.js.
 
-# ── Force HTTPS ───────────────────────────────────────────────────────────────
 RewriteEngine On
+
+# Force HTTPS
 RewriteCond %{HTTPS} off
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
-# ── Route everything through Next.js (Passenger handles this,
-#    but these rules act as a safety net for static assets) ───────────────────
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ / [L]

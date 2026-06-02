@@ -1,8 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Required for Hostinger / custom server deployments
-  output: 'standalone',
   images: {
     domains: [
       'firebasestorage.googleapis.com',
