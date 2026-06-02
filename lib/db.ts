@@ -98,6 +98,7 @@ export function toArticle(row: any): Article {
     author:      row.author_id || 'Bangui est Doux',
     tags:        row.tags || [],
     isFeatured:  row.is_featured ?? false,
+    isPublished: row.is_published ?? false,
     readTime:    row.read_time ?? 5,
     views:       row.views ?? 0,
     publishedAt: row.published_at || row.created_at,
@@ -449,6 +450,7 @@ export interface DashboardStats {
   totalMessages:    number;
   unreadMessages:   number;
   totalRevenue:     number;
+  totalUsers:       number;
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
@@ -462,6 +464,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     { count: pendingOrders },
     { count: totalMessages },
     { count: unreadMessages },
+    { count: totalUsers },
     { data: revenueData },
   ] = await Promise.all([
     supabase.from('events').select('*', { count: 'exact', head: true }).eq('is_published', true),
@@ -473,6 +476,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
     supabase.from('messages').select('*', { count: 'exact', head: true }),
     supabase.from('messages').select('*', { count: 'exact', head: true }).eq('is_read', false),
+    supabase.from('profiles').select('*', { count: 'exact', head: true }),
     supabase.from('orders').select('total').neq('status', 'cancelled'),
   ]);
 
@@ -488,6 +492,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     pendingOrders:    pendingOrders ?? 0,
     totalMessages:    totalMessages ?? 0,
     unreadMessages:   unreadMessages ?? 0,
+    totalUsers:       totalUsers ?? 0,
     totalRevenue,
   };
 }

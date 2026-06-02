@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter, Playfair_Display, DM_Sans } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider }     from '@/contexts/AuthContext';
@@ -8,25 +7,8 @@ import { LanguageProvider } from '@/contexts/LanguageContext';
 import { ReduxProvider }    from '@/components/providers/ReduxProvider';
 import PublicLayout from '@/components/layout/PublicLayout';
 import './globals.css';
-
-/* ─── Google Fonts ───────────────────────────────── */
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-});
-
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  variable: '--font-playfair',
-  display: 'swap',
-});
-
-const dmSans = DM_Sans({
-  subsets: ['latin'],
-  variable: '--font-dm-sans',
-  display: 'swap',
-});
+// Fonts are loaded via @import in globals.css and defined as CSS variables
+// (--font-inter, --font-playfair, --font-dm-sans) — no next/font needed.
 
 /* ─── Metadata ───────────────────────────────────── */
 export const metadata: Metadata = {
@@ -78,7 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="fr"
       suppressHydrationWarning
-      className={`${inter.variable} ${playfair.variable} ${dmSans.variable}`}
+      className=""
     >
       <body className="bg-white dark:bg-night text-night dark:text-beige antialiased">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>

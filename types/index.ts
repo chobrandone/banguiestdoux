@@ -120,6 +120,7 @@ export interface Article {
   author: string | User;
   tags?: string[];
   isFeatured: boolean;
+  isPublished: boolean;
   readTime?: number;
   views?: number;
   publishedAt: string;
@@ -190,12 +191,18 @@ export interface CartItem {
 export interface Order {
   _id: string;
   user?: string | User;
+  customerName?: string;
+  customerEmail?: string;
+  customerPhone?: string;
   items: CartItem[];
   total: number;
+  subtotal?: number;
+  shippingCost?: number;
   status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
   shippingAddress?: Address;
   paymentMethod?: string;
   paymentStatus: 'pending' | 'paid' | 'failed';
+  notes?: string;
   stripeSessionId?: string;
   createdAt: string;
 }
