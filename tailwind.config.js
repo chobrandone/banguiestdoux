@@ -9,18 +9,19 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        /* ── Green palette (brand: #16A34A) ── */
         gold: {
-          DEFAULT: '#16a34a',
-          50:  '#f0fdf4',
-          100: '#dcfce7',
-          200: '#bbf7d0',
-          300: '#86efac',
-          400: '#4ade80',
-          500: '#22c55e',
-          600: '#16a34a',
-          700: '#15803d',
+          DEFAULT: '#16A34A',
+          50:  '#F0FDF4',
+          100: '#DCFCE7',
+          200: '#BBF7D0',
+          300: '#86EFAC',
+          400: '#4ADE80',
+          500: '#22C55E',
+          600: '#16A34A',
+          700: '#15803D',
           800: '#166534',
-          900: '#14532d',
+          900: '#14532D',
         },
         beige: {
           DEFAULT: '#F5F0E8',
@@ -52,20 +53,20 @@ module.exports = {
       },
       backgroundImage: {
         'gradient-night':    'linear-gradient(135deg, #0A0A0A 0%, #1a0a2e 50%, #0A0A0A 100%)',
-        'gradient-gold':     'linear-gradient(135deg, #16a34a 0%, #86efac 50%, #16a34a 100%)',
+        'gradient-gold':     'linear-gradient(135deg, #16A34A 0%, #86EFAC 50%, #16A34A 100%)',
         'gradient-tropical': 'linear-gradient(135deg, #0A2A1A 0%, #1A6B3C 100%)',
         'gradient-luxury':   'linear-gradient(180deg, rgba(10,10,10,0) 0%, rgba(10,10,10,0.8) 100%)',
         'hero-overlay':      'linear-gradient(to bottom, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.7) 100%)',
       },
       animation: {
-        'fade-up':       'fadeUp 0.6s ease-out forwards',
-        'fade-in':       'fadeIn 0.4s ease-out forwards',
-        'slide-left':    'slideLeft 0.5s ease-out forwards',
-        'slide-right':   'slideRight 0.5s ease-out forwards',
-        'glow-pulse':    'glowPulse 2s ease-in-out infinite',
-        'ticker':        'ticker 30s linear infinite',
-        'float':         'float 3s ease-in-out infinite',
-        'shimmer':       'shimmer 1.5s infinite',
+        'fade-up':    'fadeUp 0.6s ease-out forwards',
+        'fade-in':    'fadeIn 0.4s ease-out forwards',
+        'slide-left': 'slideLeft 0.5s ease-out forwards',
+        'slide-right':'slideRight 0.5s ease-out forwards',
+        'glow-pulse': 'glowPulse 2s ease-in-out infinite',
+        'ticker':     'ticker 30s linear infinite',
+        'float':      'float 3s ease-in-out infinite',
+        'shimmer':    'shimmer 1.5s infinite',
       },
       keyframes: {
         fadeUp: {
@@ -106,6 +107,8 @@ module.exports = {
         'glass':      '0 8px 32px rgba(0,0,0,0.2)',
         'card':       '0 2px 20px rgba(0,0,0,0.08)',
         'card-hover': '0 12px 40px rgba(0,0,0,0.15)',
+        'gold':       '0 4px 20px rgba(22,163,74,0.3)',
+        'gold-lg':    '0 8px 30px rgba(22,163,74,0.4)',
       },
       backdropBlur: {
         xs: '2px',
@@ -114,8 +117,8 @@ module.exports = {
         xs: '480px',
       },
       spacing: {
-        '18': '4.5rem',
-        '88': '22rem',
+        '18':  '4.5rem',
+        '88':  '22rem',
         '128': '32rem',
       },
       borderRadius: {

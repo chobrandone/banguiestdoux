@@ -10,13 +10,13 @@ import { getTalents } from '@/lib/db';
 import type { Talent } from '@/types';
 
 const CATS = [
-  { key:'all',          fr:'Tous' },
-  { key:'artist',       fr:'Artistes' },
-  { key:'musician',     fr:'Musiciens' },
-  { key:'entrepreneur', fr:'Entrepreneurs' },
-  { key:'influencer',   fr:'Influenceurs' },
-  { key:'chef',         fr:'Chefs' },
-  { key:'creator',      fr:'Créateurs' },
+  { key:'all',          tKey:'cat.all' },
+  { key:'artist',       tKey:'cat.artist' },
+  { key:'musician',     tKey:'cat.musician' },
+  { key:'entrepreneur', tKey:'cat.entrepreneur' },
+  { key:'influencer',   tKey:'cat.influencer' },
+  { key:'chef',         tKey:'cat.chef' },
+  { key:'creator',      tKey:'cat.creator' },
 ];
 
 export default function TalentsPage() {
@@ -52,11 +52,11 @@ export default function TalentsPage() {
         <div className="container-custom py-10">
           {/* Filter */}
           <div className="flex items-center gap-2 mb-10 overflow-x-auto scrollbar-hide pb-2">
-            {CATS.map(({ key, fr }) => (
+            {CATS.map(({ key, tKey }) => (
               <button key={key} onClick={() => setSelectedCat(key)}
                 className={cn('flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all',
                   selectedCat === key ? 'bg-gold text-night' : 'border border-beige/20 text-beige/60 hover:border-gold/50 hover:text-gold'
-                )}>{fr}</button>
+                )}>{t(tKey)}</button>
             ))}
           </div>
 
@@ -70,9 +70,9 @@ export default function TalentsPage() {
           {/* Empty state */}
           {!loading && talents.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <Users className="w-16 h-16 text-beige/10 mb-4" />
-              <p className="text-beige/40 text-lg font-semibold">Aucun contenu disponible</p>
-              <p className="text-beige/30 text-sm mt-1">Revenez bientôt pour du nouveau contenu</p>
+              <Users className="w-16 h-16 text-gold/20 mb-4" />
+              <p className="text-beige/40 dark:text-beige/40 text-lg font-semibold">{t('general.noContent')}</p>
+              <p className="text-beige/30 text-sm mt-1">{t('general.comingSoon')}</p>
             </div>
           )}
 
@@ -90,15 +90,15 @@ export default function TalentsPage() {
                   <div className="absolute inset-0 bg-gradient-to-r from-night/90 via-night/50 to-transparent" />
                   <div className="absolute inset-0 flex items-center p-8 md:p-12">
                     <div>
-                      <span className="label-editorial mb-3 block">Interview Exclusive</span>
+                      <span className="label-editorial mb-3 block">{t('talent.exclusive')}</span>
                       <h2 className="font-display text-3xl md:text-5xl font-bold text-beige mb-2">{featuredTalent.name}</h2>
-                      <p className="text-beige/60 mb-6">{featuredTalent.titleFr ?? featuredTalent.title}</p>
+                      <p className="text-beige/60 mb-6">{lang === 'fr' ? (featuredTalent.titleFr ?? featuredTalent.title) : featuredTalent.title}</p>
                       <div className="flex gap-3">
                         <Link href={`/talents/${featuredTalent.slug}`} className="btn-gold">
-                          <Play className="w-4 h-4 fill-current" /> Voir l&apos;interview
+                          <Play className="w-4 h-4 fill-current" /> {t('talent.watch')}
                         </Link>
                         <Link href={`/talents/${featuredTalent.slug}`} className="btn border border-beige/30 text-beige hover:bg-beige/10">
-                          En savoir plus <ArrowRight className="w-4 h-4" />
+                          {t('talent.learnMore')} <ArrowRight className="w-4 h-4" />
                         </Link>
                       </div>
                     </div>
@@ -129,7 +129,7 @@ export default function TalentsPage() {
                         )}
                         <div className="absolute bottom-0 left-0 right-0 p-4">
                           <h3 className="font-display text-lg font-bold text-white group-hover:text-gold transition-colors">{talent.name}</h3>
-                          <p className="text-white/50 text-xs mb-2">{talent.titleFr ?? talent.title}</p>
+                          <p className="text-white/50 text-xs mb-2">{lang === 'fr' ? (talent.titleFr ?? talent.title) : talent.title}</p>
                           {talent.instagram && (
                             <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
                               <Instagram className="w-3 h-3 text-gold" />

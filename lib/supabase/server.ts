@@ -1,8 +1,8 @@
 /**
  * Server-side Supabase client (Server Components, Route Handlers, Middleware).
- * Uses createServerClient from @supabase/ssr for cookie-based session handling.
+ * Uses createServerClient from @supabase/ssr v0.3.x — get/set/remove API.
  */
-import { createServerClient } from '@supabase/ssr';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
 export async function createClient() {
@@ -13,14 +13,19 @@ export async function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
       cookies: {
-        getAll() {
-          return cookieStore.getAll();
+        get(name: string) {
+          return cookieStore.get(name)?.value;
         },
-        setAll(cookiesToSet) {
+        set(name: string, value: string, options: CookieOptions) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
+            cookieStore.set({ name, value, ...options });
+          } catch {
+            // Called from a Server Component — middleware handles the refresh.
+          }
+        },
+        remove(name: string, options: CookieOptions) {
+          try {
+            cookieStore.set({ name, value: '', ...options });
           } catch {
             // Called from a Server Component — middleware handles the refresh.
           }

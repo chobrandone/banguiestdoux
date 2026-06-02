@@ -14,23 +14,23 @@ import { useCart }     from '@/contexts/CartContext';
 import { cn }          from '@/lib/utils';
 
 const navLinks = [
-  { key: 'nav.events',      href: '/events',      label: 'Événements'   },
-  { key: 'nav.restaurants', href: '/restaurants', label: 'Restaurants'  },
-  { key: 'nav.cinema',      href: '/cinema',      label: 'Cinéma'       },
+  { key: 'nav.events',      href: '/events'      },
+  { key: 'nav.restaurants', href: '/restaurants' },
+  { key: 'nav.cinema',      href: '/cinema'      },
   {
-    key: 'nav.discover', href: '/discover', label: 'Découvrir',
+    key: 'nav.discover', href: '/discover',
     children: [
-      { label: 'Que faire à Bangui',  href: '/discover'                    },
-      { label: 'Où manger',           href: '/restaurants'                 },
-      { label: 'Nightlife',           href: '/restaurants?cat=nightclub'   },
-      { label: 'Quartiers tendance',  href: '/discover#neighborhoods'      },
-      { label: 'Meilleures photos',   href: '/discover#spots'              },
+      { key: 'nav.discover.todo',          href: '/discover'                   },
+      { key: 'nav.discover.eat',           href: '/restaurants'                },
+      { key: 'nav.discover.nightlife',     href: '/restaurants?cat=nightclub'  },
+      { key: 'nav.discover.neighborhoods', href: '/discover#neighborhoods'     },
+      { key: 'nav.discover.photos',        href: '/discover#spots'             },
     ],
   },
-  { key: 'nav.practical', href: '/practical', label: 'Pratique'  },
-  { key: 'nav.talents',   href: '/talents',   label: 'Talents'   },
-  { key: 'nav.gallery',   href: '/gallery',   label: 'Galerie'   },
-  { key: 'nav.shop',      href: '/shop',      label: 'Boutique'  },
+  { key: 'nav.practical', href: '/practical' },
+  { key: 'nav.talents',   href: '/talents'   },
+  { key: 'nav.gallery',   href: '/gallery'   },
+  { key: 'nav.shop',      href: '/shop'      },
 ];
 
 export default function Navbar() {
@@ -98,7 +98,7 @@ export default function Navbar() {
           isScrolled ? 'h-0 opacity-0' : 'h-9 opacity-100'
         )}>
           <div className="bg-gold text-white text-xs font-semibold text-center py-2 tracking-wider uppercase">
-            ✦ Le meilleur de Bangui — Événements · Restaurants · Culture · Nightlife ✦
+            {t('nav.announcement')}
           </div>
         </div>
 
@@ -146,7 +146,7 @@ export default function Navbar() {
                             className="block px-4 py-3 text-sm text-night/80 dark:text-beige/70 hover:text-gold hover:bg-gold/5 transition-colors"
                             onClick={() => setActiveDropdown(null)}
                           >
-                            {child.label}
+                            {t(child.key)}
                           </Link>
                         ))}
                       </motion.div>
@@ -158,7 +158,7 @@ export default function Navbar() {
 
             {/* Desktop actions */}
             <div className="hidden lg:flex items-center gap-1">
-              <button onClick={() => setSearchOpen(true)} aria-label="Rechercher"
+              <button onClick={() => setSearchOpen(true)} aria-label={t('nav.search.ariaLabel')}
                 className={cn('p-2 rounded-lg transition-all', isTransparent ? 'text-white/80 hover:bg-white/10' : 'text-night/70 dark:text-beige/70 hover:bg-gold/10 hover:text-gold')}>
                 <Search className="w-5 h-5" />
               </button>
@@ -169,13 +169,13 @@ export default function Navbar() {
               </button>
 
               {mounted && (
-                <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} aria-label="Thème"
+                <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} aria-label={t('nav.theme.ariaLabel')}
                   className={cn('p-2 rounded-lg transition-all', isTransparent ? 'text-white/80 hover:bg-white/10' : 'text-night/70 dark:text-beige/70 hover:bg-gold/10 hover:text-gold')}>
                   {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                 </button>
               )}
 
-              <button onClick={toggleCart} aria-label="Panier"
+              <button onClick={toggleCart} aria-label={t('nav.cart.ariaLabel')}
                 className={cn('relative p-2 rounded-lg transition-all', isTransparent ? 'text-white/80 hover:bg-white/10' : 'text-night/70 dark:text-beige/70 hover:bg-gold/10 hover:text-gold')}>
                 <ShoppingBag className="w-5 h-5" />
                 {itemCount > 0 && (
@@ -198,11 +198,11 @@ export default function Navbar() {
                         className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-[#1A1A1A] rounded-2xl shadow-lg border border-black/5 dark:border-white/8 overflow-hidden">
                         {isAdmin && (
                           <Link href="/admin" className="flex items-center gap-2 px-4 py-3 text-sm hover:bg-gold/10 text-night dark:text-beige transition-colors" onClick={() => setActiveDropdown(null)}>
-                            <LayoutDashboard className="w-4 h-4 text-gold" /> Dashboard Admin
+                            <LayoutDashboard className="w-4 h-4 text-gold" /> {t('nav.admin.link')}
                           </Link>
                         )}
                         <button onClick={logout} className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-500 hover:bg-red-500/10 transition-colors">
-                          <LogOut className="w-4 h-4" /> Déconnexion
+                          <LogOut className="w-4 h-4" /> {t('nav.logout')}
                         </button>
                       </motion.div>
                     )}
@@ -217,7 +217,7 @@ export default function Navbar() {
 
             {/* Mobile bar actions */}
             <div className="flex lg:hidden items-center gap-1">
-              <button onClick={toggleCart} aria-label="Panier"
+              <button onClick={toggleCart} aria-label={t('nav.cart.ariaLabel')}
                 className={cn('relative p-2 rounded-lg transition-colors', isTransparent ? 'text-white' : 'text-night dark:text-beige')}>
                 <ShoppingBag className="w-5 h-5" />
                 {itemCount > 0 && (
@@ -290,7 +290,7 @@ export default function Navbar() {
                                 {link.children.map((child) => (
                                   <Link key={child.href} href={child.href} onClick={closeMobile}
                                     className="block px-3 py-2.5 text-sm text-night/60 dark:text-beige/60 hover:text-gold hover:bg-gold/5 rounded-lg transition-all">
-                                    {child.label}
+                                    {t(child.key)}
                                   </Link>
                                 ))}
                               </div>
@@ -315,7 +315,7 @@ export default function Navbar() {
                   {mounted && (
                     <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                       className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gray-100 dark:bg-white/8 text-sm font-semibold text-night dark:text-beige hover:bg-gold/15 hover:text-gold transition-all">
-                      {theme === 'dark' ? <><Sun className="w-4 h-4" /> Clair</> : <><Moon className="w-4 h-4" /> Sombre</>}
+                      {theme === 'dark' ? <><Sun className="w-4 h-4" /> {t('nav.theme.light')}</> : <><Moon className="w-4 h-4" /> {t('nav.theme.dark')}</>}
                     </button>
                   )}
                   <button onClick={() => setLang(lang === 'fr' ? 'en' : 'fr')}
@@ -331,12 +331,12 @@ export default function Navbar() {
                     {isAdmin && (
                       <Link href="/admin" onClick={closeMobile}
                         className="w-full flex items-center justify-center gap-2 py-3 bg-gold text-white font-semibold text-sm rounded-xl hover:bg-gold-700 transition-all">
-                        <LayoutDashboard className="w-4 h-4" /> Dashboard Admin
+                        <LayoutDashboard className="w-4 h-4" /> {t('nav.admin.link')}
                       </Link>
                     )}
                     <button onClick={() => { logout(); closeMobile(); }}
                       className="w-full flex items-center justify-center gap-2 py-3 border border-red-200 dark:border-red-500/30 text-red-500 font-semibold text-sm rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 transition-all">
-                      <LogOut className="w-4 h-4" /> Déconnexion
+                      <LogOut className="w-4 h-4" /> {t('nav.logout')}
                     </button>
                   </div>
                 ) : (
@@ -374,7 +374,7 @@ export default function Navbar() {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gold" />
                 <input ref={searchRef} type="text" value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Rechercher événements, restaurants, articles..."
+                  placeholder={t('nav.search.placeholder')}
                   className="w-full pl-12 pr-12 py-4 bg-white dark:bg-[#1A1A1A] text-night dark:text-beige rounded-2xl text-lg border-2 border-gold/30 focus:border-gold outline-none"
                 />
                 <button onClick={() => setSearchOpen(false)}
@@ -385,7 +385,7 @@ export default function Navbar() {
               {searchQuery && (
                 <div className="mt-2 bg-white dark:bg-[#1A1A1A] rounded-2xl border border-black/5 dark:border-white/8 overflow-hidden">
                   <p className="px-4 py-3 text-sm text-night/50 dark:text-beige/50">
-                    Recherche pour &ldquo;{searchQuery}&rdquo;...
+                    {t('nav.search.resultsFor')} &ldquo;{searchQuery}&rdquo;...
                   </p>
                 </div>
               )}

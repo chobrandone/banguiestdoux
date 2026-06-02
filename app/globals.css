@@ -10,7 +10,7 @@
   --font-playfair: 'Playfair Display', Georgia, serif;
   --font-dm-sans:  'DM Sans', system-ui, sans-serif;
 
-  --color-gold:    #16a34a;
+  --color-gold:    #16A34A;
   --color-beige:   #F5F0E8;
   --color-night:   #0A0A0A;
   --color-dark:    #141414;
@@ -242,7 +242,7 @@ p {
     inset: 0;
     border-radius: inherit;
     padding: 1px;
-    background: linear-gradient(135deg, #16a34a, #86efac);
+    background: linear-gradient(135deg, #16A34A, #86EFAC);
     -webkit-mask: linear-gradient(#fff 0 0) content-box,
                   linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;

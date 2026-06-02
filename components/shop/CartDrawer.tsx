@@ -23,7 +23,7 @@ type Step = 'cart' | 'checkout' | 'success';
 
 export default function CartDrawer() {
   const { items, isOpen, closeCart, removeItem, updateQty, total, itemCount, clearCart } = useCart();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
 
   const [step,    setStep]    = useState<Step>('cart');
   const [loading, setLoading] = useState(false);
@@ -44,7 +44,7 @@ export default function CartDrawer() {
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim() || !form.phone.trim() || !form.email.trim()) {
-      toast.error('Nom, téléphone et email sont requis');
+      toast.error(t('cart.required'));
       return;
     }
 
@@ -82,7 +82,7 @@ export default function CartDrawer() {
       setOrderId(String(order?.id || ''));
       clearCart();
       setStep('success');
-      toast.success('Commande passée avec succès !');
+      toast.success(t('cart.orderSuccess'));
     } catch (err: unknown) {
       const msg = (err as { message?: string })?.message || 'Erreur lors de la commande';
       toast.error(msg);
@@ -126,7 +126,7 @@ export default function CartDrawer() {
                   <div className="flex items-center gap-2">
                     {items.length > 0 && (
                       <button onClick={clearCart} className="text-xs text-night/40 dark:text-beige/40 hover:text-red-500 transition-colors">
-                        Vider
+                        {t('cart.clear')}
                       </button>
                     )}
                     <button onClick={handleClose} className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gold/10 transition-colors">
@@ -140,9 +140,9 @@ export default function CartDrawer() {
                     <div className="flex flex-col items-center justify-center h-full gap-4 p-8 text-center">
                       <ShoppingBag className="w-16 h-16 text-gold/30" />
                       <p className="font-display text-xl font-bold text-night/40 dark:text-beige/40">{t('shop.empty')}</p>
-                      <p className="text-sm text-night/30 dark:text-beige/30">Découvrez notre boutique</p>
+                      <p className="text-sm text-night/30 dark:text-beige/30">{t('cart.discoverShop')}</p>
                       <button onClick={handleClose} className="btn-gold mt-2">
-                        Explorer <ArrowRight className="w-4 h-4" />
+                        {t('cart.explore')} <ArrowRight className="w-4 h-4" />
                       </button>
                     </div>
                   ) : (
@@ -162,8 +162,8 @@ export default function CartDrawer() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <h4 className="font-semibold text-sm text-night dark:text-beige line-clamp-1">{item.product.name}</h4>
-                            {item.size  && <p className="text-xs text-night/50 dark:text-beige/50">Taille: {item.size}</p>}
-                            {item.color && <p className="text-xs text-night/50 dark:text-beige/50">Couleur: {item.color}</p>}
+                            {item.size  && <p className="text-xs text-night/50 dark:text-beige/50">{t('cart.sizeLabel')}: {item.size}</p>}
+                            {item.color && <p className="text-xs text-night/50 dark:text-beige/50">{t('cart.colorLabel')}: {item.color}</p>}
                             <div className="flex items-center justify-between mt-2">
                               <div className="flex items-center gap-2">
                                 <button
@@ -200,13 +200,13 @@ export default function CartDrawer() {
                 {items.length > 0 && (
                   <div className="p-6 border-t border-gold/10 space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-night/60 dark:text-beige/60">Sous-total</span>
+                      <span className="text-sm text-night/60 dark:text-beige/60">{t('cart.subtotal')}</span>
                       <span className="font-semibold text-night dark:text-beige">{formatPrice(total, 'XAF')}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-night/60 dark:text-beige/60">Livraison</span>
-                      <span className={`font-semibold text-sm ${shippingCost === 0 ? 'text-green-600' : 'text-night dark:text-beige'}`}>
-                        {shippingCost === 0 ? 'Gratuite' : formatPrice(shippingCost, 'XAF')}
+                      <span className="text-sm text-night/60 dark:text-beige/60">{t('cart.shipping')}</span>
+                      <span className={`font-semibold text-sm ${shippingCost === 0 ? 'text-gold' : 'text-night dark:text-beige'}`}>
+                        {shippingCost === 0 ? t('cart.freeShipping') : formatPrice(shippingCost, 'XAF')}
                       </span>
                     </div>
                     <div className="flex items-center justify-between border-t border-gold/10 pt-3">
@@ -215,14 +215,16 @@ export default function CartDrawer() {
                     </div>
                     {total < 50000 && (
                       <div className="text-xs text-night/40 dark:text-beige/40 text-center bg-gold/5 rounded-xl py-2">
-                        Plus que {formatPrice(50000 - total, 'XAF')} pour la livraison gratuite
+                        {lang === 'en'
+                          ? `Only ${formatPrice(50000 - total, 'XAF')} away from free shipping`
+                          : `Plus que ${formatPrice(50000 - total, 'XAF')} pour la livraison gratuite`}
                       </div>
                     )}
                     <button
                       onClick={() => setStep('checkout')}
                       className="btn-gold w-full justify-center py-4 text-base"
                     >
-                      Commander <ArrowRight className="w-5 h-5" />
+                      {t('cart.order')} <ArrowRight className="w-5 h-5" />
                     </button>
                   </div>
                 )}
@@ -240,7 +242,7 @@ export default function CartDrawer() {
                     >
                       <ArrowRight className="w-4 h-4 rotate-180 text-night dark:text-beige" />
                     </button>
-                    <h2 className="font-display text-xl font-bold text-night dark:text-beige">Votre commande</h2>
+                    <h2 className="font-display text-xl font-bold text-night dark:text-beige">{t('cart.yourOrder')}</h2>
                   </div>
                   <button onClick={handleClose} className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gold/10 transition-colors">
                     <X className="w-5 h-5 text-night dark:text-beige" />
@@ -249,14 +251,14 @@ export default function CartDrawer() {
 
                 <div className="flex-1 overflow-y-auto p-6">
                   <p className="text-sm text-night/60 dark:text-beige/60 mb-6">
-                    Renseignez vos informations de contact pour finaliser votre commande. Vous recevrez une confirmation par email.
+                    {t('cart.checkoutInfo')}
                   </p>
 
                   <form id="checkout-form" onSubmit={handleCheckout} className="space-y-4">
                     {/* Name */}
                     <div>
                       <label className="block text-xs font-semibold text-night/50 dark:text-beige/50 uppercase tracking-wider mb-1.5">
-                        Nom complet *
+                        {t('cart.fullName')} *
                       </label>
                       <div className="relative">
                         <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-night/30 dark:text-beige/30" />
@@ -274,7 +276,7 @@ export default function CartDrawer() {
                     {/* Phone */}
                     <div>
                       <label className="block text-xs font-semibold text-night/50 dark:text-beige/50 uppercase tracking-wider mb-1.5">
-                        Téléphone *
+                        {t('cart.phoneLabel')} *
                       </label>
                       <div className="relative">
                         <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-night/30 dark:text-beige/30" />
@@ -310,7 +312,7 @@ export default function CartDrawer() {
                     {/* Address (optional) */}
                     <div>
                       <label className="block text-xs font-semibold text-night/50 dark:text-beige/50 uppercase tracking-wider mb-1.5">
-                        Adresse de livraison <span className="text-night/30 dark:text-beige/30 normal-case font-normal">(optionnel)</span>
+                        {t('cart.addressLabel')} <span className="text-night/30 dark:text-beige/30 normal-case font-normal">({t('cart.optional')})</span>
                       </label>
                       <div className="relative">
                         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-night/30 dark:text-beige/30" />
@@ -327,7 +329,7 @@ export default function CartDrawer() {
 
                   {/* Order summary */}
                   <div className="mt-6 bg-beige dark:bg-night-50 rounded-2xl p-4 space-y-2">
-                    <p className="text-xs font-semibold text-night/50 dark:text-beige/50 uppercase tracking-wider mb-3">Récapitulatif</p>
+                    <p className="text-xs font-semibold text-night/50 dark:text-beige/50 uppercase tracking-wider mb-3">{t('cart.summary')}</p>
                     {items.map(item => (
                       <div key={item.product._id} className="flex justify-between text-sm">
                         <span className="text-night/70 dark:text-beige/70 line-clamp-1 flex-1 mr-2">{item.product.name} × {item.quantity}</span>
@@ -335,7 +337,7 @@ export default function CartDrawer() {
                       </div>
                     ))}
                     <div className="border-t border-gold/10 pt-2 flex justify-between font-bold">
-                      <span className="text-night dark:text-beige">Total</span>
+                      <span className="text-night dark:text-beige">{t('shop.total')}</span>
                       <span className="text-gold">{formatPrice(orderTotal, 'XAF')}</span>
                     </div>
                   </div>
@@ -351,14 +353,14 @@ export default function CartDrawer() {
                     {loading ? (
                       <>
                         <div className="w-4 h-4 border-2 border-night/30 border-t-night rounded-full animate-spin" />
-                        Traitement...
+                        {t('cart.processing')}
                       </>
                     ) : (
-                      <>Confirmer la commande <ArrowRight className="w-5 h-5" /></>
+                      <>{t('cart.confirmOrder')} <ArrowRight className="w-5 h-5" /></>
                     )}
                   </button>
                   <p className="text-center text-xs text-night/40 dark:text-beige/40 mt-3">
-                    Un email de confirmation vous sera envoyé automatiquement.
+                    {t('cart.emailConfirmation')}
                   </p>
                 </div>
               </>
@@ -371,15 +373,15 @@ export default function CartDrawer() {
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                  className="w-20 h-20 rounded-full bg-green-500/15 flex items-center justify-center mb-6"
+                  className="w-20 h-20 rounded-full bg-gold/15 flex items-center justify-center mb-6"
                 >
-                  <CheckCircle2 className="w-10 h-10 text-green-400" />
+                  <CheckCircle2 className="w-10 h-10 text-gold" />
                 </motion.div>
                 <h3 className="font-display text-2xl font-bold text-night dark:text-beige mb-2">
-                  Commande confirmée !
+                  {t('cart.confirmed')}
                 </h3>
                 <p className="text-night/60 dark:text-beige/60 text-sm mb-2">
-                  Merci pour votre commande.
+                  {t('cart.thankYou')}
                 </p>
                 {orderId && (
                   <p className="text-xs text-gold font-mono mb-4">
@@ -387,11 +389,11 @@ export default function CartDrawer() {
                   </p>
                 )}
                 <p className="text-night/50 dark:text-beige/50 text-sm mb-8">
-                  Un email de confirmation a été envoyé à <strong>{form.email}</strong>.<br />
-                  Notre équipe vous contactera pour la livraison.
+                  {t('cart.confirmationSentTo')} <strong>{form.email}</strong>.<br />
+                  {t('cart.teamContact')}
                 </p>
                 <button onClick={handleClose} className="btn-gold">
-                  Continuer mes achats
+                  {t('cart.continueShopping')}
                 </button>
               </div>
             )}

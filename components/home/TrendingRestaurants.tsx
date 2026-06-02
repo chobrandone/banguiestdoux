@@ -88,15 +88,15 @@ export default function TrendingRestaurants() {
 
         {/* Category pills */}
         <div className="flex items-center gap-2 mb-10 overflow-x-auto scrollbar-hide pb-2">
-          {['Tous', 'Restaurants', 'Bars', 'Rooftops', 'Lounges', 'Nightlife', 'Street Food'].map((cat, i) => (
+          {(['cat.all','cat.restaurant','cat.bar','cat.rooftop','cat.lounge','cat.nightclub','cat.streetFood'] as const).map((tKey, i) => (
             <span
-              key={cat}
+              key={tKey}
               className={cn(
                 'flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold cursor-default',
                 i === 0 ? 'bg-gold text-night' : 'bg-gold/10 text-night/70 dark:text-beige/70'
               )}
             >
-              {cat}
+              {t(tKey)}
             </span>
           ))}
         </div>
@@ -171,7 +171,7 @@ export default function TrendingRestaurants() {
                           <MapPin className="w-3 h-3" /> {restaurant.address.split(',')[0]}
                         </span>
                         <span className="text-gold text-xs font-semibold flex items-center gap-1 group-hover:gap-2 transition-all">
-                          Voir <ExternalLink className="w-3 h-3" />
+                          {t('restaurants.view')} <ExternalLink className="w-3 h-3" />
                         </span>
                       </div>
                     </div>
@@ -205,12 +205,12 @@ export default function TrendingRestaurants() {
           <div className="absolute inset-0 bg-gradient-night opacity-80" />
           <div className="absolute inset-0 flex items-center justify-between px-8">
             <div>
-              <p className="label-editorial text-gold mb-1">Guide Nightlife</p>
-              <h3 className="font-display text-2xl font-bold text-white">La nuit à Bangui</h3>
-              <p className="text-white/60 text-sm mt-1">Les meilleures adresses nocturnes</p>
+              <p className="label-editorial text-gold mb-1">{t('restaurants.nightlifeLabel')}</p>
+              <h3 className="font-display text-2xl font-bold text-white">{t('restaurants.nightlifeTitle')}</h3>
+              <p className="text-white/60 text-sm mt-1">{t('restaurants.nightlifeSub')}</p>
             </div>
             <Link href="/restaurants?cat=nightclub" className="btn-gold flex-shrink-0">
-              Explorer <ArrowRight className="w-4 h-4" />
+              {t('general.seeAll')} <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </motion.div>

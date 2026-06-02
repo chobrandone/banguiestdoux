@@ -1,7 +1,7 @@
-import type { Metadata } from 'next';
-import { Plane, Car, Shield, Hotel, Phone, CreditCard, Syringe, Info } from 'lucide-react';
+'use client';
 
-export const metadata: Metadata = { title: 'Informations Pratiques – Bangui est Doux' };
+import { Plane, Car, Shield, Hotel, Phone, CreditCard, Syringe, Info } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const sections = [
   {
@@ -79,6 +79,8 @@ const sections = [
 ];
 
 export default function PracticalPage() {
+  const { t } = useLanguage();
+
   return (
     <>
       <div className="relative h-64 bg-night overflow-hidden flex items-end pb-8">
@@ -86,9 +88,9 @@ export default function PracticalPage() {
         <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1920" alt="Aéroport" className="absolute inset-0 w-full h-full object-cover opacity-30" />
         <div className="absolute inset-0 bg-gradient-to-t from-night to-transparent" />
         <div className="container-custom relative z-10 pt-24">
-          <span className="label-editorial">Guide du voyageur</span>
-          <h1 className="font-display text-4xl md:text-6xl font-bold text-beige mt-2">Informations Pratiques</h1>
-          <p className="text-beige/60 mt-2">Tout ce qu&apos;il faut savoir avant de venir à Bangui</p>
+          <span className="label-editorial">{t('practical.guide')}</span>
+          <h1 className="font-display text-4xl md:text-6xl font-bold text-beige mt-2">{t('practical.title')}</h1>
+          <p className="text-beige/60 mt-2">{t('practical.subtitle')}</p>
         </div>
       </div>
 
@@ -134,7 +136,7 @@ export default function PracticalPage() {
               <div className="w-12 h-12 flex items-center justify-center rounded-2xl bg-red-500 text-white">
                 <Phone className="w-6 h-6" />
               </div>
-              <h3 className="font-display text-2xl font-bold text-night dark:text-beige">Numéros d&apos;urgence</h3>
+              <h3 className="font-display text-2xl font-bold text-night dark:text-beige">{t('practical.emergency')}</h3>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[

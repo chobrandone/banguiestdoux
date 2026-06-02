@@ -9,12 +9,12 @@ import { getGallery } from '@/lib/db';
 import type { GalleryItem } from '@/types';
 
 const CATEGORIES = [
-  { key: 'all',    label: 'Tout' },
-  { key: 'events', label: 'Événements' },
-  { key: 'nightlife', label: 'Nightlife' },
-  { key: 'food',   label: 'Gastronomie' },
-  { key: 'culture',label: 'Culture' },
-  { key: 'video',  label: 'Vidéos' },
+  { key: 'all',       tKey: 'cat.all' },
+  { key: 'events',    tKey: 'cat.events' },
+  { key: 'nightlife', tKey: 'cat.nightclub' },
+  { key: 'food',      tKey: 'cat.food' },
+  { key: 'culture',   tKey: 'cat.culture' },
+  { key: 'video',     tKey: 'cat.video' },
 ];
 
 export default function GalleryPage() {
@@ -68,11 +68,11 @@ export default function GalleryPage() {
         <div className="container-custom py-10">
           {/* Filter */}
           <div className="flex items-center gap-2 mb-8 overflow-x-auto scrollbar-hide pb-2">
-            {CATEGORIES.map(({ key, label }) => (
+            {CATEGORIES.map(({ key, tKey }) => (
               <button key={key} onClick={() => setSelectedCat(key)}
                 className={cn('flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all',
                   selectedCat === key ? 'bg-gold text-night' : 'bg-white dark:bg-night-50 text-night/70 dark:text-beige/70 border border-gold/10 hover:bg-gold/10'
-                )}>{label}</button>
+                )}>{t(tKey)}</button>
             ))}
           </div>
 
@@ -86,9 +86,9 @@ export default function GalleryPage() {
           {/* Empty state */}
           {!loading && items.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <Images className="w-16 h-16 text-beige/10 mb-4" />
-              <p className="text-beige/40 text-lg font-semibold">Aucun contenu disponible</p>
-              <p className="text-beige/30 text-sm mt-1">Revenez bientôt pour du nouveau contenu</p>
+              <Images className="w-16 h-16 text-gold/20 mb-4" />
+              <p className="text-night/40 dark:text-beige/40 text-lg font-semibold">{t('general.noContent')}</p>
+              <p className="text-night/30 dark:text-beige/30 text-sm mt-1">{t('general.comingSoon')}</p>
             </div>
           )}
 
@@ -119,7 +119,7 @@ export default function GalleryPage() {
                     {item.type === 'video' && (
                       <div className="absolute bottom-2 right-2">
                         <span className="flex items-center gap-1 px-2 py-1 bg-black/60 rounded-full text-white text-[10px]">
-                          <Play className="w-2.5 h-2.5 fill-white" /> Vidéo
+                          <Play className="w-2.5 h-2.5 fill-white" /> {t('gallery.video')}
                         </span>
                       </div>
                     )}

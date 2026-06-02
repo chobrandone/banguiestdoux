@@ -10,15 +10,15 @@ import { getEvents } from '@/lib/db';
 import type { Event } from '@/types';
 
 const CATEGORIES = [
-  { key: 'all',                  labelFr: 'Tous' },
-  { key: 'concerts',             labelFr: 'Concerts' },
-  { key: 'festivals',            labelFr: 'Festivals' },
-  { key: 'cinema',               labelFr: 'Cinéma' },
-  { key: 'pool-parties',         labelFr: 'Pool Parties' },
-  { key: 'jazz-nights',          labelFr: 'Jazz Nights' },
-  { key: 'sports',               labelFr: 'Sports' },
-  { key: 'exhibitions',          labelFr: 'Expositions' },
-  { key: 'restaurant-openings',  labelFr: 'Restaurants' },
+  { key: 'all',                 tKey: 'cat.all' },
+  { key: 'concerts',            tKey: 'cat.concerts' },
+  { key: 'festivals',           tKey: 'cat.festivals' },
+  { key: 'cinema',              tKey: 'cat.cinema' },
+  { key: 'pool-parties',        tKey: 'cat.poolParties' },
+  { key: 'jazz-nights',         tKey: 'cat.jazzNights' },
+  { key: 'sports',              tKey: 'cat.sports' },
+  { key: 'exhibitions',         tKey: 'cat.exhibitions' },
+  { key: 'restaurant-openings', tKey: 'cat.restaurantOpenings' },
 ];
 
 type ViewMode = 'grid' | 'list';
@@ -68,7 +68,7 @@ export default function EventsPage() {
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Rechercher un événement..."
+                placeholder={t('events.search')}
                 className="w-full pl-10 pr-4 py-3 bg-white dark:bg-night-50 rounded-xl border border-gold/20 focus:border-gold outline-none text-sm text-night dark:text-beige"
               />
             </div>
@@ -90,7 +90,7 @@ export default function EventsPage() {
 
           {/* Category filters */}
           <div className="flex items-center gap-2 mb-8 overflow-x-auto scrollbar-hide pb-2">
-            {CATEGORIES.map(({ key, labelFr }) => (
+            {CATEGORIES.map(({ key, tKey }) => (
               <button
                 key={key}
                 onClick={() => setSelectedCat(key)}
@@ -101,7 +101,7 @@ export default function EventsPage() {
                     : 'bg-white dark:bg-night-50 text-night/70 dark:text-beige/70 hover:bg-gold/10 border border-gold/10'
                 )}
               >
-                {key === 'all' ? t('general.all') : labelFr}
+                {t(tKey)}
               </button>
             ))}
           </div>
@@ -116,9 +116,9 @@ export default function EventsPage() {
           {/* Empty state */}
           {!loading && events.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <Calendar className="w-16 h-16 text-beige/10 mb-4" />
-              <p className="text-beige/40 text-lg font-semibold">Aucun contenu disponible</p>
-              <p className="text-beige/30 text-sm mt-1">Revenez bientôt pour du nouveau contenu</p>
+              <Calendar className="w-16 h-16 text-gold/20 mb-4" />
+              <p className="text-night/40 dark:text-beige/40 text-lg font-semibold">{t('general.noContent')}</p>
+              <p className="text-night/30 dark:text-beige/30 text-sm mt-1">{t('general.comingSoon')}</p>
             </div>
           )}
 
@@ -126,7 +126,7 @@ export default function EventsPage() {
             <>
               {/* Count */}
               <p className="text-sm text-night/50 dark:text-beige/50 mb-6">
-                {filtered.length} événement{filtered.length > 1 ? 's' : ''} trouvé{filtered.length > 1 ? 's' : ''}
+                {filtered.length} {t('events.found')}
               </p>
 
               {/* Events Grid */}

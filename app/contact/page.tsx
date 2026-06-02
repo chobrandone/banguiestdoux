@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Send, CheckCircle2, Instagram, Facebook, Youtube, MessageCircle } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, CheckCircle2, Instagram, Facebook, Youtube } from 'lucide-react';
 import { FaTiktok, FaWhatsapp } from 'react-icons/fa';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { sendMessage } from '@/lib/db';
@@ -50,25 +50,25 @@ export default function ContactPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
             {/* Info column */}
             <div className="lg:col-span-4">
-              <span className="label-editorial mb-3 block">Nous contacter</span>
-              <h2 className="font-display text-3xl font-bold text-night dark:text-beige mb-6">On vous répond sous 24h</h2>
+              <span className="label-editorial mb-3 block">{t('contact.contactUs')}</span>
+              <h2 className="font-display text-3xl font-bold text-night dark:text-beige mb-6">{t('contact.response')}</h2>
               <p className="text-night/60 dark:text-beige/60 text-sm leading-relaxed mb-8">
-                Une question, un partenariat ou une idée de collaboration ? Envoyez-nous un message !
+                {t('contact.description')}
               </p>
 
               <div className="space-y-5 mb-10">
                 {[
-                  { icon: Mail,   label: 'Email',      value: 'banguiestdouxx@gmail.com', href: 'mailto:banguiestdouxx@gmail.com' },
-                  { icon: Phone,  label: 'Téléphone',  value: '+236 72 63 71 71',         href: 'tel:+23672637171' },
-                  { icon: FaWhatsapp, label:'WhatsApp', value: '+236 72 63 71 71',        href: 'https://wa.me/23672637171' },
-                  { icon: MapPin, label: 'Adresse',    value: 'Bangui, République Centrafricaine', href: '#map' },
-                ].map(({ icon: Icon, label, value, href }) => (
+                  { icon: Mail,       labelKey: 'contact.email',     value: 'banguiestdouxx@gmail.com',         href: 'mailto:banguiestdouxx@gmail.com' },
+                  { icon: Phone,      labelKey: 'contact.telephone', value: '+236 72 63 71 71',                 href: 'tel:+23672637171' },
+                  { icon: FaWhatsapp, labelKey: 'contact.whatsapp',  value: '+236 72 63 71 71',                 href: 'https://wa.me/23672637171' },
+                  { icon: MapPin,     labelKey: 'contact.address',   value: 'Bangui, République Centrafricaine', href: '#map' },
+                ].map(({ icon: Icon, labelKey, value, href }) => (
                   <a key={label} href={href} className="flex items-start gap-4 group">
                     <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-xl bg-gold/10 text-gold group-hover:bg-gold group-hover:text-night transition-all">
                       <Icon size={18} />
                     </div>
                     <div>
-                      <div className="text-xs uppercase tracking-wider text-night/40 dark:text-beige/40">{label}</div>
+                      <div className="text-xs uppercase tracking-wider text-night/40 dark:text-beige/40">{t(labelKey)}</div>
                       <div className="text-sm font-semibold text-night dark:text-beige group-hover:text-gold transition-colors">{value}</div>
                     </div>
                   </a>
@@ -103,10 +103,10 @@ export default function ContactPage() {
                     animate={{ scale: 1, opacity: 1 }}
                     className="text-center py-10"
                   >
-                    <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                    <CheckCircle2 className="w-16 h-16 text-gold mx-auto mb-4" />
                     <h3 className="font-display text-2xl font-bold text-night dark:text-beige mb-2">{t('contact.sent')}</h3>
-                    <p className="text-night/50 dark:text-beige/50 text-sm">Nous vous répondrons dans les plus brefs délais.</p>
-                    <button onClick={() => setSent(false)} className="btn-gold mt-6 px-6">Envoyer un autre message</button>
+                    <p className="text-night/50 dark:text-beige/50 text-sm">{t('contact.thankYou')}</p>
+                    <button onClick={() => setSent(false)} className="btn-gold mt-6 px-6">{t('contact.sendAnother')}</button>
                   </motion.div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-5">
@@ -132,12 +132,12 @@ export default function ContactPage() {
                         <label className="block text-xs font-semibold text-night/60 dark:text-beige/60 uppercase tracking-wider mb-2">{t('contact.subject')}</label>
                         <select name="subject" value={form.subject} onChange={handleChange}
                           className="w-full px-4 py-3 bg-beige dark:bg-night rounded-xl border border-gold/20 focus:border-gold outline-none text-sm text-night dark:text-beige">
-                          <option value="">Choisir un sujet</option>
-                          <option>Partenariat</option>
-                          <option>Événement</option>
-                          <option>Publicité</option>
-                          <option>Presse</option>
-                          <option>Autre</option>
+                          <option value="">{t('contact.subjectChoose')}</option>
+                          <option>{t('contact.sub.partnership')}</option>
+                          <option>{t('contact.sub.event')}</option>
+                          <option>{t('contact.sub.advertising')}</option>
+                          <option>{t('contact.sub.press')}</option>
+                          <option>{t('contact.sub.other')}</option>
                         </select>
                       </div>
                     </div>

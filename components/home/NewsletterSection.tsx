@@ -21,9 +21,9 @@ export default function NewsletterSection() {
     try {
       await sendMessage({ name: email.split('@')[0], email, subject: 'Newsletter', message: 'Inscription newsletter' });
       setSubscribed(true);
-      toast.success('Merci pour votre abonnement !');
+      toast.success(t('newsletter.success'));
     } catch {
-      toast.error('Erreur. Réessayez.');
+      toast.error(t('newsletter.error'));
     } finally {
       setIsLoading(false);
     }
@@ -51,7 +51,7 @@ export default function NewsletterSection() {
           >
             <div className="flex items-center justify-center gap-3 mb-4">
               <div className="w-12 h-px bg-gold" />
-              <span className="label-editorial">Rejoignez la communauté</span>
+              <span className="label-editorial">{t('newsletter.join')}</span>
               <div className="w-12 h-px bg-gold" />
             </div>
 
@@ -67,10 +67,10 @@ export default function NewsletterSection() {
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="inline-flex items-center gap-3 px-6 py-4 bg-green-500/20 border border-green-500/30 rounded-2xl text-green-400"
+                className="inline-flex items-center gap-3 px-6 py-4 bg-gold/20 border border-gold/30 rounded-2xl text-gold"
               >
                 <CheckCircle2 className="w-5 h-5" />
-                <span className="font-semibold">Vous êtes abonné(e) ! Merci.</span>
+                <span className="font-semibold">{t('newsletter.subscribed')}</span>
               </motion.div>
             ) : (
               <form onSubmit={handleSubmit} className="flex max-w-md mx-auto gap-2">
@@ -98,7 +98,7 @@ export default function NewsletterSection() {
             )}
 
             <p className="text-beige/30 text-xs mt-4">
-              Pas de spam. Désinscription possible à tout moment.
+              {t('newsletter.noSpam')}
             </p>
           </motion.div>
 
@@ -145,15 +145,15 @@ export default function NewsletterSection() {
             className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8"
           >
             {[
-              { value: '50+',   label: 'Événements / mois',    icon: '🎉' },
-              { value: '30+',   label: 'Restaurants référencés', icon: '🍽️' },
-              { value: '100+',  label: 'Articles publiés',      icon: '📰' },
-              { value: '10K+',  label: 'Membres communauté',   icon: '👥' },
-            ].map(({ value, label, icon }) => (
-              <div key={label} className="text-center">
+              { value: '50+',   labelKey: 'newsletter.stat.events',      icon: '🎉' },
+              { value: '30+',   labelKey: 'newsletter.stat.restaurants', icon: '🍽️' },
+              { value: '100+',  labelKey: 'newsletter.stat.articles',    icon: '📰' },
+              { value: '10K+',  labelKey: 'newsletter.stat.members',     icon: '👥' },
+            ].map(({ value, labelKey, icon }) => (
+              <div key={labelKey} className="text-center">
                 <div className="text-2xl mb-2">{icon}</div>
                 <div className="font-display text-3xl font-bold text-gold mb-1">{value}</div>
-                <div className="text-beige/40 text-xs uppercase tracking-wider">{label}</div>
+                <div className="text-beige/40 text-xs uppercase tracking-wider">{t(labelKey)}</div>
               </div>
             ))}
           </motion.div>

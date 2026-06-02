@@ -10,15 +10,15 @@ import { getRestaurants } from '@/lib/db';
 import type { Restaurant } from '@/types';
 
 const CATEGORIES = [
-  { key: 'all',         labelFr: 'Tout' },
-  { key: 'restaurant',  labelFr: 'Restaurants' },
-  { key: 'bar',         labelFr: 'Bars' },
-  { key: 'rooftop',     labelFr: 'Rooftops' },
-  { key: 'lounge',      labelFr: 'Lounges' },
-  { key: 'nightclub',   labelFr: 'Nightlife' },
-  { key: 'cafe',        labelFr: 'Cafés' },
-  { key: 'street-food', labelFr: 'Street Food' },
-  { key: 'fast-food',   labelFr: 'Fast Food' },
+  { key: 'all',         tKey: 'cat.all' },
+  { key: 'restaurant',  tKey: 'cat.restaurant' },
+  { key: 'bar',         tKey: 'cat.bar' },
+  { key: 'rooftop',     tKey: 'cat.rooftop' },
+  { key: 'lounge',      tKey: 'cat.lounge' },
+  { key: 'nightclub',   tKey: 'cat.nightclub' },
+  { key: 'cafe',        tKey: 'cat.cafe' },
+  { key: 'street-food', tKey: 'cat.streetFood' },
+  { key: 'fast-food',   tKey: 'cat.fastFood' },
 ];
 
 const PriceRange = ({ range }: { range: number }) => (
@@ -73,14 +73,14 @@ export default function RestaurantsPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Rechercher un restaurant..."
+              placeholder={t('restaurants.search')}
               className="w-full pl-10 pr-4 py-3 bg-white dark:bg-night-50 rounded-xl border border-gold/20 focus:border-gold outline-none text-sm text-night dark:text-beige"
             />
           </div>
 
           {/* Categories */}
           <div className="flex items-center gap-2 mb-10 overflow-x-auto scrollbar-hide pb-2">
-            {CATEGORIES.map(({ key, labelFr }) => (
+            {CATEGORIES.map(({ key, tKey }) => (
               <button
                 key={key}
                 onClick={() => setSelectedCat(key)}
@@ -91,7 +91,7 @@ export default function RestaurantsPage() {
                     : 'bg-white dark:bg-night-50 text-night/70 dark:text-beige/70 hover:bg-gold/10 border border-gold/10'
                 )}
               >
-                {labelFr}
+                {t(tKey)}
               </button>
             ))}
           </div>
@@ -106,9 +106,9 @@ export default function RestaurantsPage() {
           {/* Empty state */}
           {!loading && restaurants.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <UtensilsCrossed className="w-16 h-16 text-beige/10 mb-4" />
-              <p className="text-beige/40 text-lg font-semibold">Aucun contenu disponible</p>
-              <p className="text-beige/30 text-sm mt-1">Revenez bientôt pour du nouveau contenu</p>
+              <UtensilsCrossed className="w-16 h-16 text-gold/20 mb-4" />
+              <p className="text-night/40 dark:text-beige/40 text-lg font-semibold">{t('general.noContent')}</p>
+              <p className="text-night/30 dark:text-beige/30 text-sm mt-1">{t('general.comingSoon')}</p>
             </div>
           )}
 
@@ -152,7 +152,7 @@ export default function RestaurantsPage() {
                       </motion.div>
                     ))}
                   </div>
-                  <h2 className="font-display text-2xl font-bold text-night dark:text-beige mb-6">Toutes les adresses</h2>
+                  <h2 className="font-display text-2xl font-bold text-night dark:text-beige mb-6">{t('restaurants.allAddresses')}</h2>
                 </>
               )}
 

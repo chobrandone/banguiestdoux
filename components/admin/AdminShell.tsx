@@ -2,13 +2,13 @@
 
 import { useState } from 'react';
 import AdminSidebar from './AdminSidebar';
-import AdminHeader from './AdminHeader';
+import AdminHeader  from './AdminHeader';
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#0F0F0F] flex">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0F0F0F] flex">
       <AdminSidebar
         mobileOpen={mobileMenuOpen}
         onMobileClose={() => setMobileMenuOpen(false)}

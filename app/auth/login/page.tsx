@@ -39,7 +39,7 @@ export default function LoginPage() {
           <Link href="/" className="text-white font-display text-4xl font-bold mb-4">
             Bangui<span className="text-gold"> est Doux</span>
           </Link>
-          <p className="text-white/60 text-lg">Le meilleur de Bangui vous attend.</p>
+          <p className="text-white/60 text-lg">{t('auth.tagline')}</p>
         </div>
       </div>
 
@@ -57,7 +57,7 @@ export default function LoginPage() {
 
           <div className="mb-8">
             <h1 className="font-display text-3xl font-bold text-night dark:text-beige mb-2">{t('auth.login')}</h1>
-            <p className="text-night/50 dark:text-beige/50 text-sm">Connectez-vous à votre compte</p>
+            <p className="text-night/50 dark:text-beige/50 text-sm">{t('auth.loginSubtitle')}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -106,7 +106,7 @@ export default function LoginPage() {
           </form>
 
           <p className="text-center text-sm text-night/50 dark:text-beige/50 mt-6">
-            Pas encore de compte ?{' '}
+            {t('auth.noAccount')}{' '}
             <Link href="/auth/register" className="text-gold font-semibold hover:underline">{t('auth.register')}</Link>
           </p>
 

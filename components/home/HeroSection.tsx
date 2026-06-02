@@ -191,13 +191,13 @@ export default function HeroSection() {
             className="flex items-center gap-8 mt-12"
           >
             {[
-              { value: '50+', label: 'Événements / mois' },
-              { value: '30+', label: 'Restaurants' },
-              { value: '10K+', label: 'Followers' },
-            ].map(({ value, label }) => (
-              <div key={label} className="text-white">
+              { value: '50+', labelKey: 'hero.stats.events' },
+              { value: '30+', labelKey: 'hero.stats.restaurants' },
+              { value: '10K+', labelKey: 'hero.stats.followers' },
+            ].map(({ value, labelKey }) => (
+              <div key={labelKey} className="text-white">
                 <div className="text-2xl font-bold text-gold font-display">{value}</div>
-                <div className="text-xs text-white/50 uppercase tracking-wider">{label}</div>
+                <div className="text-xs text-white/50 uppercase tracking-wider">{t(labelKey)}</div>
               </div>
             ))}
           </motion.div>
@@ -236,7 +236,7 @@ export default function HeroSection() {
         transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
         className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2"
       >
-        <span className="text-white/40 text-[10px] tracking-widest uppercase">Défiler</span>
+        <span className="text-white/40 text-[10px] tracking-widest uppercase">{t('hero.scroll')}</span>
         <ChevronDown className="w-5 h-5 text-white/40" />
       </motion.div>
     </section>

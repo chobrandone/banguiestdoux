@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { getPartners } from '@/lib/db';
+import { useLanguage } from '@/contexts/LanguageContext';
 import type { Partner } from '@/types';
 
 const seedPartners: Partner[] = [
@@ -15,6 +16,7 @@ const seedPartners: Partner[] = [
 ];
 
 export default function PartnersSection() {
+  const { t } = useLanguage();
   const [partners, setPartners] = useState<Partner[]>([]);
 
   useEffect(() => {
@@ -29,7 +31,7 @@ export default function PartnersSection() {
     <section className="py-16 bg-white dark:bg-night border-t border-b border-gold/10">
       <div className="container-custom">
         <div className="text-center mb-10">
-          <span className="label-editorial">Nos partenaires</span>
+          <span className="label-editorial">{t('partners.title')}</span>
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">

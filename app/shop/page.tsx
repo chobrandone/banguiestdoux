@@ -12,13 +12,13 @@ import { getProducts } from '@/lib/db';
 import toast from 'react-hot-toast';
 
 const CATS = [
-  { key:'all',             fr:'Tout' },
-  { key:'t-shirts',        fr:'T-Shirts' },
-  { key:'caps',            fr:'Casquettes' },
-  { key:'tote-bags',       fr:'Tote Bags' },
-  { key:'glassware',       fr:'Verrerie' },
-  { key:'accessories',     fr:'Accessoires' },
-  { key:'limited-editions',fr:'Éditions Limitées' },
+  { key:'all',             tKey:'cat.all' },
+  { key:'t-shirts',        tKey:'cat.tshirts' },
+  { key:'caps',            tKey:'cat.caps' },
+  { key:'tote-bags',       tKey:'cat.toteBags' },
+  { key:'glassware',       tKey:'cat.glassware' },
+  { key:'accessories',     tKey:'cat.accessories' },
+  { key:'limited-editions',tKey:'cat.limitedEditions' },
 ];
 
 export default function ShopPage() {
@@ -51,8 +51,8 @@ export default function ShopPage() {
         <div className="absolute inset-0 bg-gradient-to-t from-night to-transparent" />
         <div className="container-custom relative z-10 pt-24">
           <span className="label-editorial">Lifestyle Store</span>
-          <h1 className="font-display text-4xl md:text-6xl font-bold text-beige mt-2">Boutique</h1>
-          <p className="text-beige/60 mt-2">Représentez la culture de Bangui</p>
+          <h1 className="font-display text-4xl md:text-6xl font-bold text-beige mt-2">{t('nav.shop')}</h1>
+          <p className="text-beige/60 mt-2">{t('shop.subtitle')}</p>
         </div>
       </div>
 
@@ -61,16 +61,16 @@ export default function ShopPage() {
           {/* Banner */}
           <div className="bg-gradient-to-r from-gold-500 to-gold-400 rounded-2xl p-4 mb-8 flex items-center gap-3">
             <Zap className="w-5 h-5 text-night" />
-            <p className="text-night font-semibold text-sm">Livraison gratuite à Bangui pour toute commande supérieure à 50 000 XAF</p>
+            <p className="text-night font-semibold text-sm">{t('shop.freeShipping')}</p>
           </div>
 
           {/* Categories */}
           <div className="flex items-center gap-2 mb-8 overflow-x-auto scrollbar-hide pb-2">
-            {CATS.map(({ key, fr }) => (
+            {CATS.map(({ key, tKey }) => (
               <button key={key} onClick={() => setSelectedCat(key)}
                 className={cn('flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all',
                   selectedCat === key ? 'bg-gold text-night shadow-gold' : 'bg-white dark:bg-night-50 text-night/70 dark:text-beige/70 border border-gold/10 hover:bg-gold/10'
-                )}>{fr}</button>
+                )}>{t(tKey)}</button>
             ))}
           </div>
 
@@ -84,9 +84,9 @@ export default function ShopPage() {
           {/* Empty state */}
           {!loading && products.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <ShoppingBag className="w-16 h-16 text-beige/10 mb-4" />
-              <p className="text-beige/40 text-lg font-semibold">Aucun contenu disponible</p>
-              <p className="text-beige/30 text-sm mt-1">Revenez bientôt pour du nouveau contenu</p>
+              <ShoppingBag className="w-16 h-16 text-gold/20 mb-4" />
+              <p className="text-night/40 dark:text-beige/40 text-lg font-semibold">{t('general.noContent')}</p>
+              <p className="text-night/30 dark:text-beige/30 text-sm mt-1">{t('general.comingSoon')}</p>
             </div>
           )}
 
@@ -103,7 +103,7 @@ export default function ShopPage() {
 
                       {/* Badges */}
                       <div className="absolute top-3 left-3 flex flex-col gap-1">
-                        {product.isLimited && <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-night text-gold uppercase">Édition Limitée</span>}
+                        {product.isLimited && <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-night text-gold uppercase">{t('shop.limitedEdition')}</span>}
                         {product.comparePrice && <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-red-500 text-white uppercase">-{Math.round((1-product.price/product.comparePrice)*100)}%</span>}
                       </div>
 

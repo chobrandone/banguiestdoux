@@ -91,7 +91,7 @@ export default function GalleryPreview() {
 
               <div className="absolute inset-0 flex items-end p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <span className="text-white text-xs font-medium bg-black/50 px-2 py-1 rounded-full">
-                  {item.type === 'video' ? '▶ Vidéo' : '📷 Photo'}
+                  {item.type === 'video' ? `▶ ${t('gallery.video')}` : `📷 ${t('gallery.photo')}`}
                 </span>
               </div>
             </motion.div>
@@ -101,7 +101,7 @@ export default function GalleryPreview() {
         <div className="mt-8 text-center">
           <Link href="/gallery" className="btn-gold px-8">
             <Images className="w-4 h-4" />
-            Voir toute la galerie
+            {t('gallery.viewAll')}
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>

@@ -5,7 +5,7 @@ import AdminShell from '@/components/admin/AdminShell';
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
 
-  // SSR auth check — validates JWT server-side, no client-side flash
+  // SSR auth check — validates JWT with Supabase Auth server, no client-side flash
   const { data: { user }, error: authError } = await supabase.auth.getUser();
 
   if (authError || !user) {

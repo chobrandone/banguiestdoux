@@ -1,29 +1,31 @@
 /**
  * Next.js middleware — refreshes Supabase session cookies on every request
  * so server components always see a fresh, valid session.
+ * Uses @supabase/ssr v0.3.x get/set/remove cookie API.
  */
-import { createServerClient } from '@supabase/ssr';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request });
+  let response = NextResponse.next({ request: { headers: request.headers } });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
       cookies: {
-        getAll() {
-          return request.cookies.getAll();
+        get(name: string) {
+          return request.cookies.get(name)?.value;
         },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
-          supabaseResponse = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          );
+        set(name: string, value: string, options: CookieOptions) {
+          request.cookies.set({ name, value, ...options } as any);
+          response = NextResponse.next({ request: { headers: request.headers } });
+          response.cookies.set({ name, value, ...options } as any);
+        },
+        remove(name: string, options: CookieOptions) {
+          request.cookies.set({ name, value: '', ...options } as any);
+          response = NextResponse.next({ request: { headers: request.headers } });
+          response.cookies.set({ name, value: '', ...options } as any);
         },
       },
     }
@@ -32,18 +34,11 @@ export async function middleware(request: NextRequest) {
   // Refresh the session — IMPORTANT: do not remove
   await supabase.auth.getUser();
 
-  return supabaseResponse;
+  return response;
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all paths except:
-     * - _next/static (static files)
-     * - _next/image  (image optimisation)
-     * - favicon.ico, sitemap.xml, robots.txt
-     * - Static asset extensions
-     */
     '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)$).*)',
   ],
 };

@@ -48,7 +48,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor:    '#C9A84C',
+  themeColor:    '#16A34A',
   width:         'device-width',
   initialScale:  1,
   maximumScale:  5,
@@ -63,7 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className=""
     >
       <body className="bg-white dark:bg-night text-night dark:text-beige antialiased">
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ReduxProvider>
             <LanguageProvider>
               <AuthProvider>

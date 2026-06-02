@@ -145,7 +145,7 @@ export default function TalentsSpotlight() {
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent to-night/80" />
               </div>
               <div className="bg-night-50 p-8 md:p-10 flex flex-col justify-center">
-                <span className="label-editorial mb-3">Interview Exclusive</span>
+                <span className="label-editorial mb-3">{t('talent.exclusive')}</span>
                 <h3 className="font-display text-2xl md:text-3xl font-bold text-beige mb-4 leading-tight">
                   {lang === 'fr'
                     ? `"Bangui m'a tout donné" — ${spotlightTalent.name}`
@@ -156,10 +156,11 @@ export default function TalentsSpotlight() {
                     ? "Rencontre avec l'une des figures montantes de la scène créative de Bangui."
                     : "A meeting with one of Bangui's rising creative scene figures."}
                 </p>
+
                 <div className="flex items-center gap-4">
                   <Link href={`/talents/${spotlightTalent.slug}`} className="btn-gold">
                     <Play className="w-4 h-4 fill-current" />
-                    {lang === 'fr' ? "Voir l'interview" : 'Watch interview'}
+                    {t('talent.watch')}
                   </Link>
                   <Link href="/talents" className="text-gold text-sm font-semibold flex items-center gap-1 hover:gap-2 transition-all">
                     {t('section.talents.title')} <ArrowRight className="w-4 h-4" />
