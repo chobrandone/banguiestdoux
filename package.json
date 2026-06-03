@@ -9,7 +9,8 @@
     "start:next": "next start",
     "lint": "next lint",
     "seed": "node scripts/seed.js",
-    "create-admin": "node scripts/create-admin.js"
+    "create-admin": "node scripts/create-admin.js",
+    "postinstall": "next build"
   },
   "engines": {
     "node": ">=20.0.0"

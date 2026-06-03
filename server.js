@@ -11,6 +11,8 @@
  */
 require('dotenv').config();
 
+const fs           = require('fs');
+const path         = require('path');
 const express      = require('express');
 const cors         = require('cors');
 const helmet       = require('helmet');
@@ -25,6 +27,13 @@ const errorHandler = require('./middleware/errorHandler');
 /* ─── Config ─────────────────────────────────────── */
 const dev  = process.env.NODE_ENV !== 'production';
 const port = parseInt(process.env.PORT || '3000', 10);
+
+/* ─── Guard: production build must exist ─────────── */
+if (!dev && !fs.existsSync(path.join(__dirname, '.next'))) {
+  console.error('\n❌  ERROR: .next build folder not found.');
+  console.error('   Run  npm run build  before starting in production mode.\n');
+  process.exit(1);
+}
 
 /* ═══════════════════════════════════════════════════
    1.  EXPRESS API  (mounted at /api)
