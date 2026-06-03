@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
@@ -85,9 +86,14 @@ export default function Footer() {
           {/* Brand column */}
           <div className="lg:col-span-4">
             <Link href="/" className="inline-block mb-4">
-              <span className="font-display text-3xl font-bold">
-                Bangui<span className="text-gold"> est Doux</span>
-              </span>
+              {/* Footer is always dark → use white logo */}
+              <Image
+                src="/logo-dark.png"
+                alt="Bangui est Doux"
+                width={160}
+                height={60}
+                className="h-12 w-auto object-contain"
+              />
             </Link>
             <p className="text-beige/60 text-sm leading-relaxed mb-6 max-w-xs">
               {t('footer.tagline')}

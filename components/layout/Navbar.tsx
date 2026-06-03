@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -107,12 +108,22 @@ export default function Navbar() {
 
             {/* Logo */}
             <Link href="/" className="flex-shrink-0" onClick={closeMobile}>
-              <span className={cn(
-                'font-display font-bold text-xl lg:text-2xl tracking-tight transition-colors duration-300',
-                isTransparent ? 'text-white' : 'text-night dark:text-beige'
-              )}>
-                Bangui<span className="text-gold"> est Doux</span>
-              </span>
+              <Image
+                src={
+                  // On transparent hero (dark background) → always white logo
+                  isTransparent
+                    ? '/logo-dark.png'
+                    // After mount, respect the actual theme; before mount default to light
+                    : (mounted && theme === 'dark')
+                      ? '/logo-dark.png'
+                      : '/logo-light.png'
+                }
+                alt="Bangui est Doux"
+                width={160}
+                height={60}
+                priority
+                className="h-10 lg:h-12 w-auto object-contain transition-all duration-300"
+              />
             </Link>
 
             {/* Desktop nav */}
@@ -257,9 +268,13 @@ export default function Navbar() {
             >
               {/* Drawer header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-white/6 flex-shrink-0">
-                <span className="font-display font-bold text-lg text-night dark:text-beige">
-                  Bangui<span className="text-gold"> est Doux</span>
-                </span>
+                <Image
+                  src={(mounted && theme === 'dark') ? '/logo-dark.png' : '/logo-light.png'}
+                  alt="Bangui est Doux"
+                  width={130}
+                  height={48}
+                  className="h-9 w-auto object-contain"
+                />
                 <button onClick={closeMobile}
                   className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/10 text-night dark:text-beige hover:bg-gray-200 dark:hover:bg-white/15 transition-colors">
                   <X className="w-5 h-5" />
