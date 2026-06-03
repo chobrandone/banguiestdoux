@@ -6,6 +6,7 @@ import { Plus, Pencil, Trash2, Star, Search, X, ImageIcon, Video, Film } from 'l
 import toast from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
 import { getGallery, deleteRow, toGalleryItem } from '@/lib/db';
+import ImageUpload from '@/components/admin/ImageUpload';
 
 interface GalleryItem {
   _id: string;
@@ -378,36 +379,36 @@ export default function GalleryAdminPage() {
                   </div>
                 </div>
 
-                <div>
-                  <label className={lc}>URL {form.type === 'video' ? 'de la vidéo' : 'de l\'image'} *</label>
-                  <input
-                    required
+                {form.type === 'image' ? (
+                  <ImageUpload
+                    bucket="gallery"
                     value={form.url}
-                    onChange={e => setForm(p => ({ ...p, url: e.target.value }))}
-                    placeholder="https://..."
-                    className={ic}
+                    onChange={url => setForm(p => ({ ...p, url }))}
+                    label="Image *"
+                    maxSize={10 * 1024 * 1024}
                   />
-                  {form.type === 'image' && form.url && (
-                    <div className="mt-2 rounded-xl overflow-hidden h-32 bg-white/5">
-                      <img src={form.url} alt="Preview" className="w-full h-full object-cover" />
-                    </div>
-                  )}
-                </div>
+                ) : (
+                  <div>
+                    <label className={lc}>URL de la vidéo *</label>
+                    <input
+                      required
+                      value={form.url}
+                      onChange={e => setForm(p => ({ ...p, url: e.target.value }))}
+                      placeholder="https://..."
+                      className={ic}
+                    />
+                  </div>
+                )}
 
-                <div>
-                  <label className={lc}>URL de la miniature {form.type === 'image' ? '(optionnel)' : ''}</label>
-                  <input
+                {form.type === 'video' && (
+                  <ImageUpload
+                    bucket="gallery"
                     value={form.thumbnail}
-                    onChange={e => setForm(p => ({ ...p, thumbnail: e.target.value }))}
-                    placeholder="https://..."
-                    className={ic}
+                    onChange={url => setForm(p => ({ ...p, thumbnail: url }))}
+                    label="Miniature de la vidéo"
+                    maxSize={10 * 1024 * 1024}
                   />
-                  {form.thumbnail && (
-                    <div className="mt-2 rounded-xl overflow-hidden h-24 bg-white/5">
-                      <img src={form.thumbnail} alt="Thumbnail preview" className="w-full h-full object-cover" />
-                    </div>
-                  )}
-                </div>
+                )}
 
                 <div className="flex items-center justify-between bg-[#0A0A0A] rounded-xl p-4">
                   <div>

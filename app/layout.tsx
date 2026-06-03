@@ -6,6 +6,7 @@ import { CartProvider }     from '@/contexts/CartContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { ReduxProvider }    from '@/components/providers/ReduxProvider';
 import PublicLayout from '@/components/layout/PublicLayout';
+import AnalyticsTracker from '@/components/providers/AnalyticsTracker';
 import './globals.css';
 // Fonts are loaded via @import in globals.css and defined as CSS variables
 // (--font-inter, --font-playfair, --font-dm-sans) — no next/font needed.
@@ -68,6 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <LanguageProvider>
               <AuthProvider>
                 <CartProvider>
+                  <AnalyticsTracker />
                   <PublicLayout>
                     {children}
                   </PublicLayout>

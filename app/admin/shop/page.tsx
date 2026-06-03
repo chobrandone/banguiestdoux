@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
 import { deleteRow } from '@/lib/db';
 import { formatPrice } from '@/lib/utils';
+import ImageUpload from '@/components/admin/ImageUpload';
 
 interface Product {
   _id: string;
@@ -539,18 +540,25 @@ export default function ShopAdminPage() {
                   </div>
 
                   <div className="col-span-2">
-                    <label className={lc}>URL de l&apos;image principale</label>
-                    <input
+                    <ImageUpload
+                      bucket="product-images"
                       value={form.images[0] || ''}
-                      onChange={e => setForm(p => ({ ...p, images: [e.target.value, ...p.images.slice(1)] }))}
-                      placeholder="https://..."
-                      className={ic}
+                      onChange={url => setForm(p => ({ ...p, images: [url, ...p.images.slice(1)] }))}
+                      label="Image principale du produit"
                     />
-                    {form.images[0] && (
-                      <div className="mt-2 rounded-xl overflow-hidden h-32 bg-white/5">
-                        <img src={form.images[0]} alt="Preview" className="w-full h-full object-cover" />
-                      </div>
-                    )}
+                  </div>
+
+                  {/* Second image (optional) */}
+                  <div className="col-span-2">
+                    <ImageUpload
+                      bucket="product-images"
+                      value={form.images[1] || ''}
+                      onChange={url => setForm(p => ({
+                        ...p,
+                        images: [p.images[0] || '', url, ...p.images.slice(2)],
+                      }))}
+                      label="Image secondaire (optionnel)"
+                    />
                   </div>
 
                   <div className="flex items-center justify-between bg-[#0A0A0A] rounded-xl p-4">

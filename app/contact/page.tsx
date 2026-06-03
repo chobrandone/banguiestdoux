@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin, Send, CheckCircle2, Instagram, Facebook, Youtube } from 'lucide-react';
 import { FaTiktok, FaWhatsapp } from 'react-icons/fa';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { sendMessage } from '@/lib/db';
 import toast from 'react-hot-toast';
 
 export default function ContactPage() {
@@ -22,8 +21,13 @@ export default function ContactPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const { success, error } = await sendMessage(form);
-      if (!success) throw new Error(error);
+      const res  = await fetch('/api/contact', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(form),
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error);
       setSent(true);
       toast.success(t('contact.sent'));
     } catch {

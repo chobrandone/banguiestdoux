@@ -6,6 +6,7 @@ import { Plus, Pencil, Trash2, Star, Search, X, ImageIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
 import { getRestaurants, deleteRow, toRestaurant } from '@/lib/db';
+import ImageUpload from '@/components/admin/ImageUpload';
 
 interface Restaurant {
   _id: string;
@@ -494,18 +495,12 @@ export default function RestaurantsAdminPage() {
                   </div>
 
                   <div className="col-span-2">
-                    <label className={lc}>URL de l&apos;image</label>
-                    <input
+                    <ImageUpload
+                      bucket="restaurant-photos"
                       value={form.image}
-                      onChange={e => setForm(p => ({ ...p, image: e.target.value }))}
-                      placeholder="https://..."
-                      className={ic}
+                      onChange={url => setForm(p => ({ ...p, image: url }))}
+                      label="Photo du restaurant"
                     />
-                    {form.image && (
-                      <div className="mt-2 rounded-xl overflow-hidden h-32 bg-white/5">
-                        <img src={form.image} alt="Preview" className="w-full h-full object-cover" />
-                      </div>
-                    )}
                   </div>
 
                   <div className="flex items-center justify-between bg-[#0A0A0A] rounded-xl p-4">

@@ -8,6 +8,7 @@ import { getEvents, deleteRow, toEvent } from '@/lib/db';
 import { formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import type { Event } from '@/types';
+import ImageUpload from '@/components/admin/ImageUpload';
 
 type EventForm = {
   title: string; category: string; date: string; time: string;
@@ -297,12 +298,12 @@ export default function AdminEventsPage() {
                   <div className="md:col-span-2"><label className={lc}>Adresse</label><input value={form.address} onChange={fld('address')} placeholder="Adresse complète, Bangui" className={ic} /></div>
                   <div className="md:col-span-2"><label className={lc}>Description</label><textarea value={form.description} onChange={fld('description')} rows={3} placeholder="Description de l'événement..." className={ic + ' resize-none'} /></div>
                   <div className="md:col-span-2">
-                    <label className={lc}>Image (URL)</label>
-                    <input value={form.image} onChange={fld('image')} placeholder="https://images.unsplash.com/..." className={ic} />
-                    {form.image && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={form.image} alt="" className="mt-2 h-28 w-full object-cover rounded-xl" onError={e => (e.currentTarget.style.display = 'none')} />
-                    )}
+                    <ImageUpload
+                      bucket="event-flyers"
+                      value={form.image}
+                      onChange={url => setForm(p => ({ ...p, image: url }))}
+                      label="Affiche de l'événement"
+                    />
                   </div>
                   <div><label className={lc}>Prix (XAF)</label><input type="number" value={form.ticketPrice} onChange={fld('ticketPrice')} min="0" className={ic} /></div>
                   <div><label className={lc}>Capacité (0 = illimitée)</label><input type="number" value={form.capacity} onChange={fld('capacity')} min="0" className={ic} /></div>
