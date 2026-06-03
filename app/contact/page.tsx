@@ -63,7 +63,7 @@ export default function ContactPage() {
                   { icon: FaWhatsapp, labelKey: 'contact.whatsapp',  value: '+236 72 63 71 71',                 href: 'https://wa.me/23672637171' },
                   { icon: MapPin,     labelKey: 'contact.address',   value: 'Bangui, République Centrafricaine', href: '#map' },
                 ].map(({ icon: Icon, labelKey, value, href }) => (
-                  <a key={label} href={href} className="flex items-start gap-4 group">
+                  <a key={labelKey} href={href} className="flex items-start gap-4 group">
                     <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-xl bg-gold/10 text-gold group-hover:bg-gold group-hover:text-night transition-all">
                       <Icon size={18} />
                     </div>

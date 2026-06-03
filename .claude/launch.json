@@ -2,16 +2,12 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "Frontend (Next.js)",
+      "name": "frontend-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "frontend", "run", "dev"],
-      "port": 3000
-    },
-    {
-      "name": "Backend (Express API)",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "backend", "run", "dev"],
-      "port": 5000
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "D:/brandone/jerry/bangui est doux/website",
+      "port": 3000,
+      "autoPort": false
     }
   ]
 }
