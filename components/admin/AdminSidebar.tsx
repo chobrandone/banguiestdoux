@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -111,7 +110,7 @@ export default function AdminSidebar({ mobileOpen = false, onMobileClose }: Admi
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
-  const logoSrc = (mounted && theme === 'dark') ? '/logo-dark.png' : '/logo-light.png';
+  const logoSrc = (mounted && theme === 'dark') ? '/images/logo-dark.svg' : '/images/logo-light.svg';
 
   return (
     <>
@@ -125,13 +124,8 @@ export default function AdminSidebar({ mobileOpen = false, onMobileClose }: Admi
           <AnimatePresence>
             {!collapsed && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <Image
-                  src={logoSrc}
-                  alt="Bangui est Doux"
-                  width={120}
-                  height={44}
-                  className="h-8 w-auto object-contain"
-                />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={logoSrc} alt="Bangui est Doux" className="h-8 w-auto object-contain" />
               </motion.div>
             )}
           </AnimatePresence>
@@ -170,13 +164,8 @@ export default function AdminSidebar({ mobileOpen = false, onMobileClose }: Admi
             >
               {/* Mobile logo + close */}
               <div className="flex items-center justify-between px-4 h-16 border-b border-gray-200 dark:border-white/5 flex-shrink-0">
-                <Image
-                  src={logoSrc}
-                  alt="Bangui est Doux"
-                  width={120}
-                  height={44}
-                  className="h-8 w-auto object-contain"
-                />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={logoSrc} alt="Bangui est Doux" className="h-8 w-auto object-contain" />
                 <button
                   onClick={onMobileClose}
                   className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 dark:text-beige/40 hover:text-gray-700 dark:hover:text-beige hover:bg-gray-100 dark:hover:bg-white/5 transition-all"

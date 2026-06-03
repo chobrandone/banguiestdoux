@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -108,20 +107,16 @@ export default function Navbar() {
 
             {/* Logo */}
             <Link href="/" className="flex-shrink-0" onClick={closeMobile}>
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={
-                  // On transparent hero (dark background) → always white logo
                   isTransparent
-                    ? '/logo-dark.png'
-                    // After mount, respect the actual theme; before mount default to light
+                    ? '/images/logo-dark.svg'
                     : (mounted && theme === 'dark')
-                      ? '/logo-dark.png'
-                      : '/logo-light.png'
+                      ? '/images/logo-dark.svg'
+                      : '/images/logo-light.svg'
                 }
                 alt="Bangui est Doux"
-                width={160}
-                height={60}
-                priority
                 className="h-10 lg:h-12 w-auto object-contain transition-all duration-300"
               />
             </Link>
@@ -268,11 +263,10 @@ export default function Navbar() {
             >
               {/* Drawer header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-white/6 flex-shrink-0">
-                <Image
-                  src={(mounted && theme === 'dark') ? '/logo-dark.png' : '/logo-light.png'}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={(mounted && theme === 'dark') ? '/images/logo-dark.svg' : '/images/logo-light.svg'}
                   alt="Bangui est Doux"
-                  width={130}
-                  height={48}
                   className="h-9 w-auto object-contain"
                 />
                 <button onClick={closeMobile}

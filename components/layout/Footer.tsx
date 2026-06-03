@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
@@ -86,12 +85,11 @@ export default function Footer() {
           {/* Brand column */}
           <div className="lg:col-span-4">
             <Link href="/" className="inline-block mb-4">
-              {/* Footer is always dark → use white logo */}
-              <Image
-                src="/logo-dark.png"
+              {/* Footer always has dark background → white logo */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/logo-dark.svg"
                 alt="Bangui est Doux"
-                width={160}
-                height={60}
                 className="h-12 w-auto object-contain"
               />
             </Link>
