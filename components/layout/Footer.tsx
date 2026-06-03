@@ -90,7 +90,7 @@ export default function Footer() {
               <img
                 src="/images/logo-dark.svg"
                 alt="Bangui est Doux"
-                className="h-12 w-auto object-contain"
+                className="h-16 w-auto object-contain"
               />
             </Link>
             <p className="text-beige/60 text-sm leading-relaxed mb-6 max-w-xs">

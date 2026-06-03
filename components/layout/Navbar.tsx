@@ -117,7 +117,7 @@ export default function Navbar() {
                       : '/images/logo-light.svg'
                 }
                 alt="Bangui est Doux"
-                className="h-10 lg:h-12 w-auto object-contain transition-all duration-300"
+                className="h-14 lg:h-16 w-auto object-contain transition-all duration-300"
               />
             </Link>
 
@@ -267,7 +267,7 @@ export default function Navbar() {
                 <img
                   src={(mounted && theme === 'dark') ? '/images/logo-dark.svg' : '/images/logo-light.svg'}
                   alt="Bangui est Doux"
-                  className="h-9 w-auto object-contain"
+                  className="h-12 w-auto object-contain"
                 />
                 <button onClick={closeMobile}
                   className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/10 text-night dark:text-beige hover:bg-gray-200 dark:hover:bg-white/15 transition-colors">
