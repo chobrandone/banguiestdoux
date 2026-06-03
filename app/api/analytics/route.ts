@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseAdmin = createClient(
-  process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
+// Force dynamic — never statically pre-render this route
+export const dynamic = 'force-dynamic';
+
+// Lazy-initialise the admin client INSIDE each handler so env vars are
+// resolved at request-time, not at build-time.
+function getAdmin() {
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) throw new Error('Missing Supabase env vars');
+  return createClient(url, key);
+}
 
 /** POST /api/analytics  — track a page view */
 export async function POST(req: NextRequest) {
@@ -20,7 +27,7 @@ export async function POST(req: NextRequest) {
     const referrer   = req.headers.get('referer') || null;
     const user_agent = req.headers.get('user-agent') || null;
 
-    await supabaseAdmin.from('page_views').insert([{ path, referrer, user_agent }]);
+    await getAdmin().from('page_views').insert([{ path, referrer, user_agent }]);
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('Analytics POST error:', err);
@@ -31,7 +38,8 @@ export async function POST(req: NextRequest) {
 /** GET /api/analytics?range=7  — aggregate stats for admin dashboard */
 export async function GET(req: NextRequest) {
   try {
-    const days = Number(req.nextUrl.searchParams.get('range') || '30');
+    const supabaseAdmin = getAdmin();
+    const days  = Number(req.nextUrl.searchParams.get('range') || '30');
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
     // Total views in range
@@ -63,7 +71,7 @@ export async function GET(req: NextRequest) {
       .slice(0, 10)
       .map(([path, views]) => ({ path, views }));
 
-    // Daily breakdown (last `days` days)
+    // Daily breakdown
     const { data: rawDaily } = await supabaseAdmin
       .from('page_views')
       .select('created_at')
@@ -72,11 +80,10 @@ export async function GET(req: NextRequest) {
 
     const dailyCounts: Record<string, number> = {};
     (rawDaily || []).forEach(r => {
-      const d = r.created_at.slice(0, 10); // YYYY-MM-DD
+      const d = r.created_at.slice(0, 10);
       dailyCounts[d] = (dailyCounts[d] || 0) + 1;
     });
 
-    // Fill in zeros for missing days
     const daily: { date: string; views: number }[] = [];
     for (let i = days - 1; i >= 0; i--) {
       const d = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);

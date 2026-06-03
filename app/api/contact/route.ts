@@ -2,22 +2,28 @@ import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import { createClient } from '@supabase/supabase-js';
 
-// Service-role client (server-only, never exposed to browser)
-const supabaseAdmin = createClient(
-  process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
+// Force dynamic — never statically pre-render this route during build
+export const dynamic = 'force-dynamic';
 
-// SMTP transporter — Hostinger mail
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.hostinger.com',
-  port: Number(process.env.SMTP_PORT || 587),
-  secure: false, // STARTTLS on port 587
-  auth: {
-    user: process.env.SMTP_USER || 'contact@banguiestdoux.com',
-    pass: process.env.SMTP_PASS,
-  },
-});
+// Lazy helpers — resolved at request-time, not build-time
+function getAdmin() {
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return null;
+  return createClient(url, key);
+}
+
+function getTransporter() {
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.hostinger.com',
+    port: Number(process.env.SMTP_PORT || 587),
+    secure: false,
+    auth: {
+      user: process.env.SMTP_USER || 'contact@banguiestdoux.com',
+      pass: process.env.SMTP_PASS,
+    },
+  });
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -39,18 +45,22 @@ export async function POST(req: NextRequest) {
     }
 
     // 1️⃣  Save to Supabase messages table
-    const { error: dbError } = await supabaseAdmin.from('messages').insert([{
-      name:    name.trim(),
-      email:   email.trim(),
-      phone:   phone?.trim() || null,
-      subject: subject?.trim() || null,
-      message: message.trim(),
-    }]);
-
-    if (dbError) {
-      console.error('Contact save error:', dbError);
-      // Don't block the email — log and continue
+    const admin = getAdmin();
+    if (admin) {
+      const { error: dbError } = await admin.from('messages').insert([{
+        name:    name.trim(),
+        email:   email.trim(),
+        phone:   phone?.trim() || null,
+        subject: subject?.trim() || null,
+        message: message.trim(),
+      }]);
+      if (dbError) {
+        console.error('Contact save error:', dbError);
+        // Don't block the email — log and continue
+      }
     }
+
+    const transporter = getTransporter();
 
     // 2️⃣  Send notification to admin
     await transporter.sendMail({
