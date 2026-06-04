@@ -32,7 +32,7 @@ const STATUS_CONFIG: Record<OrderStatus, { label: string; color: string; icon: R
   confirmed:  { label: 'Confirmé',   color: 'bg-blue-500/15 text-blue-400 border-blue-500/20',        icon: CheckCircle2  },
   processing: { label: 'En cours',   color: 'bg-purple-500/15 text-purple-400 border-purple-500/20',  icon: Package       },
   shipped:    { label: 'Expédié',    color: 'bg-indigo-500/15 text-indigo-400 border-indigo-500/20',   icon: Truck         },
-  delivered:  { label: 'Livré',      color: 'bg-green-500/15 text-green-400 border-green-500/20',     icon: CheckCircle2  },
+  delivered:  { label: 'Livré',      color: 'bg-white/10 text-beige border-white/15',     icon: CheckCircle2  },
   cancelled:  { label: 'Annulé',     color: 'bg-red-500/15 text-red-400 border-red-500/20',            icon: XCircle       },
 };
 
@@ -112,7 +112,7 @@ export default function AdminOrdersPage() {
         {[
           { label: 'Total',      value: stats.total,                        color: 'text-beige'       },
           { label: 'En attente', value: stats.pending,                      color: 'text-yellow-400'  },
-          { label: 'Livrées',    value: stats.delivered,                    color: 'text-green-400'   },
+          { label: 'Livrées',    value: stats.delivered,                    color: 'text-beige'   },
           { label: 'Revenus',    value: formatPrice(stats.revenue, 'XAF'),  color: 'text-gold'        },
         ].map(({ label, value, color }) => (
           <div key={label} className="bg-[#141414] border border-white/5 rounded-2xl p-4">

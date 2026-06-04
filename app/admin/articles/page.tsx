@@ -59,7 +59,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   nightlife: 'bg-pink-500/20 text-pink-400',
   gastronomy: 'bg-orange-500/20 text-orange-400',
   travel: 'bg-cyan-500/20 text-cyan-400',
-  lifestyle: 'bg-green-500/20 text-green-400',
+  lifestyle: 'bg-white/10 text-beige/80',
   interview: 'bg-yellow-500/20 text-yellow-400',
   guide: 'bg-teal-500/20 text-teal-400',
   other: 'bg-white/10 text-beige/50',

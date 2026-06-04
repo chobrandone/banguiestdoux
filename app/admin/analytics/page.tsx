@@ -27,7 +27,7 @@ interface VisitStats {
 /* ─── Helpers ────────────────────────────────────────────────── */
 const STATUS_STYLES: Record<string, string> = {
   pending: 'bg-yellow-500/20 text-yellow-400', processing: 'bg-blue-500/20 text-blue-400',
-  completed: 'bg-green-500/20 text-green-400', cancelled: 'bg-red-500/20 text-red-400',
+  completed: 'bg-white/10 text-beige/80', cancelled: 'bg-red-500/20 text-red-400',
   shipped: 'bg-cyan-500/20 text-cyan-400',
 };
 const STATUS_LABELS: Record<string, string> = {
@@ -35,7 +35,7 @@ const STATUS_LABELS: Record<string, string> = {
   cancelled: 'Annulé', shipped: 'Expédié',
 };
 function StatusIcon({ status }: { status: string }) {
-  if (status === 'completed') return <CheckCircle size={13} className="text-green-400" />;
+  if (status === 'completed') return <CheckCircle size={13} className="text-beige/80" />;
   if (status === 'cancelled') return <XCircle size={13} className="text-red-400" />;
   if (status === 'pending')   return <Clock size={13} className="text-yellow-400" />;
   return <Loader2 size={13} className="text-blue-400" />;
@@ -126,7 +126,7 @@ export default function AnalyticsAdminPage() {
     { label:'Événements',    value:stats.totalEvents,                    icon:CalendarDays,  color:'from-purple-500/20 to-purple-600/10 border-purple-500/20', iconColor:'text-purple-400' },
     { label:'Restaurants',   value:stats.totalRestaurants,               icon:Utensils,      color:'from-orange-500/20 to-orange-600/10 border-orange-500/20', iconColor:'text-orange-400' },
     { label:'Utilisateurs',  value:stats.totalUsers,                     icon:Users,         color:'from-blue-500/20   to-blue-600/10   border-blue-500/20',   iconColor:'text-blue-400'   },
-    { label:'Commandes',     value:stats.totalOrders,                    icon:ShoppingBag,   color:'from-green-500/20  to-green-600/10  border-green-500/20',  iconColor:'text-green-400'  },
+    { label:'Commandes',     value:stats.totalOrders,                    icon:ShoppingBag,   color:'from-white/15  to-white/5  border-white/10',  iconColor:'text-beige/80'  },
     { label:'Revenus',       value:formatPrice(stats.totalRevenue,'XAF'), icon:TrendingUp,    color:'from-gold/20       to-gold/5         border-gold/20',       iconColor:'text-gold',       isLarge:true },
     { label:'Messages n.l.', value:stats.unreadMessages,                 icon:MessageSquare, color:'from-cyan-500/20   to-cyan-600/10   border-cyan-500/20',   iconColor:'text-cyan-400'   },
   ] : [];
@@ -185,7 +185,7 @@ export default function AnalyticsAdminPage() {
                   <div className="flex items-center gap-1.5 text-beige/50 text-xs">
                     <Eye size={12} /> Vues totales
                   </div>
-                  <div className={`flex items-center gap-0.5 text-xs font-semibold ${visitDelta >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  <div className={`flex items-center gap-0.5 text-xs font-semibold ${visitDelta >= 0 ? 'text-beige/80' : 'text-red-400'}`}>
                     {visitDelta >= 0 ? <ArrowUp size={10} /> : <ArrowDown size={10} />}
                     {Math.abs(visitDelta)}%
                   </div>

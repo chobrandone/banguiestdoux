@@ -15,7 +15,7 @@ const socialLinks = [
   { icon: Facebook,  href: 'https://facebook.com/banguiestdoux', label: 'Facebook',  color: 'hover:text-blue-400'  },
   { icon: Youtube,   href: 'https://youtube.com/@banguiestdoux', label: 'YouTube',   color: 'hover:text-red-400'   },
   { icon: FaTiktok,  href: 'https://tiktok.com/@banguiestdoux',  label: 'TikTok',    color: 'hover:text-white'     },
-  { icon: FaWhatsapp,href: 'https://wa.me/23672637171',          label: 'WhatsApp',  color: 'hover:text-green-400' },
+  { icon: FaWhatsapp,href: 'https://wa.me/23672637171',          label: 'WhatsApp',  color: 'hover:text-beige' },
 ];
 
 /* Link lists — all labels use translation keys */
@@ -90,7 +90,7 @@ export default function Footer() {
               <img
                 src="/images/logo-dark.svg"
                 alt="Bangui est Doux"
-                className="h-16 w-auto object-contain"
+                className="h-16 w-auto object-contain drop-shadow-md"
               />
             </Link>
             <p className="text-beige/60 text-sm leading-relaxed mb-6 max-w-xs">
@@ -122,7 +122,7 @@ export default function Footer() {
                 <motion.p
                   initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="text-sm text-green-400"
+                  className="text-sm text-gold"
                 >
                   {t('footer.newsletter.subscribed')}
                 </motion.p>
@@ -138,7 +138,7 @@ export default function Footer() {
                   />
                   <button
                     type="submit"
-                    className="px-4 py-2.5 bg-gold hover:bg-gold-300 text-night rounded-r-xl transition-colors"
+                    className="px-4 py-2.5 bg-gold hover:bg-gold/80 text-night rounded-r-xl transition-colors"
                   >
                     <Send className="w-4 h-4" />
                   </button>

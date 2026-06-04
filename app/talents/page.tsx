@@ -55,7 +55,7 @@ export default function TalentsPage() {
             {CATS.map(({ key, tKey }) => (
               <button key={key} onClick={() => setSelectedCat(key)}
                 className={cn('flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all',
-                  selectedCat === key ? 'bg-gold text-night' : 'border border-beige/20 text-beige/60 hover:border-gold/50 hover:text-gold'
+                  selectedCat === key ? 'bg-gold text-white dark:text-night' : 'border border-beige/20 text-beige/60 hover:border-gold/50 hover:text-gold'
                 )}>{t(tKey)}</button>
             ))}
           </div>
@@ -124,7 +124,7 @@ export default function TalentsPage() {
                         )}
                         {talent.isFeatured && (
                           <div className="absolute top-3 left-3">
-                            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-gold text-night uppercase">★ Featured</span>
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-gold text-white dark:text-night uppercase">★ Featured</span>
                           </div>
                         )}
                         <div className="absolute bottom-0 left-0 right-0 p-4">

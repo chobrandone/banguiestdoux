@@ -10,7 +10,9 @@
   --font-playfair: 'Playfair Display', Georgia, serif;
   --font-dm-sans:  'DM Sans', system-ui, sans-serif;
 
-  --color-gold:    #16A34A;
+  /* Adaptive accent: black in light mode */
+  --accent:        0 0 0;          /* rgb values for rgb(var(--accent)) */
+  --color-gold:    #0A0A0A;
   --color-beige:   #F5F0E8;
   --color-night:   #0A0A0A;
   --color-dark:    #141414;
@@ -20,6 +22,12 @@
 
   --radius-card:   16px;
   --radius-pill:   50px;
+}
+
+.dark {
+  /* Adaptive accent: white in dark mode */
+  --accent:     255 255 255;
+  --color-gold: #FFFFFF;
 }
 
 /* ─── Base Reset ────────────────────────────────── */
@@ -66,14 +74,20 @@ p {
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(22,163,74,0.4);
+  background: rgba(0,0,0,0.2);
   border-radius: 999px;
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(22,163,74,0.7); }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.4); }
+.dark ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); }
+.dark ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
 
 /* ─── Selection ─────────────────────────────────── */
 ::selection {
-  background: rgba(22,163,74,0.25);
+  background: rgba(0,0,0,0.12);
+  color: inherit;
+}
+.dark ::selection {
+  background: rgba(255,255,255,0.15);
   color: inherit;
 }
 
@@ -87,12 +101,21 @@ p {
     @apply bg-black/30 backdrop-blur-md border border-white/10;
   }
   .glass-gold {
-    @apply bg-gold/10 backdrop-blur-md border border-gold/20;
+    @apply bg-gold/5 backdrop-blur-md border border-gold/15;
   }
 
-  /* Gold gradient text */
+  /* Gradient text — white shimmer on dark, dark shimmer on light */
   .text-gradient-gold {
-    @apply bg-gradient-gold bg-clip-text text-transparent;
+    background: linear-gradient(135deg, currentColor 0%, rgba(255,255,255,0.6) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .dark .text-gradient-gold {
+    background: linear-gradient(135deg, #FFFFFF 0%, #AAAAAA 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   /* Section padding */
@@ -114,7 +137,11 @@ p {
 
   /* Editorial label */
   .label-editorial {
-    @apply text-xs font-semibold uppercase tracking-[0.2em] text-gold;
+    @apply text-xs font-semibold uppercase tracking-[0.2em];
+    color: #0A0A0A;
+  }
+  .dark .label-editorial {
+    color: #FFFFFF;
   }
 
   /* Button base */
@@ -126,11 +153,18 @@ p {
     @apply cursor-pointer select-none;
     @apply hover:scale-[1.03] active:scale-[0.97];
   }
+  /* Light mode: black button with white text | Dark mode: white button with black text */
   .btn-gold {
-    @apply btn bg-gold text-night hover:bg-gold-300;
+    @apply btn bg-night text-beige hover:bg-night-50;
+  }
+  .dark .btn-gold {
+    @apply bg-beige text-night hover:bg-beige-300;
   }
   .btn-outline-gold {
-    @apply btn border-2 border-gold text-gold hover:bg-gold hover:text-night;
+    @apply btn border-2 border-night text-night hover:bg-night hover:text-beige;
+  }
+  .dark .btn-outline-gold {
+    @apply border-beige text-beige hover:bg-beige hover:text-night;
   }
   .btn-dark {
     @apply btn bg-night text-beige hover:bg-night-50 border border-white/10;
@@ -181,7 +215,7 @@ p {
     @apply absolute inset-0 shimmer;
   }
 
-  /* Gold divider */
+  /* Divider — black in light, white in dark */
   .divider-gold {
     @apply w-12 h-0.5 bg-gold;
   }
@@ -199,11 +233,11 @@ p {
 
   /* Swiper overrides */
   .swiper-pagination-bullet-active {
-    @apply !bg-gold;
+    background: rgb(var(--accent)) !important;
   }
   .swiper-button-next,
   .swiper-button-prev {
-    @apply !text-gold;
+    color: rgb(var(--accent)) !important;
   }
 
   /* Lightbox */
@@ -231,7 +265,7 @@ p {
   /* Text balance */
   .text-balance { text-wrap: balance; }
 
-  /* Gradient border */
+  /* Gradient border — white/grey shimmer */
   .gradient-border {
     position: relative;
     background: transparent;
@@ -242,7 +276,7 @@ p {
     inset: 0;
     border-radius: inherit;
     padding: 1px;
-    background: linear-gradient(135deg, #16A34A, #86EFAC);
+    background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.1));
     -webkit-mask: linear-gradient(#fff 0 0) content-box,
                   linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;

@@ -9,19 +9,19 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        /* ── Green palette (brand: #16A34A) ── */
+        /* ── Adaptive accent: black in light mode, white in dark mode ── */
         gold: {
-          DEFAULT: '#16A34A',
-          50:  '#F0FDF4',
-          100: '#DCFCE7',
-          200: '#BBF7D0',
-          300: '#86EFAC',
-          400: '#4ADE80',
-          500: '#22C55E',
-          600: '#16A34A',
-          700: '#15803D',
-          800: '#166534',
-          900: '#14532D',
+          DEFAULT: 'rgb(var(--accent) / <alpha-value>)',
+          50:  '#FAFAFA',
+          100: '#F5F5F5',
+          200: '#E5E5E5',
+          300: '#C4C4C4',
+          400: '#9B9B9B',
+          500: '#737373',
+          600: '#4A4A4A',
+          700: '#2E2E2E',
+          800: '#1A1A1A',
+          900: '#0A0A0A',
         },
         beige: {
           DEFAULT: '#F5F0E8',
@@ -40,7 +40,7 @@ module.exports = {
           300: '#0A0A0A',
         },
         tropical: {
-          green:  '#1A6B3C',
+          green:  '#2A2A2A',
           amber:  '#D4622A',
           blue:   '#1B4F8A',
           purple: '#4A1F6B',
@@ -53,8 +53,8 @@ module.exports = {
       },
       backgroundImage: {
         'gradient-night':    'linear-gradient(135deg, #0A0A0A 0%, #1a0a2e 50%, #0A0A0A 100%)',
-        'gradient-gold':     'linear-gradient(135deg, #16A34A 0%, #86EFAC 50%, #16A34A 100%)',
-        'gradient-tropical': 'linear-gradient(135deg, #0A2A1A 0%, #1A6B3C 100%)',
+        'gradient-gold':     'linear-gradient(135deg, #FFFFFF 0%, #CCCCCC 50%, #FFFFFF 100%)',
+        'gradient-tropical': 'linear-gradient(135deg, #0A0A0A 0%, #2A2A2A 100%)',
         'gradient-luxury':   'linear-gradient(180deg, rgba(10,10,10,0) 0%, rgba(10,10,10,0.8) 100%)',
         'hero-overlay':      'linear-gradient(to bottom, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.7) 100%)',
       },
@@ -86,8 +86,8 @@ module.exports = {
           '100%': { opacity: '1', transform: 'translateX(0)' },
         },
         glowPulse: {
-          '0%, 100%': { boxShadow: '0 0 20px rgba(22,163,74,0.3)' },
-          '50%':      { boxShadow: '0 0 40px rgba(22,163,74,0.6)' },
+          '0%, 100%': { boxShadow: '0 0 20px rgba(255,255,255,0.15)' },
+          '50%':      { boxShadow: '0 0 40px rgba(255,255,255,0.35)' },
         },
         ticker: {
           '0%':   { transform: 'translateX(0)' },
@@ -107,8 +107,8 @@ module.exports = {
         'glass':      '0 8px 32px rgba(0,0,0,0.2)',
         'card':       '0 2px 20px rgba(0,0,0,0.08)',
         'card-hover': '0 12px 40px rgba(0,0,0,0.15)',
-        'gold':       '0 4px 20px rgba(22,163,74,0.3)',
-        'gold-lg':    '0 8px 30px rgba(22,163,74,0.4)',
+        'gold':       '0 4px 20px rgba(0,0,0,0.12)',
+        'gold-lg':    '0 8px 30px rgba(0,0,0,0.2)',
       },
       backdropBlur: {
         xs: '2px',

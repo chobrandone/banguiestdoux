@@ -26,7 +26,7 @@ const CATS = [
 const CAT_COLORS: Record<string, string> = {
   concerts:'bg-purple-500/20 text-purple-400', festivals:'bg-pink-500/20 text-pink-400',
   cinema:'bg-blue-500/20 text-blue-400', 'pool-parties':'bg-cyan-500/20 text-cyan-400',
-  'jazz-nights':'bg-yellow-500/20 text-yellow-400', sports:'bg-green-500/20 text-green-400',
+  'jazz-nights':'bg-yellow-500/20 text-yellow-400', sports:'bg-white/10 text-beige/80',
   exhibitions:'bg-orange-500/20 text-orange-400', art:'bg-rose-500/20 text-rose-400',
 };
 const EMPTY: EventForm = { title:'', category:'concerts', date:'', time:'', location:'', address:'', description:'', image:'', ticketPrice:0, isFree:false, isFeatured:false, isPublished:true, capacity:0 };
@@ -254,7 +254,7 @@ export default function AdminEventsPage() {
                         // @ts-expect-error
                         onClick={() => toggleField(item._id, 'is_published', 'isPublished', !item.isPublished)}
                         // @ts-expect-error
-                        className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${item.isPublished ? 'bg-green-500/15 text-green-400' : 'bg-beige/10 text-beige/40'}`}
+                        className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${item.isPublished ? 'bg-white/10 text-beige' : 'bg-beige/10 text-beige/40'}`}
                       >
                         {/* @ts-expect-error */}
                         {item.isPublished ? 'Publié' : 'Brouillon'}

@@ -14,7 +14,7 @@ const sections = [
     ],
   },
   {
-    id: 'visa', icon: Info, title: 'Visa & Entrée', color: 'bg-green-500',
+    id: 'visa', icon: Info, title: 'Visa & Entrée', color: 'bg-gold',
     items: [
       { q: 'Visa obligatoire', a: "Oui, le visa est obligatoire pour la plupart des nationalités" },
       { q: 'Obtenir un visa', a: "Ambassade de RCA dans votre pays ou visa à l'arrivée (selon nationalité)" },

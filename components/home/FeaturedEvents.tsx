@@ -135,7 +135,7 @@ export default function FeaturedEvents() {
                     </div>
 
                     <div className="absolute top-4 right-4">
-                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-gold text-night uppercase tracking-wider">
+                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-gold text-white dark:text-night uppercase tracking-wider">
                         ✦ {t('general.featured')}
                       </span>
                     </div>

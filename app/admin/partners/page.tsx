@@ -45,7 +45,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   sponsor: 'bg-gold/20 text-gold',
   media: 'bg-blue-500/20 text-blue-400',
   institution: 'bg-purple-500/20 text-purple-400',
-  association: 'bg-green-500/20 text-green-400',
+  association: 'bg-white/10 text-beige/80',
   other: 'bg-white/10 text-beige/50',
 };
 

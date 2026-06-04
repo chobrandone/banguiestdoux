@@ -44,7 +44,7 @@ const categoryColors: Record<string, string> = {
   nightlife:   'bg-purple-500',
   gastronomy:  'bg-orange-500',
   travel:      'bg-blue-500',
-  culture:     'bg-green-500',
+  culture:     'bg-gold',
 };
 
 export default function LifestyleSection() {
@@ -158,7 +158,7 @@ export default function LifestyleSection() {
           {[
             { label: 'Nightlife', href: '/restaurants?cat=nightclub', icon: '🌙', color: 'from-purple-900 to-purple-700', img: 'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=600' },
             { label: 'Gastronomie', href: '/restaurants', icon: '🍽️', color: 'from-orange-900 to-orange-700', img: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=600' },
-            { label: 'Culture', href: '/cinema', icon: '🎭', color: 'from-green-900 to-green-700', img: 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=600' },
+            { label: 'Culture', href: '/cinema', icon: '🎭', color: 'from-gray-900 to-gray-700', img: 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=600' },
             { label: 'Talents', href: '/talents', icon: '⭐', color: 'from-gold-900 to-gold-700', img: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600' },
           ].map(({ label, href, icon, img }) => (
             <Link key={label} href={href} className="group relative h-32 rounded-2xl overflow-hidden">

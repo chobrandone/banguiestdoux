@@ -125,7 +125,7 @@ export default function AdminSidebar({ mobileOpen = false, onMobileClose }: Admi
             {!collapsed && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={logoSrc} alt="Bangui est Doux" className="h-10 w-auto object-contain" />
+                <img src={logoSrc} alt="Bangui est Doux" className="h-10 w-auto object-contain drop-shadow-sm" />
               </motion.div>
             )}
           </AnimatePresence>
@@ -165,7 +165,7 @@ export default function AdminSidebar({ mobileOpen = false, onMobileClose }: Admi
               {/* Mobile logo + close */}
               <div className="flex items-center justify-between px-4 h-16 border-b border-gray-200 dark:border-white/5 flex-shrink-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={logoSrc} alt="Bangui est Doux" className="h-10 w-auto object-contain" />
+                <img src={logoSrc} alt="Bangui est Doux" className="h-10 w-auto object-contain drop-shadow-sm" />
                 <button
                   onClick={onMobileClose}
                   className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 dark:text-beige/40 hover:text-gray-700 dark:hover:text-beige hover:bg-gray-100 dark:hover:bg-white/5 transition-all"

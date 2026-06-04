@@ -52,7 +52,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   food: 'bg-orange-500/20 text-orange-400',
   culture: 'bg-purple-500/20 text-purple-400',
   art: 'bg-rose-500/20 text-rose-400',
-  sports: 'bg-green-500/20 text-green-400',
+  sports: 'bg-white/10 text-beige/80',
 };
 
 function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {

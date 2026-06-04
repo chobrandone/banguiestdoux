@@ -127,7 +127,7 @@ export default function UsersAdminPage() {
       'bg-blue-500/30 text-blue-400',
       'bg-purple-500/30 text-purple-400',
       'bg-pink-500/30 text-pink-400',
-      'bg-green-500/30 text-green-400',
+      'bg-white/15 text-beige',
       'bg-orange-500/30 text-orange-400',
       'bg-cyan-500/30 text-cyan-400',
     ];
@@ -245,8 +245,8 @@ export default function UsersAdminPage() {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
-                            <div className={`w-2 h-2 rounded-full ${user.isActive ? 'bg-green-400' : 'bg-red-400'}`} />
-                            <span className={`text-xs font-medium ${user.isActive ? 'text-green-400' : 'text-red-400'}`}>
+                            <div className={`w-2 h-2 rounded-full ${user.isActive ? 'bg-white' : 'bg-red-400'}`} />
+                            <span className={`text-xs font-medium ${user.isActive ? 'text-beige' : 'text-red-400'}`}>
                               {user.isActive ? 'Actif' : 'Inactif'}
                             </span>
                           </div>

@@ -64,7 +64,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   musician: 'bg-purple-500/20 text-purple-400',
   entrepreneur: 'bg-blue-500/20 text-blue-400',
   influencer: 'bg-rose-500/20 text-rose-400',
-  athlete: 'bg-green-500/20 text-green-400',
+  athlete: 'bg-white/10 text-beige/80',
   creator: 'bg-cyan-500/20 text-cyan-400',
   chef: 'bg-orange-500/20 text-orange-400',
   other: 'bg-white/10 text-beige/50',

@@ -46,7 +46,7 @@ const STATUS_COLORS: Record<string, string> = {
   confirmed:  'bg-blue-500/15 text-blue-600 dark:text-blue-400',
   processing: 'bg-purple-500/15 text-purple-600 dark:text-purple-400',
   shipped:    'bg-indigo-500/15 text-indigo-600 dark:text-indigo-400',
-  delivered:  'bg-green-500/15 text-green-600 dark:text-green-400',
+  delivered:  'bg-white/10 text-gray-700 dark:text-beige',
   cancelled:  'bg-red-500/15 text-red-600 dark:text-red-400',
 };
 
@@ -118,7 +118,7 @@ export default function AdminDashboard() {
     { labelKey: 'admin.dash.events',      value: String(dbStats?.totalEvents ?? '—'),     change: +12,   icon: Calendar,    color: 'text-gold',       bg: 'bg-gold/10'       },
     { labelKey: 'admin.dash.orders',      value: String(orderStats.total),                change: +34.2, icon: ShoppingBag, color: 'text-purple-500', bg: 'bg-purple-500/10' },
     { labelKey: 'admin.dash.pending',     value: String(orderStats.pending),              change: 0,     icon: Package,     color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
-    { labelKey: 'admin.dash.restaurants', value: String(dbStats?.totalRestaurants ?? '—'),change: +8,    icon: Utensils,    color: 'text-green-500',  bg: 'bg-green-500/10'  },
+    { labelKey: 'admin.dash.restaurants', value: String(dbStats?.totalRestaurants ?? '—'),change: +8,    icon: Utensils,    color: 'text-gold',  bg: 'bg-white/5'  },
     { labelKey: 'admin.dash.revenue',     value: formatPrice(orderStats.revenue, 'XAF'),  change: +15.7, icon: TrendingUp,  color: 'text-cyan-500',   bg: 'bg-cyan-500/10'   },
   ];
 
@@ -153,7 +153,7 @@ export default function AdminDashboard() {
             <div className="text-2xl font-bold text-gray-900 dark:text-beige mb-0.5">{value}</div>
             <div className="text-xs text-gray-400 dark:text-beige/40 mb-2">{t(labelKey)}</div>
             {change !== 0 && (
-              <div className={`flex items-center gap-1 text-xs font-semibold ${change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+              <div className={`flex items-center gap-1 text-xs font-semibold ${change >= 0 ? 'text-gold' : 'text-red-500'}`}>
                 {change >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                 {Math.abs(change)}%
               </div>

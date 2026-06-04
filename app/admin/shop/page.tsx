@@ -62,7 +62,7 @@ const CATEGORIES = [
 
 const CATEGORY_COLORS: Record<string, string> = {
   't-shirts': 'bg-blue-500/20 text-blue-400',
-  caps: 'bg-green-500/20 text-green-400',
+  caps: 'bg-white/10 text-beige/80',
   'tote-bags': 'bg-yellow-500/20 text-yellow-400',
   glassware: 'bg-cyan-500/20 text-cyan-400',
   accessories: 'bg-purple-500/20 text-purple-400',
@@ -89,7 +89,7 @@ function StockBadge({ stock }: { stock: number }) {
     <span className="px-2 py-0.5 rounded-lg text-xs font-semibold bg-yellow-500/20 text-yellow-400">{stock}</span>
   );
   return (
-    <span className="px-2 py-0.5 rounded-lg text-xs font-semibold bg-green-500/20 text-green-400">{stock}</span>
+    <span className="px-2 py-0.5 rounded-lg text-xs font-semibold bg-white/10 text-beige/80">{stock}</span>
   );
 }
 
