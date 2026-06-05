@@ -75,13 +75,13 @@ export default function EventsPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setViewMode('grid')}
-                className={cn('p-3 rounded-xl border transition-all', viewMode === 'grid' ? 'bg-gold text-white dark:text-night border-gold' : 'border-gold/20 text-night/50 dark:text-beige/50 hover:border-gold/50')}
+                className={cn('p-3 rounded-xl border transition-all', viewMode === 'grid' ? 'bg-gold text-night border-gold' : 'border-gold/20 text-night/50 dark:text-beige/50 hover:border-gold/50')}
               >
                 <Grid3X3 className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={cn('p-3 rounded-xl border transition-all', viewMode === 'list' ? 'bg-gold text-white dark:text-night border-gold' : 'border-gold/20 text-night/50 dark:text-beige/50 hover:border-gold/50')}
+                className={cn('p-3 rounded-xl border transition-all', viewMode === 'list' ? 'bg-gold text-night border-gold' : 'border-gold/20 text-night/50 dark:text-beige/50 hover:border-gold/50')}
               >
                 <List className="w-4 h-4" />
               </button>
@@ -97,7 +97,7 @@ export default function EventsPage() {
                 className={cn(
                   'flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200',
                   selectedCat === key
-                    ? 'bg-gold text-white dark:text-night shadow-gold'
+                    ? 'bg-gold text-night shadow-gold'
                     : 'bg-white dark:bg-night-50 text-night/70 dark:text-beige/70 hover:bg-gold/10 border border-gold/10'
                 )}
               >
@@ -151,7 +151,7 @@ export default function EventsPage() {
                           </div>
                           {event.isFeatured && (
                             <div className="absolute top-3 right-3">
-                              <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-gold text-white dark:text-night uppercase">★ Featured</span>
+                              <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-gold text-night uppercase">★ Featured</span>
                             </div>
                           )}
                           <div className="absolute bottom-3 left-3">

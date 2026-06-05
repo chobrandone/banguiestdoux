@@ -93,7 +93,7 @@ export default function TrendingRestaurants() {
               key={tKey}
               className={cn(
                 'flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold cursor-default',
-                i === 0 ? 'bg-gold text-white dark:text-night' : 'bg-gold/10 text-night/70 dark:text-beige/70'
+                i === 0 ? 'bg-gold text-night' : 'bg-gold/10 text-night/70 dark:text-beige/70'
               )}
             >
               {t(tKey)}
@@ -131,7 +131,7 @@ export default function TrendingRestaurants() {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                       <div className="absolute top-3 left-3">
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-gold text-white dark:text-night uppercase tracking-wider">
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-gold text-night uppercase tracking-wider">
                           {restaurantCategoryLabels[restaurant.category]?.[lang] || restaurant.category}
                         </span>
                       </div>

@@ -162,7 +162,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-gold text-white font-semibold text-sm rounded-xl hover:bg-gold/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mt-2"
+              className="w-full py-3 bg-gold text-night font-semibold text-sm rounded-xl hover:bg-gold/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mt-2"
             >
               {loading ? (
                 <>

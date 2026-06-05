@@ -9,19 +9,19 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        /* ── Adaptive accent: black in light mode, white in dark mode ── */
+        /* ── Brand accent: electric yellow #e3fc02 ── */
         gold: {
           DEFAULT: 'rgb(var(--accent) / <alpha-value>)',
-          50:  '#FAFAFA',
-          100: '#F5F5F5',
-          200: '#E5E5E5',
-          300: '#C4C4C4',
-          400: '#9B9B9B',
-          500: '#737373',
-          600: '#4A4A4A',
-          700: '#2E2E2E',
-          800: '#1A1A1A',
-          900: '#0A0A0A',
+          50:  '#feffd6',
+          100: '#fcffaa',
+          200: '#f5fc6b',
+          300: '#e3fc02',   /* primary */
+          400: '#c8df00',
+          500: '#a0b200',
+          600: '#7a8800',
+          700: '#565f00',
+          800: '#363c00',
+          900: '#1c1f00',
         },
         beige: {
           DEFAULT: '#F5F0E8',
@@ -53,7 +53,7 @@ module.exports = {
       },
       backgroundImage: {
         'gradient-night':    'linear-gradient(135deg, #0A0A0A 0%, #1a0a2e 50%, #0A0A0A 100%)',
-        'gradient-gold':     'linear-gradient(135deg, #FFFFFF 0%, #CCCCCC 50%, #FFFFFF 100%)',
+        'gradient-gold':     'linear-gradient(135deg, #e3fc02 0%, #c8df00 50%, #e3fc02 100%)',
         'gradient-tropical': 'linear-gradient(135deg, #0A0A0A 0%, #2A2A2A 100%)',
         'gradient-luxury':   'linear-gradient(180deg, rgba(10,10,10,0) 0%, rgba(10,10,10,0.8) 100%)',
         'hero-overlay':      'linear-gradient(to bottom, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.7) 100%)',
@@ -86,8 +86,8 @@ module.exports = {
           '100%': { opacity: '1', transform: 'translateX(0)' },
         },
         glowPulse: {
-          '0%, 100%': { boxShadow: '0 0 20px rgba(255,255,255,0.15)' },
-          '50%':      { boxShadow: '0 0 40px rgba(255,255,255,0.35)' },
+          '0%, 100%': { boxShadow: '0 0 20px rgba(227,252,2,0.3)' },
+          '50%':      { boxShadow: '0 0 50px rgba(227,252,2,0.65)' },
         },
         ticker: {
           '0%':   { transform: 'translateX(0)' },
@@ -107,8 +107,8 @@ module.exports = {
         'glass':      '0 8px 32px rgba(0,0,0,0.2)',
         'card':       '0 2px 20px rgba(0,0,0,0.08)',
         'card-hover': '0 12px 40px rgba(0,0,0,0.15)',
-        'gold':       '0 4px 20px rgba(0,0,0,0.12)',
-        'gold-lg':    '0 8px 30px rgba(0,0,0,0.2)',
+        'gold':       '0 4px 20px rgba(227,252,2,0.25)',
+        'gold-lg':    '0 8px 40px rgba(227,252,2,0.4)',
       },
       backdropBlur: {
         xs: '2px',

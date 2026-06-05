@@ -120,7 +120,7 @@ export default function CartDrawer() {
                     <ShoppingBag className="w-5 h-5 text-gold" />
                     <h2 className="font-display text-xl font-bold text-night dark:text-beige">{t('shop.cart')}</h2>
                     {itemCount > 0 && (
-                      <span className="px-2.5 py-0.5 bg-gold text-white dark:text-night text-xs font-bold rounded-full">{itemCount}</span>
+                      <span className="px-2.5 py-0.5 bg-gold text-night text-xs font-bold rounded-full">{itemCount}</span>
                     )}
                   </div>
                   <div className="flex items-center gap-2">

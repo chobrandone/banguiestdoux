@@ -10,24 +10,24 @@
   --font-playfair: 'Playfair Display', Georgia, serif;
   --font-dm-sans:  'DM Sans', system-ui, sans-serif;
 
-  /* Adaptive accent: black in light mode */
-  --accent:        0 0 0;          /* rgb values for rgb(var(--accent)) */
-  --color-gold:    #0A0A0A;
-  --color-beige:   #F5F0E8;
-  --color-night:   #0A0A0A;
-  --color-dark:    #141414;
+  /* Brand accent: electric yellow #e3fc02 (rgb 227 252 2) */
+  --accent:      227 252 2;
+  --color-gold:  #e3fc02;
+  --color-beige: #F5F0E8;
+  --color-night: #0A0A0A;
+  --color-dark:  #141414;
 
   --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 
-  --radius-card:   16px;
-  --radius-pill:   50px;
+  --radius-card: 16px;
+  --radius-pill: 50px;
 }
 
+/* Dark mode uses the same electric yellow accent */
 .dark {
-  /* Adaptive accent: white in dark mode */
-  --accent:     255 255 255;
-  --color-gold: #FFFFFF;
+  --accent:     227 252 2;
+  --color-gold: #e3fc02;
 }
 
 /* ─── Base Reset ────────────────────────────────── */
@@ -74,25 +74,20 @@ p {
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(0,0,0,0.2);
+  background: rgba(227,252,2,0.35);
   border-radius: 999px;
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.4); }
-.dark ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); }
-.dark ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+::-webkit-scrollbar-thumb:hover { background: rgba(227,252,2,0.6); }
 
 /* ─── Selection ─────────────────────────────────── */
 ::selection {
-  background: rgba(0,0,0,0.12);
-  color: inherit;
-}
-.dark ::selection {
-  background: rgba(255,255,255,0.15);
-  color: inherit;
+  background: rgba(227,252,2,0.25);
+  color: #0A0A0A;
 }
 
 /* ─── Utility Classes ───────────────────────────── */
 @layer components {
+
   /* Glass morphism */
   .glass {
     @apply bg-white/10 backdrop-blur-md border border-white/20;
@@ -101,33 +96,21 @@ p {
     @apply bg-black/30 backdrop-blur-md border border-white/10;
   }
   .glass-gold {
-    @apply bg-gold/5 backdrop-blur-md border border-gold/15;
+    @apply bg-gold/10 backdrop-blur-md border border-gold/25;
   }
 
-  /* Gradient text — white shimmer on dark, dark shimmer on light */
+  /* Gradient text — yellow shimmer */
   .text-gradient-gold {
-    background: linear-gradient(135deg, currentColor 0%, rgba(255,255,255,0.6) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .dark .text-gradient-gold {
-    background: linear-gradient(135deg, #FFFFFF 0%, #AAAAAA 100%);
+    background: linear-gradient(135deg, #e3fc02 0%, #c8df00 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   /* Section padding */
-  .section-py {
-    @apply py-16 md:py-24 lg:py-32;
-  }
-  .section-px {
-    @apply px-4 sm:px-6 lg:px-8;
-  }
-  .container-custom {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
-  }
+  .section-py  { @apply py-16 md:py-24 lg:py-32; }
+  .section-px  { @apply px-4 sm:px-6 lg:px-8; }
+  .container-custom { @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8; }
 
   /* Premium card */
   .card-premium {
@@ -135,16 +118,12 @@ p {
     @apply shadow-card hover:shadow-card-hover hover:-translate-y-1;
   }
 
-  /* Editorial label */
+  /* Editorial label — yellow accent */
   .label-editorial {
-    @apply text-xs font-semibold uppercase tracking-[0.2em];
-    color: #0A0A0A;
-  }
-  .dark .label-editorial {
-    color: #FFFFFF;
+    @apply text-xs font-semibold uppercase tracking-[0.2em] text-gold;
   }
 
-  /* Button base */
+  /* ── Buttons ──────────────────────────────────── */
   .btn {
     @apply inline-flex items-center justify-center gap-2;
     @apply font-semibold text-sm tracking-wide;
@@ -153,19 +132,17 @@ p {
     @apply cursor-pointer select-none;
     @apply hover:scale-[1.03] active:scale-[0.97];
   }
-  /* Light mode: black button with white text | Dark mode: white button with black text */
+
+  /* Yellow button — always dark text since yellow is bright */
   .btn-gold {
-    @apply btn bg-night text-beige hover:bg-night-50;
+    @apply btn bg-gold text-night font-bold hover:bg-gold/85 shadow-gold;
   }
-  .dark .btn-gold {
-    @apply bg-beige text-night hover:bg-beige-300;
-  }
+
+  /* Yellow outline button */
   .btn-outline-gold {
-    @apply btn border-2 border-night text-night hover:bg-night hover:text-beige;
+    @apply btn border-2 border-gold text-gold hover:bg-gold hover:text-night;
   }
-  .dark .btn-outline-gold {
-    @apply border-beige text-beige hover:bg-beige hover:text-night;
-  }
+
   .btn-dark {
     @apply btn bg-night text-beige hover:bg-night-50 border border-white/10;
   }
@@ -174,17 +151,11 @@ p {
   }
 
   /* Image overlay */
-  .img-overlay {
-    @apply absolute inset-0 bg-gradient-luxury;
-  }
+  .img-overlay { @apply absolute inset-0 bg-gradient-luxury; }
 
   /* Ticker */
-  .ticker-wrapper {
-    @apply overflow-hidden whitespace-nowrap;
-  }
-  .ticker-inner {
-    @apply inline-flex animate-ticker;
-  }
+  .ticker-wrapper { @apply overflow-hidden whitespace-nowrap; }
+  .ticker-inner   { @apply inline-flex animate-ticker; }
 
   /* Shimmer loading */
   .shimmer {
@@ -215,21 +186,12 @@ p {
     @apply absolute inset-0 shimmer;
   }
 
-  /* Divider — black in light, white in dark */
-  .divider-gold {
-    @apply w-12 h-0.5 bg-gold;
-  }
+  /* Yellow divider */
+  .divider-gold { @apply w-12 h-0.5 bg-gold; }
 
   /* Masonry grid */
-  .masonry-grid {
-    display: flex;
-    margin-left: -16px;
-    width: auto;
-  }
-  .masonry-grid-column {
-    padding-left: 16px;
-    background-clip: padding-box;
-  }
+  .masonry-grid          { display: flex; margin-left: -16px; width: auto; }
+  .masonry-grid-column   { padding-left: 16px; background-clip: padding-box; }
 
   /* Swiper overrides */
   .swiper-pagination-bullet-active {
@@ -258,14 +220,12 @@ p {
   .will-change-transform { will-change: transform; }
   .will-change-opacity   { will-change: opacity; }
 
-  /* Hide scrollbar but keep scrolling */
   .scrollbar-hide::-webkit-scrollbar { display: none; }
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-  /* Text balance */
   .text-balance { text-wrap: balance; }
 
-  /* Gradient border — white/grey shimmer */
+  /* Yellow gradient border */
   .gradient-border {
     position: relative;
     background: transparent;
@@ -276,15 +236,14 @@ p {
     inset: 0;
     border-radius: inherit;
     padding: 1px;
-    background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.1));
+    background: linear-gradient(135deg, rgba(227,252,2,0.7), rgba(227,252,2,0.15));
     -webkit-mask: linear-gradient(#fff 0 0) content-box,
                   linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
   }
 
-  /* Hover scale */
-  .hover-scale { @apply transition-transform duration-300 hover:scale-105; }
+  .hover-scale    { @apply transition-transform duration-300 hover:scale-105; }
   .hover-scale-sm { @apply transition-transform duration-300 hover:scale-102; }
 }
 
