@@ -6,8 +6,8 @@ node_modules/
 # Testing
 coverage/
 
-# Next.js build output (generated on server by npm run build)
-.next/
+# Next.js — commit the build (minus cache) so Hostinger always has a ready binary
+.next/cache/
 out/
 
 # Production builds

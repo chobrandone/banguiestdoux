@@ -10,7 +10,7 @@
     "lint": "next lint",
     "seed": "node scripts/seed.js",
     "create-admin": "node scripts/create-admin.js",
-    "postinstall": "next build"
+    "postinstall": "echo 'Build committed to git — skipping postinstall build'"
   },
   "engines": {
     "node": ">=20.0.0"

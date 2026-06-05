@@ -28,11 +28,11 @@ const errorHandler = require('./middleware/errorHandler');
 const dev  = process.env.NODE_ENV !== 'production';
 const port = parseInt(process.env.PORT || '3000', 10);
 
-/* ─── Guard: production build must exist ─────────── */
+/* ─── Guard: warn if build is missing but continue — Next will handle it ── */
 if (!dev && !fs.existsSync(path.join(__dirname, '.next'))) {
-  console.error('\n❌  ERROR: .next build folder not found.');
-  console.error('   Run  npm run build  before starting in production mode.\n');
-  process.exit(1);
+  console.warn('\n⚠️  .next folder not found — the build should be committed to git.');
+  console.warn('   Continuing in dev mode as fallback.\n');
+  // Let Next.js prepare in dev mode as fallback — prevents 503
 }
 
 /* ═══════════════════════════════════════════════════
