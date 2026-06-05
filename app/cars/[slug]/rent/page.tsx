@@ -9,8 +9,8 @@ import toast from 'react-hot-toast';
 interface CarItem { id: string; name: string; slug: string; price_per_day: number; cover_image: string; }
 
 function formatPrice(p: number) { return new Intl.NumberFormat('fr-FR').format(p) + ' XAF'; }
-const today    = typeof window !== 'undefined' ? new Date().toISOString().split('T')[0] : '';
-const tomorrow = typeof window !== 'undefined' ? new Date(Date.now() + 86400000).toISOString().split('T')[0] : '';
+// dates set via useEffect after mount (avoids SSR hydration mismatch)
+
 
 function CarRentPageInner() {
   const { slug }      = useParams<{ slug: string }>();
@@ -22,12 +22,19 @@ function CarRentPageInner() {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone]       = useState(false);
 
+  // Set real dates only after hydration (avoids SSR/client mismatch)
+  useEffect(() => {
+    const today    = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+    setForm(f => ({ ...f, start_date: today, end_date: tomorrow }));
+  }, []);
+
   const [form, setForm] = useState({
     renter_name:     '',
     renter_email:    '',
     renter_phone:    '',
-    start_date:      today,
-    end_date:        tomorrow,
+    start_date: '',
+    end_date: '',
     pickup_location: isWelcomeRide ? 'Aéroport de Bangui M\'Poko' : 'Bangui',
     notes:           '',
     is_welcome_ride: isWelcomeRide,
@@ -121,7 +128,7 @@ function CarRentPageInner() {
               <label className="block text-sm font-semibold text-night dark:text-beige mb-1.5">
                 <CalendarDays size={13} className="inline mr-1" />Date de début
               </label>
-              <input type="date" value={form.start_date} min={today} onChange={set('start_date')} className={ic} required />
+              <input type="date" value={form.start_date} min={new Date().toISOString().split("T")[0]} onChange={set('start_date')} className={ic} required />
             </div>
             <div>
               <label className="block text-sm font-semibold text-night dark:text-beige mb-1.5">

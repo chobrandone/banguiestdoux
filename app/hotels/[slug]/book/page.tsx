@@ -11,8 +11,8 @@ interface Hotel { id: string; name: string; slug: string; hotel_rooms: Room[]; }
 
 function formatPrice(p: number) { return new Intl.NumberFormat('fr-FR').format(p) + ' XAF'; }
 
-const today    = typeof window !== 'undefined' ? new Date().toISOString().split('T')[0] : '';
-const tomorrow = typeof window !== 'undefined' ? new Date(Date.now() + 86400000).toISOString().split('T')[0] : '';
+// dates set via useEffect after mount (avoids SSR hydration mismatch)
+
 
 function HotelBookPageInner() {
   const { slug }       = useParams<{ slug: string }>();
@@ -24,12 +24,19 @@ function HotelBookPageInner() {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone]       = useState(false);
 
+  // Set real dates only after hydration (avoids SSR/client mismatch)
+  useEffect(() => {
+    const today    = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+    setForm(f => ({ ...f, check_in: today, check_out: tomorrow }));
+  }, []);
+
   const [form, setForm] = useState({
     guest_name:  '',
     guest_email: '',
     guest_phone: '',
-    check_in:    today,
-    check_out:   tomorrow,
+    check_in:    '',
+    check_out:   '',
     room_id:     preselectedRoom || '',
     notes:       '',
   });
@@ -127,7 +134,7 @@ function HotelBookPageInner() {
               <label className="block text-sm font-semibold text-night dark:text-beige mb-1.5">
                 <CalendarDays size={13} className="inline mr-1" />Arrivée
               </label>
-              <input type="date" value={form.check_in} min={today} onChange={set('check_in')} className={ic} required />
+              <input type="date" value={form.check_in} min={new Date().toISOString().split("T")[0]} onChange={set('check_in')} className={ic} required />
             </div>
             <div>
               <label className="block text-sm font-semibold text-night dark:text-beige mb-1.5">

@@ -1,22 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Car, Phone, User, CalendarDays, CheckCircle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 
 export default function WelcomeRideSection() {
-  // Compute dates client-side only to avoid SSR/hydration mismatch
-  const today    = typeof window !== 'undefined' ? new Date().toISOString().split('T')[0] : '';
-  const tomorrow = typeof window !== 'undefined' ? new Date(Date.now() + 86400000).toISOString().split('T')[0] : '';
-
+  // Start with empty strings to match SSR — fill in after mount
   const [form, setForm] = useState({
-    renter_name: '', renter_phone: '', start_date: today, end_date: tomorrow,
+    renter_name: '', renter_phone: '', start_date: '', end_date: '',
     pickup_location: "Aéroport de Bangui M'Poko", notes: '',
   });
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone]             = useState(false);
+
+  // Set real dates only on the client after hydration
+  useEffect(() => {
+    const today    = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+    setForm(f => ({ ...f, start_date: today, end_date: tomorrow }));
+  }, []);
 
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }));
@@ -98,7 +102,7 @@ export default function WelcomeRideSection() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs text-beige/50 mb-1 block">Date d'arrivée</label>
-                    <input type="date" value={form.start_date} min={today} onChange={set('start_date')} className={ic} required />
+                    <input type="date" value={form.start_date} min={form.start_date || ''} onChange={set('start_date')} className={ic} required />
                   </div>
                   <div>
                     <label className="text-xs text-beige/50 mb-1 block">Heure (notes)</label>
