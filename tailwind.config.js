@@ -53,7 +53,7 @@ module.exports = {
       },
       backgroundImage: {
         'gradient-night':    'linear-gradient(135deg, #0A0A0A 0%, #1a0a2e 50%, #0A0A0A 100%)',
-        'gradient-gold':     'linear-gradient(135deg, #9A7300 0%, #c8a000 50%, #9A7300 100%)',
+        'gradient-gold':     'linear-gradient(135deg, #e3fc02 0%, #c8df00 50%, #e3fc02 100%)',
         'gradient-tropical': 'linear-gradient(135deg, #0A0A0A 0%, #2A2A2A 100%)',
         'gradient-luxury':   'linear-gradient(180deg, rgba(10,10,10,0) 0%, rgba(10,10,10,0.8) 100%)',
         'hero-overlay':      'linear-gradient(to bottom, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.7) 100%)',

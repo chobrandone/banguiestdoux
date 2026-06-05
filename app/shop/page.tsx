@@ -69,7 +69,7 @@ export default function ShopPage() {
             {CATS.map(({ key, tKey }) => (
               <button key={key} onClick={() => setSelectedCat(key)}
                 className={cn('flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all',
-                  selectedCat === key ? 'bg-gold text-white dark:text-night shadow-gold' : 'bg-white dark:bg-night-50 text-night/70 dark:text-beige/70 border border-gold/10 hover:bg-gold/10'
+                  selectedCat === key ? 'bg-gold text-night shadow-gold' : 'bg-white dark:bg-night-50 text-night/70 dark:text-beige/70 border border-gold/10 hover:bg-gold/10'
                 )}>{t(tKey)}</button>
             ))}
           </div>

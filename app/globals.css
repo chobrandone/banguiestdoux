@@ -10,9 +10,15 @@
   --font-playfair: 'Playfair Display', Georgia, serif;
   --font-dm-sans:  'DM Sans', system-ui, sans-serif;
 
-  /* Brand accent light mode: deep amber-gold #9A7300 — readable on white */
-  --accent:      154 115 0;
-  --color-gold:  #9A7300;
+  /*
+   * --accent      : used for bg-gold, border-gold → electric yellow #e3fc02
+   *                 stays bright for buttons & decorative elements in all modes
+   * --accent-text : used for text-gold → amber #9A7300 in light mode (readable
+   *                 on white), electric yellow in dark mode
+   */
+  --accent:      227 252 2;     /* #e3fc02 — bright yellow for bg & borders */
+  --accent-text: 154 115 0;     /* #9A7300 — dark amber for text on white bg */
+  --color-gold:  #e3fc02;
   --color-beige: #F5F0E8;
   --color-night: #0A0A0A;
   --color-dark:  #141414;
@@ -24,10 +30,11 @@
   --radius-pill: 50px;
 }
 
-/* Dark mode: electric yellow #e3fc02 pops on dark backgrounds */
+/* Dark mode: both accent and text use electric yellow */
 .dark {
-  --accent:     227 252 2;
-  --color-gold: #e3fc02;
+  --accent:      227 252 2;
+  --accent-text: 227 252 2;
+  --color-gold:  #e3fc02;
 }
 
 /* ─── Base Reset ────────────────────────────────── */
@@ -66,27 +73,19 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: -0.02em;
 }
 
-p {
-  line-height: 1.7;
-}
+p { line-height: 1.7; }
 
 /* ─── Scrollbar ─────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(154,115,0,0.35);   /* amber in light mode */
+  background: rgba(227,252,2,0.4);
   border-radius: 999px;
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(154,115,0,0.6); }
-.dark ::-webkit-scrollbar-thumb { background: rgba(227,252,2,0.35); }
-.dark ::-webkit-scrollbar-thumb:hover { background: rgba(227,252,2,0.6); }
+::-webkit-scrollbar-thumb:hover { background: rgba(227,252,2,0.7); }
 
 /* ─── Selection ─────────────────────────────────── */
 ::selection {
-  background: rgba(154,115,0,0.2);   /* amber tint in light mode */
-  color: inherit;
-}
-.dark ::selection {
   background: rgba(227,252,2,0.25);
   color: #0A0A0A;
 }
@@ -94,45 +93,31 @@ p {
 /* ─── Utility Classes ───────────────────────────── */
 @layer components {
 
-  /* Glass morphism */
-  .glass {
-    @apply bg-white/10 backdrop-blur-md border border-white/20;
-  }
-  .glass-dark {
-    @apply bg-black/30 backdrop-blur-md border border-white/10;
-  }
-  .glass-gold {
-    @apply bg-gold/10 backdrop-blur-md border border-gold/25;
-  }
+  .glass      { @apply bg-white/10 backdrop-blur-md border border-white/20; }
+  .glass-dark { @apply bg-black/30 backdrop-blur-md border border-white/10; }
+  .glass-gold { @apply bg-gold/10 backdrop-blur-md border border-gold/25; }
 
-  /* Gradient text — amber in light mode, yellow in dark */
+  /* Gradient text — always bright yellow shimmer (used on dark backgrounds) */
   .text-gradient-gold {
-    background: linear-gradient(135deg, #9A7300 0%, #c8a000 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .dark .text-gradient-gold {
     background: linear-gradient(135deg, #e3fc02 0%, #c8df00 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  /* Section padding */
-  .section-py  { @apply py-16 md:py-24 lg:py-32; }
-  .section-px  { @apply px-4 sm:px-6 lg:px-8; }
+  .section-py       { @apply py-16 md:py-24 lg:py-32; }
+  .section-px       { @apply px-4 sm:px-6 lg:px-8; }
   .container-custom { @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8; }
 
-  /* Premium card */
   .card-premium {
     @apply rounded-2xl overflow-hidden transition-all duration-400;
     @apply shadow-card hover:shadow-card-hover hover:-translate-y-1;
   }
 
-  /* Editorial label — yellow accent */
+  /* Editorial label — uses --accent-text so amber on white, yellow on dark */
   .label-editorial {
-    @apply text-xs font-semibold uppercase tracking-[0.2em] text-gold;
+    @apply text-xs font-semibold uppercase tracking-[0.2em];
+    color: rgb(var(--accent-text));
   }
 
   /* ── Buttons ──────────────────────────────────── */
@@ -145,83 +130,47 @@ p {
     @apply hover:scale-[1.03] active:scale-[0.97];
   }
 
-  /* Light mode: amber bg (#9A7300) → white text for contrast
-     Dark mode:  yellow bg (#e3fc02) → dark text for contrast       */
+  /*
+   * btn-gold: electric yellow bg (#e3fc02) in BOTH modes.
+   * Yellow is bright → always dark text for legibility.
+   */
   .btn-gold {
-    @apply btn bg-gold text-white font-bold hover:bg-gold/90 shadow-gold;
-  }
-  .dark .btn-gold {
-    @apply text-night hover:bg-gold/85;
+    @apply btn bg-gold text-night font-bold hover:bg-gold/85 shadow-gold;
   }
 
-  /* Outline variant */
   .btn-outline-gold {
-    @apply btn border-2 border-gold text-gold hover:bg-gold hover:text-white;
-  }
-  .dark .btn-outline-gold {
-    @apply hover:text-night;
+    @apply btn border-2 border-gold hover:bg-gold hover:text-night;
+    color: rgb(var(--accent-text));   /* amber text in light, yellow in dark */
   }
 
-  .btn-dark {
-    @apply btn bg-night text-beige hover:bg-night-50 border border-white/10;
-  }
-  .btn-ghost {
-    @apply btn text-inherit hover:bg-white/10;
-  }
+  .btn-dark  { @apply btn bg-night text-beige hover:bg-night-50 border border-white/10; }
+  .btn-ghost { @apply btn text-inherit hover:bg-white/10; }
 
-  /* Image overlay */
-  .img-overlay { @apply absolute inset-0 bg-gradient-luxury; }
-
-  /* Ticker */
+  .img-overlay    { @apply absolute inset-0 bg-gradient-luxury; }
   .ticker-wrapper { @apply overflow-hidden whitespace-nowrap; }
   .ticker-inner   { @apply inline-flex animate-ticker; }
 
-  /* Shimmer loading */
   .shimmer {
-    background: linear-gradient(
-      90deg,
-      rgba(255,255,255,0) 0%,
-      rgba(255,255,255,0.2) 50%,
-      rgba(255,255,255,0) 100%
-    );
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
     background-size: 1000px 100%;
     @apply animate-shimmer;
   }
   .dark .shimmer {
-    background: linear-gradient(
-      90deg,
-      rgba(255,255,255,0) 0%,
-      rgba(255,255,255,0.05) 50%,
-      rgba(255,255,255,0) 100%
-    );
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) 100%);
   }
 
-  /* Skeleton */
-  .skeleton {
-    @apply bg-gray-200 dark:bg-night-50 rounded-lg overflow-hidden relative;
-  }
-  .skeleton::after {
-    content: '';
-    @apply absolute inset-0 shimmer;
-  }
+  .skeleton { @apply bg-gray-200 dark:bg-night-50 rounded-lg overflow-hidden relative; }
+  .skeleton::after { content: ''; @apply absolute inset-0 shimmer; }
 
-  /* Yellow divider */
   .divider-gold { @apply w-12 h-0.5 bg-gold; }
 
-  /* Masonry grid */
-  .masonry-grid          { display: flex; margin-left: -16px; width: auto; }
-  .masonry-grid-column   { padding-left: 16px; background-clip: padding-box; }
+  .masonry-grid        { display: flex; margin-left: -16px; width: auto; }
+  .masonry-grid-column { padding-left: 16px; background-clip: padding-box; }
 
-  /* Swiper overrides */
-  .swiper-pagination-bullet-active {
-    background: rgb(var(--accent)) !important;
-  }
+  .swiper-pagination-bullet-active { background: #e3fc02 !important; }
   .swiper-button-next,
-  .swiper-button-prev {
-    color: rgb(var(--accent)) !important;
-  }
+  .swiper-button-prev              { color: #e3fc02 !important; }
 
-  /* Lightbox */
   .lightbox-overlay {
     @apply fixed inset-0 z-50 bg-black/95 flex items-center justify-center;
   }
@@ -244,26 +193,51 @@ p {
 
   .text-balance { text-wrap: balance; }
 
-  /* Yellow gradient border */
-  .gradient-border {
-    position: relative;
-    background: transparent;
-  }
+  .gradient-border { position: relative; background: transparent; }
   .gradient-border::before {
     content: '';
-    position: absolute;
-    inset: 0;
+    position: absolute; inset: 0;
     border-radius: inherit;
     padding: 1px;
     background: linear-gradient(135deg, rgba(227,252,2,0.7), rgba(227,252,2,0.15));
-    -webkit-mask: linear-gradient(#fff 0 0) content-box,
-                  linear-gradient(#fff 0 0);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
   }
 
   .hover-scale    { @apply transition-transform duration-300 hover:scale-105; }
   .hover-scale-sm { @apply transition-transform duration-300 hover:scale-102; }
+}
+
+/* ─────────────────────────────────────────────────
+   TEXT COLOUR OVERRIDES
+   These sit outside @layer so they beat Tailwind's
+   layered utilities in the cascade.
+
+   .text-gold uses --accent-text:
+     • Light mode → #9A7300 (amber, readable on white)
+     • Dark mode  → #e3fc02 (electric yellow on dark)
+
+   bg-gold / border-gold are NOT overridden — they
+   keep --accent (#e3fc02) so buttons & decorative
+   elements stay bright yellow in every mode.
+───────────────────────────────────────────────── */
+.text-gold,
+.dark .text-gold {
+  color: rgb(var(--accent-text));
+}
+
+/* hover & group-hover variants */
+.hover\:text-gold:hover,
+.dark .hover\:text-gold:hover,
+.group-hover\:text-gold,
+.dark .group-hover\:text-gold {
+  color: rgb(var(--accent-text));
+}
+
+/* dark: prefix variant (e.g. class="text-beige dark:text-gold") */
+.dark .dark\:text-gold {
+  color: rgb(var(--accent-text));  /* resolves to yellow in dark mode */
 }
 
 /* ─── PWA / Mobile ──────────────────────────────── */
