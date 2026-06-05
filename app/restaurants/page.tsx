@@ -87,7 +87,7 @@ export default function RestaurantsPage() {
                 className={cn(
                   'flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all',
                   selectedCat === key
-                    ? 'bg-gold text-night shadow-gold'
+                    ? 'bg-gold text-white dark:text-night shadow-gold'
                     : 'bg-white dark:bg-night-50 text-night/70 dark:text-beige/70 hover:bg-gold/10 border border-gold/10'
                 )}
               >
@@ -128,7 +128,7 @@ export default function RestaurantsPage() {
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={r.image} alt={r.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                            <div className="absolute top-3 left-3"><span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-gold text-night uppercase">{restaurantCategoryLabels[r.category]?.[lang]}</span></div>
+                            <div className="absolute top-3 left-3"><span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-gold text-white dark:text-night uppercase">{restaurantCategoryLabels[r.category]?.[lang]}</span></div>
                           </div>
                           <div className="p-5">
                             <div className="flex items-start justify-between mb-2">
@@ -163,7 +163,7 @@ export default function RestaurantsPage() {
                       <div className="relative h-44">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={r.image} alt={r.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                        <div className="absolute top-2 left-2"><span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-gold text-night uppercase">{restaurantCategoryLabels[r.category]?.[lang]}</span></div>
+                        <div className="absolute top-2 left-2"><span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-gold text-white dark:text-night uppercase">{restaurantCategoryLabels[r.category]?.[lang]}</span></div>
                       </div>
                       <div className="p-4">
                         <div className="flex items-center justify-between mb-1">

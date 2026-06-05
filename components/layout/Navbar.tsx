@@ -97,7 +97,7 @@ export default function Navbar() {
           'overflow-hidden transition-all duration-500',
           isScrolled ? 'h-0 opacity-0' : 'h-9 opacity-100'
         )}>
-          <div className="bg-gold text-night text-xs font-semibold text-center py-2 tracking-wider uppercase">
+          <div className="bg-gold text-white dark:text-night text-xs font-semibold text-center py-2 tracking-wider uppercase">
             {t('nav.announcement')}
           </div>
         </div>
@@ -185,7 +185,7 @@ export default function Navbar() {
                 className={cn('relative p-2 rounded-lg transition-all', isTransparent ? 'text-white/80 hover:bg-white/10' : 'text-night/70 dark:text-beige/70 hover:bg-gold/10 hover:text-gold')}>
                 <ShoppingBag className="w-5 h-5" />
                 {itemCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4.5 h-4.5 bg-gold text-night text-[10px] font-bold rounded-full flex items-center justify-center">{itemCount}</span>
+                  <span className="absolute -top-1 -right-1 w-4.5 h-4.5 bg-gold text-white dark:text-night text-[10px] font-bold rounded-full flex items-center justify-center">{itemCount}</span>
                 )}
               </button>
 
@@ -215,7 +215,7 @@ export default function Navbar() {
                   </AnimatePresence>
                 </div>
               ) : (
-                <Link href="/auth/login" className="ml-1 px-4 py-2 bg-gold text-night text-sm font-semibold rounded-xl hover:bg-gold/80 transition-all hover:scale-[1.03] active:scale-[0.97]">
+                <Link href="/auth/login" className="ml-1 px-4 py-2 bg-gold text-white dark:text-night text-sm font-semibold rounded-xl hover:bg-gold/80 transition-all hover:scale-[1.03] active:scale-[0.97]">
                   {t('auth.login')}
                 </Link>
               )}
@@ -227,7 +227,7 @@ export default function Navbar() {
                 className={cn('relative p-2 rounded-lg transition-colors', isTransparent ? 'text-white' : 'text-night dark:text-beige')}>
                 <ShoppingBag className="w-5 h-5" />
                 {itemCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-gold text-night text-[9px] font-bold rounded-full flex items-center justify-center">{itemCount}</span>
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-gold text-white dark:text-night text-[9px] font-bold rounded-full flex items-center justify-center">{itemCount}</span>
                 )}
               </button>
               <button onClick={() => setIsMobileOpen(true)} aria-label="Menu"
@@ -339,7 +339,7 @@ export default function Navbar() {
                   <div className="space-y-2">
                     {isAdmin && (
                       <Link href="/admin" onClick={closeMobile}
-                        className="w-full flex items-center justify-center gap-2 py-3 bg-gold text-night font-semibold text-sm rounded-xl hover:bg-gold/80 transition-all">
+                        className="w-full flex items-center justify-center gap-2 py-3 bg-gold text-white dark:text-night font-semibold text-sm rounded-xl hover:bg-gold/80 transition-all">
                         <LayoutDashboard className="w-4 h-4" /> {t('nav.admin.link')}
                       </Link>
                     )}
@@ -350,7 +350,7 @@ export default function Navbar() {
                   </div>
                 ) : (
                   <Link href="/auth/login" onClick={closeMobile}
-                    className="w-full flex items-center justify-center gap-2 py-3 bg-gold text-night font-semibold text-sm rounded-xl hover:bg-gold/80 transition-all">
+                    className="w-full flex items-center justify-center gap-2 py-3 bg-gold text-white dark:text-night font-semibold text-sm rounded-xl hover:bg-gold/80 transition-all">
                     {t('auth.login')}
                   </Link>
                 )}

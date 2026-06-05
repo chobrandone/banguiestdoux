@@ -10,9 +10,9 @@
   --font-playfair: 'Playfair Display', Georgia, serif;
   --font-dm-sans:  'DM Sans', system-ui, sans-serif;
 
-  /* Brand accent: electric yellow #e3fc02 (rgb 227 252 2) */
-  --accent:      227 252 2;
-  --color-gold:  #e3fc02;
+  /* Brand accent light mode: deep amber-gold #9A7300 — readable on white */
+  --accent:      154 115 0;
+  --color-gold:  #9A7300;
   --color-beige: #F5F0E8;
   --color-night: #0A0A0A;
   --color-dark:  #141414;
@@ -24,7 +24,7 @@
   --radius-pill: 50px;
 }
 
-/* Dark mode uses the same electric yellow accent */
+/* Dark mode: electric yellow #e3fc02 pops on dark backgrounds */
 .dark {
   --accent:     227 252 2;
   --color-gold: #e3fc02;
@@ -74,13 +74,19 @@ p {
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(227,252,2,0.35);
+  background: rgba(154,115,0,0.35);   /* amber in light mode */
   border-radius: 999px;
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(227,252,2,0.6); }
+::-webkit-scrollbar-thumb:hover { background: rgba(154,115,0,0.6); }
+.dark ::-webkit-scrollbar-thumb { background: rgba(227,252,2,0.35); }
+.dark ::-webkit-scrollbar-thumb:hover { background: rgba(227,252,2,0.6); }
 
 /* ─── Selection ─────────────────────────────────── */
 ::selection {
+  background: rgba(154,115,0,0.2);   /* amber tint in light mode */
+  color: inherit;
+}
+.dark ::selection {
   background: rgba(227,252,2,0.25);
   color: #0A0A0A;
 }
@@ -99,8 +105,14 @@ p {
     @apply bg-gold/10 backdrop-blur-md border border-gold/25;
   }
 
-  /* Gradient text — yellow shimmer */
+  /* Gradient text — amber in light mode, yellow in dark */
   .text-gradient-gold {
+    background: linear-gradient(135deg, #9A7300 0%, #c8a000 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .dark .text-gradient-gold {
     background: linear-gradient(135deg, #e3fc02 0%, #c8df00 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -133,14 +145,21 @@ p {
     @apply hover:scale-[1.03] active:scale-[0.97];
   }
 
-  /* Yellow button — always dark text since yellow is bright */
+  /* Light mode: amber bg (#9A7300) → white text for contrast
+     Dark mode:  yellow bg (#e3fc02) → dark text for contrast       */
   .btn-gold {
-    @apply btn bg-gold text-night font-bold hover:bg-gold/85 shadow-gold;
+    @apply btn bg-gold text-white font-bold hover:bg-gold/90 shadow-gold;
+  }
+  .dark .btn-gold {
+    @apply text-night hover:bg-gold/85;
   }
 
-  /* Yellow outline button */
+  /* Outline variant */
   .btn-outline-gold {
-    @apply btn border-2 border-gold text-gold hover:bg-gold hover:text-night;
+    @apply btn border-2 border-gold text-gold hover:bg-gold hover:text-white;
+  }
+  .dark .btn-outline-gold {
+    @apply hover:text-night;
   }
 
   .btn-dark {
