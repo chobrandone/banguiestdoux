@@ -11,28 +11,40 @@
  */
 require('dotenv').config();
 
-const fs           = require('fs');
-const path         = require('path');
-const express      = require('express');
-const cors         = require('cors');
-const helmet       = require('helmet');
-const morgan       = require('morgan');
-const compression  = require('compression');
-const rateLimit    = require('express-rate-limit');
-const { parse }    = require('url');
-const next         = require('next');
+const fs            = require('fs');
+const path          = require('path');
+const { execSync }  = require('child_process');
+const express       = require('express');
+const cors          = require('cors');
+const helmet        = require('helmet');
+const morgan        = require('morgan');
+const compression   = require('compression');
+const rateLimit     = require('express-rate-limit');
+const { parse }     = require('url');
+const next          = require('next');
 
-const errorHandler = require('./middleware/errorHandler');
+const errorHandler  = require('./middleware/errorHandler');
 
 /* ─── Config ─────────────────────────────────────── */
 const dev  = process.env.NODE_ENV !== 'production';
 const port = parseInt(process.env.PORT || '3000', 10);
 
-/* ─── Guard: production build must exist ─────────── */
+/* ─── Auto-build if .next is missing (production) ── */
 if (!dev && !fs.existsSync(path.join(__dirname, '.next'))) {
-  console.error('\n❌  ERROR: .next build folder not found.');
-  console.error('   Run  npm run build  before starting in production mode.\n');
-  process.exit(1);
+  console.log('\n⚙️  .next build not found — running next build now...');
+  console.log('   This happens on first deploy. Please wait ~2 minutes.\n');
+  try {
+    execSync('npm run build', {
+      stdio: 'inherit',
+      cwd: __dirname,
+      env: { ...process.env, NODE_ENV: 'production' },
+    });
+    console.log('\n✅  Build complete — starting server.\n');
+  } catch (buildErr) {
+    console.error('\n❌  Build failed. Check logs above for details.');
+    console.error('   Tip: make sure all required env vars are set in Hostinger.\n');
+    process.exit(1);
+  }
 }
 
 /* ═══════════════════════════════════════════════════
