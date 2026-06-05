@@ -46,3 +46,6 @@ firebase-debug.log
 # IDE
 .vscode/
 .idea/
+
+# Duplicate project folder (old copy — not part of the build)
+frontend/
