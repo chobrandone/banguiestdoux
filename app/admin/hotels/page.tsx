@@ -8,18 +8,9 @@ import {
   Plus, Search, Edit2, Trash2, X, Star, Hotel, ChevronDown, ChevronUp,
   BedDouble, DollarSign, Users, Eye, EyeOff,
 } from 'lucide-react';
-import { createClient } from '@supabase/supabase-js';
 import toast from 'react-hot-toast';
 import ImageUpload from '@/components/admin/ImageUpload';
-
-/* ── helpers ────────────────────────────────────────────── */
-function getAdmin() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY ||
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  );
-}
+import { supabase } from '@/lib/supabase';
 
 function slugify(s: string) {
   return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
@@ -123,7 +114,7 @@ function RoomsPanel({ hotelId }: { hotelId: string }) {
   const fetchRooms = useCallback(async () => {
     setLoading(true);
     try {
-      const sb = getAdmin();
+      const sb = supabase;
       const { data, error } = await sb.from('hotel_rooms').select('*').eq('hotel_id', hotelId).order('created_at');
       if (error) throw error;
       setRooms(data || []);
@@ -157,7 +148,7 @@ function RoomsPanel({ hotelId }: { hotelId: string }) {
     if (!form.room_type) { toast.error('Type de chambre requis'); return; }
     setSaving(true);
     try {
-      const sb = getAdmin();
+      const sb = supabase;
       const row = {
         hotel_id: hotelId,
         room_type: form.room_type,
@@ -190,7 +181,7 @@ function RoomsPanel({ hotelId }: { hotelId: string }) {
   const handleDelete = async (id: string) => {
     if (!confirm('Supprimer cette chambre ?')) return;
     try {
-      const sb = getAdmin();
+      const sb = supabase;
       const { error } = await sb.from('hotel_rooms').delete().eq('id', id);
       if (error) throw error;
       setRooms(prev => prev.filter(r => r.id !== id));
@@ -356,7 +347,7 @@ export default function AdminHotelsPage() {
   const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
-      const sb = getAdmin();
+      const sb = supabase;
       const { data, error } = await sb
         .from('hotels')
         .select('*')
@@ -401,7 +392,7 @@ export default function AdminHotelsPage() {
     if (!form.name) { toast.error('Nom requis'); return; }
     setSaving(true);
     try {
-      const sb = getAdmin();
+      const sb = supabase;
       const row = {
         name: form.name,
         slug: form.slug || slugify(form.name),
@@ -439,7 +430,7 @@ export default function AdminHotelsPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Supprimer cet hôtel et toutes ses chambres ?')) return;
     try {
-      const sb = getAdmin();
+      const sb = supabase;
       const { error } = await sb.from('hotels').delete().eq('id', id);
       if (error) throw error;
       setItems(prev => prev.filter(i => i.id !== id));
@@ -451,7 +442,7 @@ export default function AdminHotelsPage() {
   const togglePublished = async (id: string, current: boolean) => {
     setItems(prev => prev.map(i => i.id === id ? { ...i, is_published: !current } : i));
     try {
-      const sb = getAdmin();
+      const sb = supabase;
       const { error } = await sb.from('hotels').update({ is_published: !current }).eq('id', id);
       if (error) throw error;
     } catch {

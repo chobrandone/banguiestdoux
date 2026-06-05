@@ -7,18 +7,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus, Search, Edit2, Trash2, X, Car, Eye, EyeOff,
 } from 'lucide-react';
-import { createClient } from '@supabase/supabase-js';
 import toast from 'react-hot-toast';
 import ImageUpload from '@/components/admin/ImageUpload';
-
-/* ── helpers ────────────────────────────────────────────── */
-function getAdmin() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY ||
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  );
-}
+import { supabase } from '@/lib/supabase';
 
 function slugify(s: string) {
   return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
@@ -108,7 +99,7 @@ export default function AdminCarsPage() {
   const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
-      const sb = getAdmin();
+      const sb = supabase;
       const { data, error } = await sb
         .from('cars')
         .select('*')
@@ -154,7 +145,7 @@ export default function AdminCarsPage() {
     if (!form.name || !form.brand) { toast.error('Nom et marque requis'); return; }
     setSaving(true);
     try {
-      const sb = getAdmin();
+      const sb = supabase;
       const row = {
         name: form.name,
         slug: form.slug || slugify(form.name),
@@ -193,7 +184,7 @@ export default function AdminCarsPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Supprimer cette voiture ?')) return;
     try {
-      const sb = getAdmin();
+      const sb = supabase;
       const { error } = await sb.from('cars').delete().eq('id', id);
       if (error) throw error;
       setItems(prev => prev.filter(i => i.id !== id));
@@ -204,7 +195,7 @@ export default function AdminCarsPage() {
   const toggleField = async (id: string, col: 'is_available' | 'is_published', current: boolean) => {
     setItems(prev => prev.map(i => i.id === id ? { ...i, [col]: !current } : i));
     try {
-      const sb = getAdmin();
+      const sb = supabase;
       const { error } = await sb.from('cars').update({ [col]: !current }).eq('id', id);
       if (error) throw error;
     } catch {

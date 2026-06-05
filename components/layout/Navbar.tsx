@@ -16,6 +16,8 @@ import { cn }          from '@/lib/utils';
 const navLinks = [
   { key: 'nav.events',      href: '/events'      },
   { key: 'nav.restaurants', href: '/restaurants' },
+  { key: 'nav.hotels',      href: '/hotels'      },
+  { key: 'nav.cars',        href: '/cars'        },
   { key: 'nav.cinema',      href: '/cinema'      },
   {
     key: 'nav.discover', href: '/discover',

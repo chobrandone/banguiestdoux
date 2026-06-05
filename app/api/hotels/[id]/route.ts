@@ -12,7 +12,9 @@ function getAdmin() {
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const sb  = getAdmin();
-    const col = params.id.includes('-') && params.id.length !== 36 ? 'slug' : 'id';
+    // UUID v4 is exactly 36 chars: 8-4-4-4-12
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.id);
+    const col = isUUID ? 'id' : 'slug';
     const { data, error } = await sb.from('hotels').select('*, hotel_rooms(*)').eq(col, params.id).single();
     if (error) throw error;
     return NextResponse.json({ data });

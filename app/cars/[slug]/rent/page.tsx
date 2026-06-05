@@ -34,8 +34,12 @@ export default function CarRentPage() {
   });
 
   useEffect(() => {
-    if (slug === 'welcome') return; // welcome ride without specific car
-    fetch(`/api/cars/${slug}`).then(r => r.json()).then(({ data }) => setCar(data));
+    // 'welcome' is a virtual route — no specific car, admin assigns one
+    if (!slug || slug === 'welcome') return;
+    fetch(`/api/cars/${slug}`)
+      .then(r => r.json())
+      .then(({ data }) => { if (data) setCar(data); })
+      .catch(() => {/* car not found — form still works */});
   }, [slug]);
 
   const days = Math.max(0, Math.round(
