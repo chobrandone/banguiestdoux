@@ -17,7 +17,7 @@
    *                 on white), electric yellow in dark mode
    */
   --accent:      227 252 2;     /* #e3fc02 — bright yellow for bg & borders */
-  --accent-text: 154 115 0;     /* #9A7300 — dark amber for text on white bg */
+  --accent-text: 184 134 11;    /* #B8860B DarkGoldenrod — yellow-range, readable on white */
   --color-gold:  #e3fc02;
   --color-beige: #F5F0E8;
   --color-night: #0A0A0A;
