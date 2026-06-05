@@ -211,33 +211,47 @@ p { line-height: 1.7; }
 
 /* ─────────────────────────────────────────────────
    TEXT COLOUR OVERRIDES
-   These sit outside @layer so they beat Tailwind's
-   layered utilities in the cascade.
+   Outside @layer → beats Tailwind layered utilities.
 
-   .text-gold uses --accent-text:
-     • Light mode → #9A7300 (amber, readable on white)
-     • Dark mode  → #e3fc02 (electric yellow on dark)
+   Strategy:
+   • Default (white backgrounds, light mode):
+       --accent-text = #B8860B (DarkGoldenrod) — readable gold
+   • Dark backgrounds in light mode & all dark mode:
+       --accent-text overridden → #e3fc02 (electric yellow)
 
-   bg-gold / border-gold are NOT overridden — they
-   keep --accent (#e3fc02) so buttons & decorative
-   elements stay bright yellow in every mode.
+   bg-gold / border-gold keep --accent (#e3fc02) always.
 ───────────────────────────────────────────────── */
-.text-gold,
-.dark .text-gold {
-  color: rgb(var(--accent-text));
-}
 
-/* hover & group-hover variants */
+/* Step 1 — all text-gold uses the variable */
+.text-gold,
+.dark .text-gold,
 .hover\:text-gold:hover,
 .dark .hover\:text-gold:hover,
 .group-hover\:text-gold,
-.dark .group-hover\:text-gold {
+.dark .group-hover\:text-gold,
+.dark .dark\:text-gold {
   color: rgb(var(--accent-text));
 }
 
-/* dark: prefix variant (e.g. class="text-beige dark:text-gold") */
-.dark .dark\:text-gold {
-  color: rgb(var(--accent-text));  /* resolves to yellow in dark mode */
+/* Step 2 — restore electric yellow on dark backgrounds (light mode).
+   Any element that carries one of these dark-bg classes sets
+   --accent-text back to electric yellow for itself AND all children. */
+.bg-night,
+.bg-night-50,
+.bg-night-100,
+.bg-night-200,
+.bg-black,
+.bg-\[#0A0A0A\],
+.bg-\[#0a0a0a\],
+.bg-\[#0F0F0F\],
+.bg-\[#0f0f0f\],
+.bg-\[#111111\],
+.bg-\[#141414\],
+.bg-\[#1A1A1A\],
+.bg-\[#1a1a1a\],
+.gradient-night,
+footer {
+  --accent-text: 227 252 2;   /* electric yellow on dark bg */
 }
 
 /* ─── PWA / Mobile ──────────────────────────────── */
