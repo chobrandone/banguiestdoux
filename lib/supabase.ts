@@ -1,22 +1,22 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 // Prefer the JWT anon key (starts with eyJ), then fall back to publishable key
 const supabaseKey =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+  '';
 
+// Warn instead of throw — prevents a missing env var from crashing the server
 if (!supabaseUrl || !supabaseKey) {
-  throw new Error(
-    'Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY'
-  );
+  console.warn('[supabase] Missing NEXT_PUBLIC_SUPABASE_URL or anon key — DB features disabled');
 }
 
 /**
  * Browser / client-side Supabase client.
  * Uses the publishable key — RLS policies apply.
  */
-export const supabase = createClient(supabaseUrl, supabaseKey, {
+export const supabase = createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseKey || 'placeholder', {
   auth: {
     persistSession: true,
     autoRefreshToken: true,

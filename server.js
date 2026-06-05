@@ -9,7 +9,9 @@
  * Local dev: npm run dev  (Next.js only, much faster)
  *            node server.js  (full stack, same as production)
  */
+// Load env vars: .env (local dev) → .env.production (production, committed to git)
 require('dotenv').config();
+require('dotenv').config({ path: '.env.production', override: false });
 
 const fs           = require('fs');
 const path         = require('path');
