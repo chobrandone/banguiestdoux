@@ -21,7 +21,11 @@ const pageTitleKeys: Record<string, string> = {
   '/admin/analytics':   'admin.nav.analytics',
   '/admin/users':       'admin.nav.users',
   '/admin/orders':      'admin.nav.orders',
-  '/admin/partners':    'admin.nav.partners',
+  '/admin/partners':       'admin.nav.partners',
+  '/admin/hotels':         'admin.nav.hotels',
+  '/admin/hotel-bookings': 'admin.nav.hotelBookings',
+  '/admin/cars':           'admin.nav.cars',
+  '/admin/car-rentals':    'admin.nav.carRentals',
 };
 
 interface AdminHeaderProps {
