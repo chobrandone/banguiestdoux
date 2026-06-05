@@ -9,7 +9,7 @@ import {
   LayoutDashboard, Calendar, Utensils, Film, ShoppingBag,
   Images, Users, MessageSquare, Settings, BarChart3,
   ChevronLeft, ChevronRight, Star, Globe, LogOut, Home,
-  Megaphone, X,
+  Megaphone, X, Hotel, Car, BookOpen,
 } from 'lucide-react';
 import { useAuth }     from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -25,11 +25,15 @@ const navItems = [
   { key: 'admin.nav.gallery',     href: '/admin/gallery',      icon: Images          },
   { key: 'admin.nav.shop',        href: '/admin/shop',         icon: ShoppingBag     },
   { key: 'admin.nav.orders',      href: '/admin/orders',       icon: ShoppingBag     },
-  { key: 'admin.nav.partners',    href: '/admin/partners',     icon: Megaphone       },
-  { key: 'admin.nav.users',       href: '/admin/users',        icon: Users           },
-  { key: 'admin.nav.messages',    href: '/admin/messages',     icon: MessageSquare   },
-  { key: 'admin.nav.analytics',   href: '/admin/analytics',    icon: BarChart3       },
-  { key: 'admin.nav.settings',    href: '/admin/settings',     icon: Settings        },
+  { key: 'admin.nav.partners',      href: '/admin/partners',       icon: Megaphone  },
+  { key: 'admin.nav.hotels',        href: '/admin/hotels',         icon: Hotel      },
+  { key: 'admin.nav.hotelBookings', href: '/admin/hotel-bookings', icon: BookOpen   },
+  { key: 'admin.nav.cars',          href: '/admin/cars',           icon: Car        },
+  { key: 'admin.nav.carRentals',    href: '/admin/car-rentals',    icon: Car        },
+  { key: 'admin.nav.users',         href: '/admin/users',          icon: Users      },
+  { key: 'admin.nav.messages',      href: '/admin/messages',       icon: MessageSquare },
+  { key: 'admin.nav.analytics',     href: '/admin/analytics',      icon: BarChart3  },
+  { key: 'admin.nav.settings',      href: '/admin/settings',       icon: Settings   },
 ];
 
 interface AdminSidebarProps {

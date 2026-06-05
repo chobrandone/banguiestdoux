@@ -3,6 +3,7 @@ import HeroSection         from '@/components/home/HeroSection';
 import FeaturedEvents      from '@/components/home/FeaturedEvents';
 import TrendingRestaurants from '@/components/home/TrendingRestaurants';
 import LifestyleSection    from '@/components/home/LifestyleSection';
+import WelcomeRideSection  from '@/components/home/WelcomeRideSection';
 import TalentsSpotlight    from '@/components/home/TalentsSpotlight';
 import GalleryPreview      from '@/components/home/GalleryPreview';
 import PartnersSection     from '@/components/home/PartnersSection';
@@ -20,6 +21,7 @@ export default function HomePage() {
       <FeaturedEvents />
       <TrendingRestaurants />
       <LifestyleSection />
+      <WelcomeRideSection />
       <TalentsSpotlight />
       <GalleryPreview />
       <PartnersSection />
