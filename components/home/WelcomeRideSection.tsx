@@ -6,10 +6,11 @@ import { Car, Phone, User, CalendarDays, CheckCircle, ArrowRight } from 'lucide-
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 
-const today    = new Date().toISOString().split('T')[0];
-const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
-
 export default function WelcomeRideSection() {
+  // Compute dates client-side only to avoid SSR/hydration mismatch
+  const today    = typeof window !== 'undefined' ? new Date().toISOString().split('T')[0] : '';
+  const tomorrow = typeof window !== 'undefined' ? new Date(Date.now() + 86400000).toISOString().split('T')[0] : '';
+
   const [form, setForm] = useState({
     renter_name: '', renter_phone: '', start_date: today, end_date: tomorrow,
     pickup_location: "Aéroport de Bangui M'Poko", notes: '',

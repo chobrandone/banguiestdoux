@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { CalendarDays, User, Phone, Mail, ChevronLeft, CheckCircle } from 'lucide-react';
@@ -11,10 +11,10 @@ interface Hotel { id: string; name: string; slug: string; hotel_rooms: Room[]; }
 
 function formatPrice(p: number) { return new Intl.NumberFormat('fr-FR').format(p) + ' XAF'; }
 
-const today    = new Date().toISOString().split('T')[0];
-const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+const today    = typeof window !== 'undefined' ? new Date().toISOString().split('T')[0] : '';
+const tomorrow = typeof window !== 'undefined' ? new Date(Date.now() + 86400000).toISOString().split('T')[0] : '';
 
-export default function HotelBookPage() {
+function HotelBookPageInner() {
   const { slug }       = useParams<{ slug: string }>();
   const searchParams   = useSearchParams();
   const router         = useRouter();
@@ -179,5 +179,18 @@ export default function HotelBookPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+
+export default function HotelBookPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-white dark:bg-night flex items-center justify-center">
+        <div className="w-10 h-10 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
+      </div>
+    }>
+      <HotelBookPageInner />
+    </Suspense>
   );
 }

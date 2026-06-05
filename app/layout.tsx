@@ -63,7 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
       className=""
     >
-      <body className="bg-white dark:bg-night text-night dark:text-beige antialiased">
+      <body suppressHydrationWarning className="bg-white dark:bg-night text-night dark:text-beige antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ReduxProvider>
             <LanguageProvider>
@@ -86,7 +86,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         fontFamily: 'var(--font-inter)',
                         fontSize:   '14px',
                       },
-                      success: { iconTheme: { primary: '#16a34a', secondary: '#FFFFFF' } },
+                      success: { iconTheme: { primary: '#e3fc02', secondary: '#0A0A0A' } },
                       error:   { iconTheme: { primary: '#EF4444', secondary: '#FFFFFF' } },
                     }}
                   />
