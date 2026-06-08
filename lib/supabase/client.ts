@@ -5,10 +5,11 @@
 import { createBrowserClient } from '@supabase/ssr';
 
 export function createClient() {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
-  );
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  // JWT anon key is required for auth.signInWithPassword to work
+  const key = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+               process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)!;
+  return createBrowserClient(url, key);
 }
 
 /** Singleton for use inside client components */

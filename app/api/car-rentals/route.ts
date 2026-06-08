@@ -33,7 +33,9 @@ export async function POST(req: NextRequest) {
     if (!renter_name || !renter_phone || !start_date || !end_date)
       return NextResponse.json({ error: 'Champs requis manquants.' }, { status: 400 });
 
-    const { data, error } = await getAdmin().from('car_rentals').insert([body]).select().single();
+    // Strip generated columns — 'days' is GENERATED ALWAYS AS (end_date - start_date)
+    const { days: _days, ...insertBody } = body;
+    const { data, error } = await getAdmin().from('car_rentals').insert([insertBody]).select().single();
     if (error) throw error;
     return NextResponse.json({ data });
   } catch (e: unknown) {
