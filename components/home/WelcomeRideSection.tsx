@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Car, Phone, User, CalendarDays, CheckCircle, ArrowRight } from 'lucide-react';
+import { Car, Phone, User, CalendarDays, Clock, CheckCircle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 
@@ -10,6 +10,7 @@ export default function WelcomeRideSection() {
   // Start with empty strings to match SSR — fill in after mount
   const [form, setForm] = useState({
     renter_name: '', renter_phone: '', start_date: '', end_date: '',
+    pickup_time: '09:00',
     pickup_location: "Aéroport de Bangui M'Poko", notes: '',
   });
   const [submitting, setSubmitting] = useState(false);
@@ -33,8 +34,13 @@ export default function WelcomeRideSection() {
       const res = await fetch('/api/car-rentals', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...form, car_name: 'À attribuer', is_welcome_ride: true,
-          days: 1, total_price: 0, status: 'pending',
+          ...form,
+          car_name:     'À attribuer',
+          is_welcome_ride: true,
+          service_type: 'pickup',
+          end_date:     form.start_date,   // same-day pickup
+          total_price:  0,
+          status:       'pending',
         }),
       });
       if (!res.ok) throw new Error();
@@ -101,13 +107,17 @@ export default function WelcomeRideSection() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs text-beige/50 mb-1 block">Date d'arrivée</label>
+                    <label className="text-xs text-beige/50 mb-1 flex items-center gap-1"><CalendarDays size={11} />Date d'arrivée</label>
                     <input type="date" value={form.start_date} min={form.start_date || ''} onChange={set('start_date')} className={ic} required />
                   </div>
                   <div>
-                    <label className="text-xs text-beige/50 mb-1 block">Heure (notes)</label>
-                    <input placeholder="Vol AF123 / 14h30" value={form.notes} onChange={set('notes')} className={ic} />
+                    <label className="text-xs text-beige/50 mb-1 flex items-center gap-1"><Clock size={11} />Heure d'arrivée</label>
+                    <input type="time" value={form.pickup_time} onChange={set('pickup_time')} className={ic} required />
                   </div>
+                </div>
+                <div>
+                  <label className="text-xs text-beige/50 mb-1 block">N° de vol / remarques</label>
+                  <input placeholder="Ex: Vol AF123, 3 passagers…" value={form.notes} onChange={set('notes')} className={ic} />
                 </div>
 
                 <div>
