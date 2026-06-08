@@ -58,7 +58,7 @@ export default function GalleryPage() {
           ))}
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-night to-transparent" />
-        <div className="container-custom relative z-10 pt-20">
+        <div className="container-custom relative z-10 pt-24 md:pt-28">
           <span className="label-editorial">{t('section.gallery.subtitle')}</span>
           <h1 className="font-display text-4xl md:text-6xl font-bold text-beige mt-2">{t('section.gallery.title')}</h1>
         </div>

@@ -37,7 +37,7 @@ export default function RegisterPage() {
   const ic = 'w-full pl-11 pr-4 py-3.5 bg-white dark:bg-night-50 rounded-xl border border-gray-200 dark:border-white/10 text-sm text-night dark:text-beige outline-none focus:border-gold transition-all placeholder:text-gray-300 dark:placeholder:text-beige/25';
 
   return (
-    <div className="min-h-screen bg-white dark:bg-night flex items-center justify-center px-4 py-20">
+    <div className="min-h-screen bg-white dark:bg-night flex items-center justify-center px-4 pt-32 pb-20">
       <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
         <Link href="/auth/login" className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-beige/50 hover:text-gold mb-8 transition-colors">
           <ArrowLeft size={15} /> Retour à la connexion

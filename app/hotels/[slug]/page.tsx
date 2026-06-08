@@ -35,13 +35,13 @@ export default function HotelDetailPage() {
   }, [slug]);
 
   if (loading) return (
-    <div className="min-h-screen bg-white dark:bg-night pt-28 flex items-center justify-center">
+    <div className="min-h-screen bg-white dark:bg-night pt-32 flex items-center justify-center">
       <div className="w-10 h-10 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
     </div>
   );
 
   if (!hotel) return (
-    <div className="min-h-screen bg-white dark:bg-night pt-28 flex flex-col items-center justify-center text-center px-4">
+    <div className="min-h-screen bg-white dark:bg-night pt-32 flex flex-col items-center justify-center text-center px-4">
       <p className="text-2xl font-display text-night dark:text-beige mb-4">Hôtel introuvable</p>
       <button onClick={() => router.push('/hotels')} className="btn-gold px-6 py-3">
         ← Retour aux hôtels

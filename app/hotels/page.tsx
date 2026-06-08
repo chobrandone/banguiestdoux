@@ -55,7 +55,7 @@ export default function HotelsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-white dark:bg-night pt-28 pb-20">
+    <div className="min-h-screen bg-white dark:bg-night pt-28 lg:pt-32 pb-20">
       {/* Hero */}
       <div className="bg-night text-beige py-16 px-4 text-center">
         <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}

@@ -78,7 +78,7 @@ export default function CinemaPage() {
           className="absolute inset-0 w-full h-full object-cover opacity-30"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-night to-transparent" />
-        <div className="container-custom relative z-10 pt-24">
+        <div className="container-custom relative z-10 pt-24 lg:pt-28">
           <span className="label-editorial">{t('cinema.arts')}</span>
           <h1 className="font-display text-4xl md:text-6xl font-bold text-beige mt-2">{t('cinema.title')}</h1>
           <p className="text-beige/60 mt-2">{t('cinema.subtitle')}</p>

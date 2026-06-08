@@ -5,7 +5,7 @@ export const metadata: Metadata = { title: 'Politique de confidentialité — Ba
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-white dark:bg-night pt-28 pb-20">
+    <div className="min-h-screen bg-white dark:bg-night pt-28 lg:pt-32 pb-20">
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         <Link href="/" className="text-sm text-gold hover:underline mb-8 inline-block">← Retour à l'accueil</Link>
         <h1 className="font-display text-4xl font-bold text-night dark:text-beige mb-2">Politique de confidentialité</h1>

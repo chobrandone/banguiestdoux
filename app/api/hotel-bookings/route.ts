@@ -33,7 +33,9 @@ export async function POST(req: NextRequest) {
     if (!guest_name || !guest_phone || !check_in || !check_out)
       return NextResponse.json({ error: 'Champs requis manquants.' }, { status: 400 });
 
-    const { data, error } = await getAdmin().from('hotel_bookings').insert([body]).select().single();
+    // Strip generated column — 'nights' is GENERATED ALWAYS AS (check_out - check_in)
+    const { nights: _nights, ...insertBody } = body;
+    const { data, error } = await getAdmin().from('hotel_bookings').insert([insertBody]).select().single();
     if (error) throw error;
     return NextResponse.json({ data });
   } catch (e: unknown) {

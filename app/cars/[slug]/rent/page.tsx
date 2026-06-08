@@ -106,7 +106,7 @@ function CarRentPageInner() {
   };
 
   if (done) return (
-    <div className="min-h-screen bg-white dark:bg-night pt-28 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-white dark:bg-night pt-32 flex items-center justify-center px-4">
       <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
         className="max-w-md w-full bg-white dark:bg-[#141414] border border-gray-100 dark:border-white/10 rounded-3xl p-10 text-center">
         <div className="w-16 h-16 bg-gold/15 rounded-full flex items-center justify-center mx-auto mb-4">

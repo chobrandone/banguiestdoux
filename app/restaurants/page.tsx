@@ -57,7 +57,7 @@ export default function RestaurantsPage() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="https://images.unsplash.com/photo-1566717153027-aa70e8df07c4?w=1920" alt="Restaurants" className="absolute inset-0 w-full h-full object-cover opacity-40" />
         <div className="absolute inset-0 bg-gradient-to-t from-night via-night/50 to-transparent" />
-        <div className="container-custom relative z-10 pt-24">
+        <div className="container-custom relative z-10 pt-24 lg:pt-28">
           <span className="label-editorial">Gastronomie & Nightlife</span>
           <h1 className="font-display text-4xl md:text-6xl font-bold text-beige mt-2">{t('section.restaurants.title')}</h1>
           <p className="text-beige/60 mt-2">{t('section.restaurants.subtitle')}</p>
