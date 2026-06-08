@@ -26,16 +26,33 @@ export async function GET() {
   }
 }
 
+// Helper: empty string / undefined → null (prevents UUID / type errors in Postgres)
+function orNull(v: unknown) { return (v === '' || v === undefined) ? null : v; }
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { guest_name, guest_phone, hotel_id, room_id, check_in, check_out } = body;
+    const { guest_name, guest_phone, check_in, check_out } = body;
     if (!guest_name || !guest_phone || !check_in || !check_out)
       return NextResponse.json({ error: 'Champs requis manquants.' }, { status: 400 });
 
-    // Strip generated column — 'nights' is GENERATED ALWAYS AS (check_out - check_in)
-    const { nights: _nights, ...insertBody } = body;
-    const { data, error } = await getAdmin().from('hotel_bookings').insert([insertBody]).select().single();
+    // Build a clean insert row — strip generated 'nights', coerce empty strings to null
+    const row = {
+      hotel_id:    orNull(body.hotel_id),
+      room_id:     orNull(body.room_id),
+      hotel_name:  orNull(body.hotel_name),
+      room_type:   orNull(body.room_type),
+      guest_name:  String(guest_name).trim(),
+      guest_email: orNull(body.guest_email),
+      guest_phone: String(guest_phone).trim(),
+      check_in,
+      check_out,
+      total_price: body.total_price ? Math.round(Number(body.total_price)) : null,
+      notes:       orNull(body.notes),
+      status:      'pending',
+    };
+
+    const { data, error } = await getAdmin().from('hotel_bookings').insert([row]).select().single();
     if (error) throw error;
     return NextResponse.json({ data });
   } catch (e: unknown) {

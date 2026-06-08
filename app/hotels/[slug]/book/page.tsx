@@ -66,10 +66,16 @@ function HotelBookPageInner() {
     setSubmitting(true);
     try {
       const payload = {
-        ...form,
-        hotel_id:   hotel?.id,
-        hotel_name: hotel?.name,
-        room_type:  selectedRoom?.room_type,
+        hotel_id:    hotel?.id || null,
+        hotel_name:  hotel?.name || null,
+        room_id:     form.room_id || null,          // empty string → null for UUID column
+        room_type:   selectedRoom?.room_type || null,
+        guest_name:  form.guest_name,
+        guest_email: form.guest_email || null,
+        guest_phone: form.guest_phone,
+        check_in:    form.check_in,
+        check_out:   form.check_out,
+        notes:       form.notes || null,
         total_price: total,
       };
       const res = await fetch('/api/hotel-bookings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });

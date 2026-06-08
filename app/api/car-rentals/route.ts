@@ -26,6 +26,8 @@ export async function GET() {
   }
 }
 
+function orNull(v: unknown) { return (v === '' || v === undefined) ? null : v; }
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -33,9 +35,25 @@ export async function POST(req: NextRequest) {
     if (!renter_name || !renter_phone || !start_date || !end_date)
       return NextResponse.json({ error: 'Champs requis manquants.' }, { status: 400 });
 
-    // Strip generated columns — 'days' is GENERATED ALWAYS AS (end_date - start_date)
-    const { days: _days, ...insertBody } = body;
-    const { data, error } = await getAdmin().from('car_rentals').insert([insertBody]).select().single();
+    // Build clean row — strip generated 'days', coerce empty strings to null
+    const row = {
+      car_id:          orNull(body.car_id),
+      car_name:        orNull(body.car_name),
+      renter_name:     String(renter_name).trim(),
+      renter_email:    orNull(body.renter_email),
+      renter_phone:    String(renter_phone).trim(),
+      start_date,
+      end_date,
+      pickup_time:     orNull(body.pickup_time),
+      pickup_location: orNull(body.pickup_location),
+      service_type:    body.service_type || 'rent',
+      is_welcome_ride: Boolean(body.is_welcome_ride),
+      total_price:     body.total_price ? Math.round(Number(body.total_price)) : null,
+      notes:           orNull(body.notes),
+      status:          'pending',
+    };
+
+    const { data, error } = await getAdmin().from('car_rentals').insert([row]).select().single();
     if (error) throw error;
     return NextResponse.json({ data });
   } catch (e: unknown) {
