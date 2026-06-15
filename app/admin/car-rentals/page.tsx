@@ -3,7 +3,8 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Car, Phone, Mail, Search, CheckCircle, Clock, XCircle, MapPin, CalendarDays } from 'lucide-react';
+import { Car, Phone, Mail, Search, CheckCircle, Clock, XCircle, MapPin, CalendarDays, FileSpreadsheet } from 'lucide-react';
+import { exportToExcel, timestampedFilename } from '@/lib/exportExcel';
 import toast from 'react-hot-toast';
 
 interface Rental {
@@ -65,12 +66,41 @@ export default function CarRentalsPage() {
     revenue:  rentals.filter(r => r.status !== 'cancelled').reduce((s, r) => s + (r.total_price || 0), 0),
   };
 
+  const STATUS_LABELS: Record<string, string> = { pending: 'En attente', confirmed: 'Confirmée', cancelled: 'Annulée' };
+
+  const handleExport = () => {
+    const rows = filtered.map(r => ({
+      'ID': r.id,
+      'Voiture': r.car_name,
+      'Client': r.renter_name,
+      'Téléphone': r.renter_phone || '',
+      'Email': r.renter_email || '',
+      'Début': formatDate(r.start_date),
+      'Fin': formatDate(r.end_date),
+      'Jours': r.days,
+      'Lieu de prise en charge': r.pickup_location || '',
+      'Trajet accueil': r.is_welcome_ride ? 'Oui' : 'Non',
+      'Total (XAF)': r.total_price,
+      'Statut': STATUS_LABELS[r.status] || r.status,
+      'Notes': r.notes || '',
+      'Créée le': formatDate(r.created_at),
+    }));
+    exportToExcel([{ name: 'Locations Voitures', rows }], timestampedFilename('locations_voitures'));
+    toast.success('Export Excel généré');
+  };
+
   return (
     <div className="min-h-screen bg-[#0A0A0A] p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-beige flex items-center gap-2"><Car size={22} /> Locations de voitures</h1>
-          <p className="text-sm text-beige/40 mt-0.5">Toutes les demandes de location reçues</p>
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-beige flex items-center gap-2"><Car size={22} /> Locations de voitures</h1>
+            <p className="text-sm text-beige/40 mt-0.5">Toutes les demandes de location reçues</p>
+          </div>
+          <button onClick={handleExport} disabled={filtered.length === 0} className="flex items-center gap-2 px-4 py-2 bg-gold/10 border border-gold/20 rounded-xl text-sm text-gold hover:bg-gold/20 transition-all disabled:opacity-50">
+            <FileSpreadsheet size={16} />
+            Exporter Excel
+          </button>
         </div>
 
         {/* Stats */}

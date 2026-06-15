@@ -4,10 +4,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   ShoppingBag, Search, RefreshCw, User, Phone, Mail,
-  Clock, CheckCircle2, XCircle, Truck, Package, Eye,
+  Clock, CheckCircle2, XCircle, Truck, Package, Eye, FileSpreadsheet,
 } from 'lucide-react';
 import { getOrders, updateOrderStatus as updateOrderStatusDB } from '@/lib/db';
 import { formatPrice } from '@/lib/utils';
+import { exportToExcel, timestampedFilename } from '@/lib/exportExcel';
 import toast from 'react-hot-toast';
 
 type OrderStatus = 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
@@ -75,6 +76,44 @@ export default function AdminOrdersPage() {
     }
   };
 
+  const handleExport = () => {
+    const ordersRows = visible.map(o => ({
+      'ID': o._id,
+      'Client': o.customerName || o.user?.name || '',
+      'Téléphone': o.customerPhone || '',
+      'Email': o.customerEmail || o.user?.email || '',
+      'Articles': o.items.length,
+      'Sous-total (XAF)': o.subtotal,
+      'Livraison (XAF)': o.shippingCost,
+      'Total (XAF)': o.total,
+      'Statut': STATUS_CONFIG[o.status]?.label || o.status,
+      'Statut paiement': o.paymentStatus,
+      'Date': new Date(o.createdAt).toLocaleDateString('fr-FR'),
+    }));
+
+    const itemsRows = visible.flatMap(o =>
+      o.items.map(item => ({
+        'Commande ID': o._id,
+        'Client': o.customerName || o.user?.name || '',
+        'Article': item.name,
+        'Quantité': item.quantity,
+        'Prix unitaire (XAF)': item.price,
+        'Total (XAF)': item.price * item.quantity,
+        'Taille': item.size || '',
+        'Couleur': item.color || '',
+      }))
+    );
+
+    exportToExcel(
+      [
+        { name: 'Commandes', rows: ordersRows },
+        { name: 'Articles commandés', rows: itemsRows },
+      ],
+      timestampedFilename('commandes')
+    );
+    toast.success('Export Excel généré');
+  };
+
   const visible = orders.filter(o => {
     if (!search) return true;
     const q = search.toLowerCase();
@@ -101,10 +140,16 @@ export default function AdminOrdersPage() {
           <h2 className="font-display text-2xl font-bold">Commandes</h2>
           <p className="text-beige/40 text-sm">{orders.length} commandes au total</p>
         </div>
-        <button onClick={fetchOrders} disabled={loading} className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-beige/70 hover:text-beige hover:bg-white/10 transition-all disabled:opacity-50">
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          Actualiser
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={handleExport} disabled={loading || visible.length === 0} className="flex items-center gap-2 px-4 py-2 bg-gold/10 border border-gold/20 rounded-xl text-sm text-gold hover:bg-gold/20 transition-all disabled:opacity-50">
+            <FileSpreadsheet className="w-4 h-4" />
+            Exporter Excel
+          </button>
+          <button onClick={fetchOrders} disabled={loading} className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-beige/70 hover:text-beige hover:bg-white/10 transition-all disabled:opacity-50">
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            Actualiser
+          </button>
+        </div>
       </div>
 
       {/* Stats */}

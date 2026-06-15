@@ -6,6 +6,7 @@ import { Plus, Pencil, Trash2, Star, Search, X, UserCircle, Instagram, Facebook 
 import toast from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
 import { getTalents, deleteRow, toTalent } from '@/lib/db';
+import ImageUpload from '@/components/admin/ImageUpload';
 
 interface Talent {
   _id: string;
@@ -433,18 +434,12 @@ export default function TalentsAdminPage() {
                   </div>
 
                   <div className="col-span-2">
-                    <label className={lc}>URL de la photo</label>
-                    <input
+                    <ImageUpload
+                      bucket="talents"
                       value={form.image}
-                      onChange={e => setForm(p => ({ ...p, image: e.target.value }))}
-                      placeholder="https://..."
-                      className={ic}
+                      onChange={url => setForm(p => ({ ...p, image: url }))}
+                      label="Photo du talent"
                     />
-                    {form.image && (
-                      <div className="mt-2 w-16 h-16 rounded-full overflow-hidden bg-white/5">
-                        <img src={form.image} alt="Preview" className="w-full h-full object-cover" />
-                      </div>
-                    )}
                   </div>
 
                   <div>

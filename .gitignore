@@ -49,3 +49,6 @@ firebase-debug.log
 
 # Duplicate project folder (old copy — not part of the build)
 frontend/
+
+# Generated reports
+exports/

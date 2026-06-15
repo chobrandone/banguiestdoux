@@ -6,6 +6,7 @@ import { Plus, Pencil, Trash2, Star, Search, X, ExternalLink, Building2 } from '
 import toast from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
 import { deleteRow } from '@/lib/db';
+import ImageUpload from '@/components/admin/ImageUpload';
 
 interface Partner {
   _id: string;
@@ -387,20 +388,12 @@ export default function PartnersAdminPage() {
                   </select>
                 </div>
 
-                <div>
-                  <label className={lc}>URL du logo</label>
-                  <input
-                    value={form.logo}
-                    onChange={e => setForm(p => ({ ...p, logo: e.target.value }))}
-                    placeholder="https://..."
-                    className={ic}
-                  />
-                  {form.logo && (
-                    <div className="mt-2 rounded-xl overflow-hidden h-24 bg-white/5 flex items-center justify-center p-3">
-                      <img src={form.logo} alt="Logo preview" className="max-h-full object-contain" />
-                    </div>
-                  )}
-                </div>
+                <ImageUpload
+                  bucket="partners"
+                  value={form.logo}
+                  onChange={url => setForm(p => ({ ...p, logo: url }))}
+                  label="Logo du partenaire"
+                />
 
                 <div>
                   <label className={lc}>Site web</label>

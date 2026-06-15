@@ -5,11 +5,12 @@ import { motion } from 'framer-motion';
 import {
   CalendarDays, Utensils, Users, ShoppingBag,
   TrendingUp, MessageSquare, Clock, CheckCircle, XCircle, Loader2,
-  Eye, BarChart2, ArrowUp, ArrowDown, Globe,
+  Eye, BarChart2, ArrowUp, ArrowDown, Globe, FileSpreadsheet,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getDashboardStats, getOrders, getEvents } from '@/lib/db';
 import { formatPrice } from '@/lib/utils';
+import { exportToExcel, timestampedFilename } from '@/lib/exportExcel';
 
 /* ─── Types ──────────────────────────────────────────────────── */
 interface DashboardStats {
@@ -133,14 +134,104 @@ export default function AnalyticsAdminPage() {
 
   const visitDelta = visits ? pctChange(visits.totalViews, visits.prevViews) : 0;
 
+  const [exporting, setExporting] = useState(false);
+
+  const handleFinancialExport = async () => {
+    setExporting(true);
+    try {
+      const [allOrders, hotelRes, carRes] = await Promise.all([
+        getOrders({ limit: 1000 }),
+        fetch('/api/hotel-bookings').then(r => r.json()).catch(() => ({ data: [] })),
+        fetch('/api/car-rentals').then(r => r.json()).catch(() => ({ data: [] })),
+      ]);
+
+      const hotelBookings: { id: string; hotel_name: string; room_type: string; guest_name: string; guest_email: string; guest_phone: string; check_in: string; check_out: string; nights: number; total_price: number; status: string; created_at: string }[] = hotelRes.data || [];
+      const carRentals: { id: string; car_name: string; renter_name: string; renter_email: string; renter_phone: string; start_date: string; end_date: string; days: number; total_price: number; status: string; created_at: string }[] = carRes.data || [];
+
+      const ordersRows = allOrders.map(o => ({
+        'ID': o._id,
+        'Client': o.customerName || (typeof o.user === 'object' ? o.user?.name : '') || '',
+        'Total (XAF)': o.total,
+        'Statut': o.status,
+        'Statut paiement': o.paymentStatus,
+        'Date': new Date(o.createdAt).toLocaleDateString('fr-FR'),
+      }));
+
+      const hotelRows = hotelBookings.map(b => ({
+        'ID': b.id,
+        'Hôtel': b.hotel_name,
+        'Chambre': b.room_type,
+        'Client': b.guest_name,
+        'Téléphone': b.guest_phone || '',
+        'Email': b.guest_email || '',
+        'Arrivée': new Date(b.check_in).toLocaleDateString('fr-FR'),
+        'Départ': new Date(b.check_out).toLocaleDateString('fr-FR'),
+        'Nuits': b.nights,
+        'Total (XAF)': b.total_price,
+        'Statut': b.status,
+        'Date': new Date(b.created_at).toLocaleDateString('fr-FR'),
+      }));
+
+      const carRows = carRentals.map(r => ({
+        'ID': r.id,
+        'Voiture': r.car_name,
+        'Client': r.renter_name,
+        'Téléphone': r.renter_phone || '',
+        'Email': r.renter_email || '',
+        'Début': new Date(r.start_date).toLocaleDateString('fr-FR'),
+        'Fin': new Date(r.end_date).toLocaleDateString('fr-FR'),
+        'Jours': r.days,
+        'Total (XAF)': r.total_price,
+        'Statut': r.status,
+        'Date': new Date(r.created_at).toLocaleDateString('fr-FR'),
+      }));
+
+      const shopRevenue  = allOrders.filter(o => o.status !== 'cancelled').reduce((s, o) => s + o.total, 0);
+      const hotelRevenue = hotelBookings.filter(b => b.status !== 'cancelled').reduce((s, b) => s + (b.total_price || 0), 0);
+      const carRevenue   = carRentals.filter(r => r.status !== 'cancelled').reduce((s, r) => s + (r.total_price || 0), 0);
+
+      const summaryRows = [
+        { 'Source': 'Boutique',          'Nombre': allOrders.length,     'Revenus (XAF)': shopRevenue },
+        { 'Source': 'Réservations Hôtel','Nombre': hotelBookings.length, 'Revenus (XAF)': hotelRevenue },
+        { 'Source': 'Locations Voitures','Nombre': carRentals.length,    'Revenus (XAF)': carRevenue },
+        { 'Source': 'TOTAL',             'Nombre': allOrders.length + hotelBookings.length + carRentals.length, 'Revenus (XAF)': shopRevenue + hotelRevenue + carRevenue },
+      ];
+
+      exportToExcel(
+        [
+          { name: 'Résumé', rows: summaryRows },
+          { name: 'Commandes Boutique', rows: ordersRows },
+          { name: 'Réservations Hôtel', rows: hotelRows },
+          { name: 'Locations Voitures', rows: carRows },
+        ],
+        timestampedFilename('rapport_financier')
+      );
+      toast.success('Rapport financier exporté');
+    } catch {
+      toast.error('Erreur lors de l\'export');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0A0A0A] p-6">
       <div className="max-w-7xl mx-auto space-y-6">
 
         {/* Header */}
-        <div>
-          <h1 className="text-2xl font-bold text-beige">Tableau de bord</h1>
-          <p className="text-sm text-beige/40 mt-0.5">Vue d&apos;ensemble de la plateforme Bangui est Doux</p>
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-beige">Tableau de bord</h1>
+            <p className="text-sm text-beige/40 mt-0.5">Vue d&apos;ensemble de la plateforme Bangui est Doux</p>
+          </div>
+          <button
+            onClick={handleFinancialExport}
+            disabled={exporting}
+            className="flex items-center gap-2 px-4 py-2 bg-gold/10 border border-gold/20 rounded-xl text-sm text-gold hover:bg-gold/20 transition-all disabled:opacity-50"
+          >
+            <FileSpreadsheet size={16} className={exporting ? 'animate-pulse' : ''} />
+            {exporting ? 'Génération...' : 'Rapport financier Excel'}
+          </button>
         </div>
 
         {/* Pending orders alert */}

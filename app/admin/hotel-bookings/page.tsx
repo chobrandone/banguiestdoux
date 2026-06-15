@@ -3,7 +3,8 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { CalendarDays, Phone, Mail, Search, CheckCircle, Clock, XCircle, Hotel } from 'lucide-react';
+import { CalendarDays, Phone, Mail, Search, CheckCircle, Clock, XCircle, Hotel, FileSpreadsheet } from 'lucide-react';
+import { exportToExcel, timestampedFilename } from '@/lib/exportExcel';
 import toast from 'react-hot-toast';
 
 interface Booking {
@@ -62,12 +63,40 @@ export default function HotelBookingsPage() {
     revenue:   bookings.filter(b => b.status !== 'cancelled').reduce((s, b) => s + (b.total_price || 0), 0),
   };
 
+  const STATUS_LABELS: Record<string, string> = { pending: 'En attente', confirmed: 'Confirmée', cancelled: 'Annulée' };
+
+  const handleExport = () => {
+    const rows = filtered.map(b => ({
+      'ID': b.id,
+      'Hôtel': b.hotel_name,
+      'Type de chambre': b.room_type,
+      'Client': b.guest_name,
+      'Téléphone': b.guest_phone || '',
+      'Email': b.guest_email || '',
+      'Arrivée': formatDate(b.check_in),
+      'Départ': formatDate(b.check_out),
+      'Nuits': b.nights,
+      'Total (XAF)': b.total_price,
+      'Statut': STATUS_LABELS[b.status] || b.status,
+      'Notes': b.notes || '',
+      'Créée le': formatDate(b.created_at),
+    }));
+    exportToExcel([{ name: 'Réservations Hôtel', rows }], timestampedFilename('reservations_hotel'));
+    toast.success('Export Excel généré');
+  };
+
   return (
     <div className="min-h-screen bg-[#0A0A0A] p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-beige flex items-center gap-2"><Hotel size={22} /> Réservations Hôtel</h1>
-          <p className="text-sm text-beige/40 mt-0.5">Toutes les demandes de réservation reçues</p>
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-beige flex items-center gap-2"><Hotel size={22} /> Réservations Hôtel</h1>
+            <p className="text-sm text-beige/40 mt-0.5">Toutes les demandes de réservation reçues</p>
+          </div>
+          <button onClick={handleExport} disabled={filtered.length === 0} className="flex items-center gap-2 px-4 py-2 bg-gold/10 border border-gold/20 rounded-xl text-sm text-gold hover:bg-gold/20 transition-all disabled:opacity-50">
+            <FileSpreadsheet size={16} />
+            Exporter Excel
+          </button>
         </div>
 
         {/* Stats */}

@@ -6,6 +6,7 @@ import { Plus, Pencil, Trash2, Star, Search, X, ImageIcon, Eye, Clock, Film } fr
 import toast from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
 import { deleteRow } from '@/lib/db';
+import ImageUpload from '@/components/admin/ImageUpload';
 
 interface CinemaArticle {
   _id: string;
@@ -494,20 +495,12 @@ export default function CinemaAdminPage() {
                   />
                 </div>
 
-                <div>
-                  <label className={lc}>URL de l&apos;image</label>
-                  <input
-                    value={form.image}
-                    onChange={e => setForm(p => ({ ...p, image: e.target.value }))}
-                    placeholder="https://..."
-                    className={ic}
-                  />
-                  {form.image && (
-                    <div className="mt-2 rounded-xl overflow-hidden h-32 bg-white/5">
-                      <img src={form.image} alt="Preview" className="w-full h-full object-cover" />
-                    </div>
-                  )}
-                </div>
+                <ImageUpload
+                  bucket="articles"
+                  value={form.image}
+                  onChange={url => setForm(p => ({ ...p, image: url }))}
+                  label="Image de l'article"
+                />
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex items-center justify-between bg-[#0A0A0A] rounded-xl p-4">
