@@ -8,38 +8,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { getFeaturedTalents } from '@/lib/db';
 import type { Talent } from '@/types';
 
-/* ─── Fallback seed data ────────────────────────── */
-const seedTalents: Talent[] = [
-  {
-    _id: '1', slug: 'kessy-ekomo', name: 'Kessy EKOMO',
-    title: 'Artiste & Influenceuse', titleFr: 'Artiste & Influenceuse',
-    bio: '', category: 'influencer', isFeatured: true, createdAt: '',
-    image: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600',
-    videoUrl: 'https://youtube.com', instagram: '@kessy.ekomo',
-  },
-  {
-    _id: '2', slug: 'milene', name: 'Milene',
-    title: 'Chanteuse & Créatrice', titleFr: 'Chanteuse & Créatrice',
-    bio: '', category: 'musician', isFeatured: true, createdAt: '',
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600',
-    videoUrl: 'https://youtube.com', instagram: '@milene_music',
-  },
-  {
-    _id: '3', slug: 'chef-arouna', name: 'Chef Arouna',
-    title: 'Chef Cuisinier', titleFr: 'Chef Cuisinier',
-    bio: '', category: 'chef', isFeatured: true, createdAt: '',
-    image: 'https://images.unsplash.com/photo-1566554273541-37a9ca77b91f?w=600',
-    instagram: '@chef.arouna',
-  },
-  {
-    _id: '4', slug: 'dj-sango', name: 'DJ Sango',
-    title: 'DJ & Producteur', titleFr: 'DJ & Producteur',
-    bio: '', category: 'artist', isFeatured: true, createdAt: '',
-    image: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600',
-    videoUrl: 'https://youtube.com', instagram: '@dj.sango',
-  },
-];
-
 export default function TalentsSpotlight() {
   const { lang, t } = useLanguage();
   const [talents,   setTalents]   = useState<Talent[]>([]);
@@ -47,12 +15,12 @@ export default function TalentsSpotlight() {
 
   useEffect(() => {
     getFeaturedTalents(4)
-      .then((data) => setTalents(data.length ? data : seedTalents))
-      .catch(() => setTalents(seedTalents))
+      .then((data) => setTalents(data))
+      .catch(() => setTalents([]))
       .finally(() => setIsLoading(false));
   }, []);
 
-  const featured = isLoading ? seedTalents : (talents.length ? talents : seedTalents);
+  const featured = talents;
   const spotlightTalent = featured[0];
 
   return (
@@ -80,9 +48,17 @@ export default function TalentsSpotlight() {
           </Link>
         </div>
 
+        {/* Empty state */}
+        {!isLoading && featured.length === 0 && (
+          <div className="text-center py-16 text-beige/30">
+            <p className="text-lg">{lang === 'fr' ? 'Aucun talent à la une' : 'No featured talents yet'}</p>
+          </div>
+        )}
+
         {/* Cards */}
+        {featured.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          {(isLoading ? seedTalents : featured).map((talent, i) => (
+          {(isLoading ? [] : featured).map((talent, i) => (
             <motion.div
               key={talent._id}
               initial={{ opacity: 0, y: 30 }}
@@ -129,6 +105,7 @@ export default function TalentsSpotlight() {
             </motion.div>
           ))}
         </div>
+        )}
 
         {/* Featured interview banner */}
         {spotlightTalent && (

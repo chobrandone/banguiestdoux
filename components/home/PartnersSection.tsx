@@ -6,17 +6,6 @@ import { getPartners } from '@/lib/db';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { Partner } from '@/types';
 
-// Fallback partners shown when DB has no data
-// Uses CSS text badges instead of unreliable external placeholder images
-const seedPartners: Partner[] = [
-  { _id:'1', name: 'Bangui Rock Club',    logo: '', isFeatured: true },
-  { _id:'2', name: "Restaurant M'",       logo: '', isFeatured: true },
-  { _id:'3', name: "L'Avenue",            logo: '', isFeatured: true },
-  { _id:'4', name: 'Ambassade de France', logo: '', isFeatured: true },
-  { _id:'5', name: 'Air France',          logo: '', isFeatured: true },
-  { _id:'6', name: 'TÎ-ï Festival',       logo: '', isFeatured: true },
-];
-
 function PartnerLogo({ logo, name }: { logo: string; name: string }) {
   const [imgError, setImgError] = useState(false);
 
@@ -42,13 +31,15 @@ function PartnerLogo({ logo, name }: { logo: string; name: string }) {
 
 export default function PartnersSection() {
   const { t } = useLanguage();
-  const [partners, setPartners] = useState<Partner[]>(seedPartners);
+  const [partners, setPartners] = useState<Partner[]>([]);
 
   useEffect(() => {
     getPartners()
-      .then((data) => { if (data.length) setPartners(data); })
-      .catch(() => { /* keep seed */ });
+      .then((data) => setPartners(data))
+      .catch(() => setPartners([]));
   }, []);
+
+  if (partners.length === 0) return null;
 
   return (
     <section className="py-16 bg-white dark:bg-night border-t border-b border-gold/10">

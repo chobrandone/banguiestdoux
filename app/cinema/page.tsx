@@ -1,75 +1,32 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Film, Music, Theater, Palette, Calendar, Star } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { getArticles, getUpcomingEvents } from '@/lib/db';
+import type { Article, Event } from '@/types';
 
-const movies = [
-  {
-    titleFr: 'Mufasa : Le Roi Lion', titleEn: 'Mufasa: The Lion King',
-    genre: 'Animation', rating: 4.2,
-    image: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600',
-    dateFr: '15 août 2025', dateEn: 'Aug 15, 2025',
-    screening: 'Cinéma Rex, Bangui',
-  },
-  {
-    titleFr: 'Vaiana 2', titleEn: 'Moana 2',
-    genre: 'Animation', rating: 4.5,
-    image: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600',
-    dateFr: '16 août 2025', dateEn: 'Aug 16, 2025',
-    screening: 'Cinéma Rex, Bangui',
-  },
-  {
-    titleFr: 'Film Africain', titleEn: 'African Film',
-    genreFr: 'Drame', genreEn: 'Drama', rating: 4.7,
-    image: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=600',
-    dateFr: '20 août 2025', dateEn: 'Aug 20, 2025',
-    screening: 'Cinéma Oubangui',
-  },
-  {
-    titleFr: 'Jazz in Africa', titleEn: 'Jazz in Africa',
-    genreFr: 'Documentaire', genreEn: 'Documentary', rating: 4.8,
-    image: 'https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?w=600',
-    dateFr: '25 août 2025', dateEn: 'Aug 25, 2025',
-    screening: 'Espace Culturel',
-  },
-];
-
-const culturalEvents = [
-  {
-    icon: Music,
-    titleFr: 'TÎ-ï Festival',          titleEn: 'TÎ-ï Festival',
-    dateFr: '1er sept. 2025',          dateEn: 'Sept 1, 2025',
-    descFr: 'Le festival de musique centrafricaine incontournable.',
-    descEn: 'The unmissable Central African music festival.',
-  },
-  {
-    icon: Palette,
-    titleFr: 'Exposition Art Urbain',   titleEn: 'Urban Art Exhibition',
-    dateFr: '18 août 2025',            dateEn: 'Aug 18, 2025',
-    descFr: 'Les artistes émergents de Bangui exposent leurs œuvres.',
-    descEn: "Bangui's emerging artists showcase their work.",
-  },
-  {
-    icon: Theater,
-    titleFr: "Théâtre de l'Oubangui",  titleEn: 'Oubangui Theatre',
-    dateFr: 'Chaque vendredi',         dateEn: 'Every Friday',
-    descFr: 'Pièces de théâtre en français et sango.',
-    descEn: 'Plays performed in French and Sango.',
-  },
-  {
-    icon: Film,
-    titleFr: 'Ciné en plein air',      titleEn: 'Outdoor Cinema',
-    dateFr: 'Mensuellement',           dateEn: 'Monthly',
-    descFr: 'Projections gratuites sous les étoiles de Bangui.',
-    descEn: 'Free screenings under the stars of Bangui.',
-  },
-];
+const CULTURAL_ICONS = [Music, Palette, Theater, Film];
 
 export default function CinemaPage() {
   const { t, lang } = useLanguage();
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [events,   setEvents]   = useState<Event[]>([]);
+  const [loading,  setLoading]  = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      getArticles({ limit: 8 }).then(data => data.filter(a => a.category === 'cinema' || a.category === 'culture')),
+      getUpcomingEvents(4),
+    ])
+      .then(([arts, evts]) => { setArticles(arts); setEvents(evts); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <>
+      {/* Hero — design image kept intentionally */}
       <div className="relative h-72 overflow-hidden flex items-end pb-8">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -95,72 +52,99 @@ export default function CinemaPage() {
               <span className="label-editorial">{t('cinema.nowScreening')}</span>
             </div>
             <h2 className="font-display text-4xl font-bold text-night dark:text-beige mb-8">{t('cinema.nowPlaying')}</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-              {movies.map((movie) => (
-                <div key={movie.titleFr} className="group bg-white dark:bg-night-50 rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-all hover:-translate-y-1">
-                  <div className="relative h-64 overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={movie.image}
-                      alt={lang === 'fr' ? movie.titleFr : movie.titleEn}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                    <div className="absolute top-3 left-3">
-                      <span className="px-2 py-0.5 bg-blue-500 text-white text-[9px] font-bold rounded-full uppercase">
-                        {lang === 'fr' ? (movie.genreFr ?? movie.genre) : (movie.genreEn ?? movie.genre)}
-                      </span>
+
+            {loading && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-5 animate-pulse">
+                {[0,1,2,3].map(i => <div key={i} className="h-72 bg-night/10 dark:bg-beige/5 rounded-2xl" />)}
+              </div>
+            )}
+
+            {!loading && articles.length === 0 && (
+              <p className="text-night/40 dark:text-beige/40">
+                {lang === 'fr' ? 'Aucun film ou article cinéma disponible pour le moment.' : 'No cinema articles available at the moment.'}
+              </p>
+            )}
+
+            {!loading && articles.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+                {articles.map((article) => (
+                  <div key={article._id} className="group bg-white dark:bg-night-50 rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-all hover:-translate-y-1">
+                    <div className="relative h-64 overflow-hidden">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={article.image}
+                        alt={lang === 'fr' ? (article.titleFr || article.title) : article.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                      <div className="absolute top-3 left-3">
+                        <span className="px-2 py-0.5 bg-blue-500 text-white text-[9px] font-bold rounded-full uppercase">
+                          {article.category}
+                        </span>
+                      </div>
+                      {article.readTime && (
+                        <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 bg-black/50 rounded-full">
+                          <Star className="w-3 h-3 text-gold fill-gold" />
+                          <span className="text-white text-[10px] font-bold">{article.readTime} min</span>
+                        </div>
+                      )}
                     </div>
-                    <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 bg-black/50 rounded-full">
-                      <Star className="w-3 h-3 text-gold fill-gold" />
-                      <span className="text-white text-[10px] font-bold">{movie.rating}</span>
+                    <div className="p-4">
+                      <h3 className="font-display text-base font-bold text-night dark:text-beige group-hover:text-gold transition-colors mb-1 line-clamp-2">
+                        {lang === 'fr' ? (article.titleFr || article.title) : article.title}
+                      </h3>
+                      {article.publishedAt && (
+                        <p className="text-xs text-night/40 dark:text-beige/40 flex items-center gap-1 mb-1">
+                          <Calendar className="w-3 h-3" />
+                          {new Date(article.publishedAt).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </p>
+                      )}
+                      {article.author && typeof article.author === 'string' && (
+                        <p className="text-xs text-night/50 dark:text-beige/50">{article.author}</p>
+                      )}
                     </div>
                   </div>
-                  <div className="p-4">
-                    <h3 className="font-display text-base font-bold text-night dark:text-beige group-hover:text-gold transition-colors mb-1">
-                      {lang === 'fr' ? movie.titleFr : movie.titleEn}
-                    </h3>
-                    <p className="text-xs text-night/40 dark:text-beige/40 flex items-center gap-1 mb-1">
-                      <Calendar className="w-3 h-3" />
-                      {lang === 'fr' ? movie.dateFr : movie.dateEn}
-                    </p>
-                    <p className="text-xs text-night/50 dark:text-beige/50">{movie.screening}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Cultural Agenda */}
-          <div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="divider-gold" />
-              <span className="label-editorial">{t('cinema.agenda')}</span>
+          {!loading && events.length > 0 && (
+            <div>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="divider-gold" />
+                <span className="label-editorial">{t('cinema.agenda')}</span>
+              </div>
+              <h2 className="font-display text-4xl font-bold text-night dark:text-beige mb-8">{t('cinema.culturalAgenda')}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {events.map((event, i) => {
+                  const Icon = CULTURAL_ICONS[i % CULTURAL_ICONS.length];
+                  return (
+                    <div key={event._id} className="flex gap-4 bg-white dark:bg-night-50 rounded-2xl p-5 hover:shadow-card-hover transition-all group cursor-pointer">
+                      <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-xl bg-gold/10 text-gold group-hover:bg-gold group-hover:text-night transition-all">
+                        <Icon className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 className="font-display text-lg font-bold text-night dark:text-beige group-hover:text-gold transition-colors mb-0.5">
+                          {event.title}
+                        </h3>
+                        <p className="text-xs text-gold font-semibold mb-1">
+                          {new Date(event.date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                          {event.location ? ` · ${event.location}` : ''}
+                        </p>
+                        {event.description && (
+                          <p className="text-sm text-night/50 dark:text-beige/50 line-clamp-2">{event.description}</p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-            <h2 className="font-display text-4xl font-bold text-night dark:text-beige mb-8">{t('cinema.culturalAgenda')}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {culturalEvents.map(({ icon: Icon, titleFr, titleEn, dateFr, dateEn, descFr, descEn }) => (
-                <div key={titleFr} className="flex gap-4 bg-white dark:bg-night-50 rounded-2xl p-5 hover:shadow-card-hover transition-all group cursor-pointer">
-                  <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-xl bg-gold/10 text-gold group-hover:bg-gold group-hover:text-night transition-all">
-                    <Icon className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h3 className="font-display text-lg font-bold text-night dark:text-beige group-hover:text-gold transition-colors mb-0.5">
-                      {lang === 'fr' ? titleFr : titleEn}
-                    </h3>
-                    <p className="text-xs text-gold font-semibold mb-1">
-                      {lang === 'fr' ? dateFr : dateEn}
-                    </p>
-                    <p className="text-sm text-night/50 dark:text-beige/50">
-                      {lang === 'fr' ? descFr : descEn}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          )}
 
-          {/* Urban Art */}
+          {/* Urban Art — design section with curated images, kept intentionally */}
           <div>
             <div className="flex items-center gap-3 mb-3">
               <div className="divider-gold" />

@@ -8,17 +8,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { getFeaturedGallery } from '@/lib/db';
 import type { GalleryItem } from '@/types';
 
-/* ─── Fallback seed data ─────────────────────────── */
-const seedItems = [
-  { _id: '1', type: 'image' as const, url: 'https://images.unsplash.com/photo-1574169208507-84376144848b?w=600', span: 'col-span-2 row-span-2', isFeatured: true, createdAt: '' },
-  { _id: '2', type: 'video' as const, url: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600', span: '', isFeatured: true, createdAt: '' },
-  { _id: '3', type: 'image' as const, url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600', span: '', isFeatured: true, createdAt: '' },
-  { _id: '4', type: 'image' as const, url: 'https://images.unsplash.com/photo-1515923152115-758a6b16f35e?w=600', span: '', isFeatured: true, createdAt: '' },
-  { _id: '5', type: 'image' as const, url: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=600', span: '', isFeatured: true, createdAt: '' },
-  { _id: '6', type: 'image' as const, url: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=600', span: '', isFeatured: true, createdAt: '' },
-  { _id: '7', type: 'video' as const, url: 'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=600', span: 'col-span-2', isFeatured: true, createdAt: '' },
-];
-
 type SpannedItem = GalleryItem & { span?: string };
 
 /** Assign grid span classes based on position */
@@ -36,12 +25,12 @@ export default function GalleryPreview() {
 
   useEffect(() => {
     getFeaturedGallery(7)
-      .then((data) => setItems(applySpans(data.length ? data : seedItems)))
-      .catch(() => setItems(seedItems))
+      .then((data) => setItems(applySpans(data)))
+      .catch(() => setItems([]))
       .finally(() => setIsLoading(false));
   }, []);
 
-  const displayItems = isLoading ? seedItems : (items.length ? items : seedItems);
+  const displayItems = isLoading ? [] : items;
 
   return (
     <section className="section-py bg-beige dark:bg-night-50">
@@ -62,7 +51,15 @@ export default function GalleryPreview() {
           </Link>
         </div>
 
+        {/* Empty state */}
+        {!isLoading && displayItems.length === 0 && (
+          <div className="text-center py-16 text-night/30 dark:text-beige/30">
+            <p className="text-lg">{t('gallery.empty') || 'Galerie bientôt disponible'}</p>
+          </div>
+        )}
+
         {/* Grid */}
+        {displayItems.length > 0 && (
         <div className="grid grid-cols-4 grid-rows-3 gap-3 h-[600px]">
           {displayItems.map((item, i) => (
             <motion.div
@@ -97,6 +94,7 @@ export default function GalleryPreview() {
             </motion.div>
           ))}
         </div>
+        )}
 
         <div className="mt-8 text-center">
           <Link href="/gallery" className="btn-gold px-8">

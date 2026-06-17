@@ -9,42 +9,6 @@ import { cn, restaurantCategoryLabels } from '@/lib/utils';
 import { getFeaturedRestaurants } from '@/lib/db';
 import type { Restaurant } from '@/types';
 
-/* ─── Fallback seed data ────────────────────────── */
-const seedRestaurants: Restaurant[] = [
-  {
-    _id: '1', slug: 'restaurant-m', name: "Restaurant M'",
-    category: 'restaurant', cuisine: ['Africaine', 'Française', 'Fusion'],
-    description: "L'adresse incontournable de Bangui pour une cuisine raffinée au cœur de la capitale.",
-    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800',
-    rating: 4.8, reviewCount: 124, priceRange: 3,
-    address: 'Centre-ville, Bangui', isFeatured: true, createdAt: '',
-  },
-  {
-    _id: '2', slug: 'bangui-rock-club', name: 'Bangui Rock Club',
-    category: 'nightclub', cuisine: ['Cocktails', 'Snacks'],
-    description: "Le temple de la musique live et des nuits inoubliables à Bangui.",
-    image: 'https://images.unsplash.com/photo-1545128485-c400ce7b9e5d?w=800',
-    rating: 4.7, reviewCount: 89, priceRange: 2,
-    address: 'Bangui', isFeatured: true, createdAt: '',
-  },
-  {
-    _id: '3', slug: 'l-avenue', name: "L'Avenue",
-    category: 'lounge', cuisine: ['International', 'Cocktails'],
-    description: "Le lounge chic et moderne de Bangui, parfait pour l'apéritif et la soirée.",
-    image: 'https://images.unsplash.com/photo-1525610553991-2bede1a236e2?w=800',
-    rating: 4.6, reviewCount: 67, priceRange: 3,
-    address: "Avenue de l'Indépendance, Bangui", isFeatured: true, createdAt: '',
-  },
-  {
-    _id: '4', slug: 'rooftop-bangui', name: 'Rooftop Bangui',
-    category: 'rooftop', cuisine: ['Cocktails', 'Tapas', 'Grillades'],
-    description: "La vue panoramique sur Bangui et ses cocktails signature vous attendent.",
-    image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800',
-    rating: 4.9, reviewCount: 45, priceRange: 4,
-    address: 'Centre-ville, Bangui', isFeatured: true, createdAt: '',
-  },
-];
-
 const PriceRange = ({ range }: { range: number }) => (
   <span className="text-xs font-semibold">
     {Array.from({ length: 4 }, (_, i) => (
@@ -60,12 +24,12 @@ export default function TrendingRestaurants() {
 
   useEffect(() => {
     getFeaturedRestaurants(4)
-      .then((data) => setRestaurants(data.length ? data : seedRestaurants))
-      .catch(() => setRestaurants(seedRestaurants))
+      .then((data) => setRestaurants(data))
+      .catch(() => setRestaurants([]))
       .finally(() => setIsLoading(false));
   }, []);
 
-  const displayRestaurants = isLoading ? [] : (restaurants.length ? restaurants : seedRestaurants);
+  const displayRestaurants = isLoading ? [] : restaurants;
 
   return (
     <section className="section-py bg-white dark:bg-night-50" id="restaurants">
@@ -109,7 +73,12 @@ export default function TrendingRestaurants() {
         )}
 
         {/* Restaurant cards */}
-        {!isLoading && (
+        {!isLoading && displayRestaurants.length === 0 && (
+          <div className="text-center py-16 text-night/30 dark:text-beige/30">
+            <p className="text-lg">{t('general.noData') || 'Aucun restaurant disponible'}</p>
+          </div>
+        )}
+        {!isLoading && displayRestaurants.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {displayRestaurants.map((restaurant, i) => (
               <motion.div

@@ -9,45 +9,6 @@ import { formatDate, eventCategoryLabels, cn } from '@/lib/utils';
 import { getUpcomingEvents } from '@/lib/db';
 import type { Event } from '@/types';
 
-/* ─── Fallback seed data ────────────────────────── */
-const seedEvents: Event[] = [
-  {
-    _id: '1', slug: 'bbq-pool-party', isFree: false, isFeatured: true,
-    title: 'BBQ & Pool Party', category: 'pool-parties',
-    date: '2026-08-10T18:00:00Z', location: 'Bangui',
-    ticketPrice: 5000, description: '', createdAt: '',
-    image: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800',
-  },
-  {
-    _id: '2', slug: 'journee-femme', isFree: true, isFeatured: true,
-    title: "Journée Internationale de la Femme", category: 'festivals',
-    date: '2026-08-08T10:00:00Z', location: 'Bangui',
-    ticketPrice: 0, description: '', createdAt: '',
-    image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800',
-  },
-  {
-    _id: '3', slug: 'cinema-mufasa', isFree: false, isFeatured: true,
-    title: 'Cinéma en Famille – Mufasa', category: 'cinema',
-    date: '2026-08-15T19:30:00Z', location: 'Bangui',
-    ticketPrice: 3000, description: '', createdAt: '',
-    image: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800',
-  },
-  {
-    _id: '4', slug: 'tournoi-inter-entreprises', isFree: false, isFeatured: true,
-    title: 'Tournoi Inter-Entreprises', category: 'sports',
-    date: '2026-08-20T08:00:00Z', location: 'Bangui',
-    ticketPrice: 2000, description: '', createdAt: '',
-    image: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=800',
-  },
-  {
-    _id: '5', slug: 'ti-i-festival', isFree: false, isFeatured: true,
-    title: 'TÎ-ï Festival', category: 'festivals',
-    date: '2026-09-01T17:00:00Z', location: 'Bangui',
-    ticketPrice: 10000, description: '', createdAt: '',
-    image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800',
-  },
-];
-
 const containerVariants = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.1 } },
@@ -64,12 +25,12 @@ export default function FeaturedEvents() {
 
   useEffect(() => {
     getUpcomingEvents(8)
-      .then((data) => setEvents(data.length ? data : seedEvents))
-      .catch(() => setEvents(seedEvents))
+      .then((data) => setEvents(data))
+      .catch(() => setEvents([]))
       .finally(() => setIsLoading(false));
   }, []);
 
-  const displayEvents = isLoading ? [] : (events.length ? events : seedEvents);
+  const displayEvents = isLoading ? [] : events;
 
   return (
     <section className="section-py bg-beige dark:bg-night" id="events">
@@ -103,8 +64,15 @@ export default function FeaturedEvents() {
           </div>
         )}
 
+        {/* Empty state */}
+        {!isLoading && displayEvents.length === 0 && (
+          <div className="text-center py-16 text-night/30 dark:text-beige/30">
+            <p className="text-lg">{lang === 'fr' ? 'Aucun événement à venir' : 'No upcoming events'}</p>
+          </div>
+        )}
+
         {/* Content */}
-        {!isLoading && (
+        {!isLoading && displayEvents.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Hero event card */}
             {displayEvents[0] && (
