@@ -35,6 +35,7 @@ export interface Event {
   rsvpCount?: number;
   tags?: string[];
   organizer?: string;
+  contactWhatsapp?: string;
   createdAt: string;
 }
 

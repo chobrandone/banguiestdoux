@@ -47,6 +47,7 @@ export function toEvent(row: any): Event {
     rsvpCount:    row.rsvp_count ?? 0,
     tags:         row.tags || [],
     organizer:    row.organizer,
+    contactWhatsapp: row.contact_whatsapp,
     createdAt:    row.created_at,
   };
 }

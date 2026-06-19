@@ -14,6 +14,7 @@ type EventForm = {
   title: string; category: string; date: string; time: string;
   location: string; address: string; description: string; image: string;
   ticketPrice: number; isFree: boolean; isFeatured: boolean; isPublished: boolean; capacity: number;
+  contactWhatsapp: string;
 };
 
 const CATS = [
@@ -29,7 +30,7 @@ const CAT_COLORS: Record<string, string> = {
   'jazz-nights':'bg-yellow-500/20 text-yellow-400', sports:'bg-white/10 text-beige/80',
   exhibitions:'bg-orange-500/20 text-orange-400', art:'bg-rose-500/20 text-rose-400',
 };
-const EMPTY: EventForm = { title:'', category:'concerts', date:'', time:'', location:'', address:'', description:'', image:'', ticketPrice:0, isFree:false, isFeatured:false, isPublished:true, capacity:0 };
+const EMPTY: EventForm = { title:'', category:'concerts', date:'', time:'', location:'', address:'', description:'', image:'', ticketPrice:0, isFree:false, isFeatured:false, isPublished:true, capacity:0, contactWhatsapp:'' };
 const ic = 'w-full px-4 py-3 bg-[#0A0A0A] border border-white/10 rounded-xl text-sm text-beige placeholder:text-beige/30 outline-none focus:border-gold/50 transition-all';
 const lc = 'block text-xs font-semibold text-beige/50 uppercase tracking-wider mb-1.5';
 
@@ -61,6 +62,7 @@ function formToRow(form: EventForm) {
     gallery:      [],
     tags:         [],
     rsvp_count:   0,
+    contact_whatsapp: form.contactWhatsapp || null,
   };
 }
 
@@ -106,6 +108,7 @@ export default function AdminEventsPage() {
       // @ts-expect-error — isPublished not in Event type but present in DB
       isPublished: item.isPublished ?? true,
       capacity:    item.capacity || 0,
+      contactWhatsapp: item.contactWhatsapp || '',
     });
     setShowModal(true);
   };
@@ -296,6 +299,16 @@ export default function AdminEventsPage() {
                   <div><label className={lc}>Heure</label><input type="time" value={form.time} onChange={fld('time')} className={ic} /></div>
                   <div><label className={lc}>Lieu *</label><input value={form.location} onChange={fld('location')} required placeholder="Nom du lieu" className={ic} /></div>
                   <div className="md:col-span-2"><label className={lc}>Adresse</label><input value={form.address} onChange={fld('address')} placeholder="Adresse complète, Bangui" className={ic} /></div>
+                  <div className="md:col-span-2">
+                    <label className={lc}>Contact WhatsApp</label>
+                    <input
+                      value={form.contactWhatsapp}
+                      onChange={fld('contactWhatsapp')}
+                      placeholder="Ex: +236 72 63 71 71"
+                      className={ic}
+                    />
+                    <p className="text-[11px] text-beige/30 mt-1">Numéro affiché comme bouton &quot;Contacter sur WhatsApp&quot; sur la page de l&apos;événement.</p>
+                  </div>
                   <div className="md:col-span-2"><label className={lc}>Description</label><textarea value={form.description} onChange={fld('description')} rows={3} placeholder="Description de l'événement..." className={ic + ' resize-none'} /></div>
                   <div className="md:col-span-2">
                     <ImageUpload
