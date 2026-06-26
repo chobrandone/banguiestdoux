@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Send, CheckCircle2, Instagram, Facebook, Youtube } from 'lucide-react';
 import { FaTiktok, FaWhatsapp } from 'react-icons/fa';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { sendMessage } from '@/lib/db';
+import { supabase } from '@/lib/supabase';
 import toast from 'react-hot-toast';
 
 export default function NewsletterSection() {
@@ -19,7 +19,8 @@ export default function NewsletterSection() {
     if (!email) return;
     setIsLoading(true);
     try {
-      await sendMessage({ name: email.split('@')[0], email, subject: 'Newsletter', message: 'Inscription newsletter' });
+      const { error } = await supabase.from('newsletter_subscribers').insert([{ email }]);
+      if (error && error.code !== '23505') throw error; // ignore duplicate email
       setSubscribed(true);
       toast.success(t('newsletter.success'));
     } catch {
@@ -134,28 +135,6 @@ export default function NewsletterSection() {
                 </a>
               ))}
             </div>
-          </motion.div>
-
-          {/* Stats bar */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
-            className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8"
-          >
-            {[
-              { value: '50+',   labelKey: 'newsletter.stat.events',      icon: '🎉' },
-              { value: '30+',   labelKey: 'newsletter.stat.restaurants', icon: '🍽️' },
-              { value: '100+',  labelKey: 'newsletter.stat.articles',    icon: '📰' },
-              { value: '10K+',  labelKey: 'newsletter.stat.members',     icon: '👥' },
-            ].map(({ value, labelKey, icon }) => (
-              <div key={labelKey} className="text-center">
-                <div className="text-2xl mb-2">{icon}</div>
-                <div className="font-display text-3xl font-bold text-gold mb-1">{value}</div>
-                <div className="text-beige/40 text-xs uppercase tracking-wider">{t(labelKey)}</div>
-              </div>
-            ))}
           </motion.div>
         </div>
       </div>

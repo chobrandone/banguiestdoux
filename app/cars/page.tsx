@@ -115,7 +115,7 @@ export default function CarsPage() {
 
                 {/* Info */}
                 <div className="p-4">
-                  <h3 className="font-bold text-night dark:text-beige">{car.name}</h3>
+                  <h3 className="font-display font-bold text-night dark:text-beige group-hover:text-gold transition-colors">{car.name}</h3>
                   <p className="text-xs text-gray-400 dark:text-beige/40 mb-3">{car.brand} {car.model}</p>
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-beige/40">

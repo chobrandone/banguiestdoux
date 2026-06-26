@@ -131,6 +131,7 @@ export interface Article {
 export type ArticleCategory =
   | 'news'
   | 'culture'
+  | 'cinema'
   | 'nightlife'
   | 'gastronomy'
   | 'travel'
@@ -236,6 +237,8 @@ export interface Talent {
   youtube?: string;
   isFeatured: boolean;
   tags?: string[];
+  tagline?: string;
+  qaPairs?: { question: string; answer: string }[];
   createdAt: string;
 }
 

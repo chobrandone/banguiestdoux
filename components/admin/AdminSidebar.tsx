@@ -9,7 +9,7 @@ import {
   LayoutDashboard, Calendar, Utensils, Film, ShoppingBag,
   Images, Users, MessageSquare, Settings, BarChart3,
   ChevronLeft, ChevronRight, Star, Globe, LogOut, Home,
-  Megaphone, X, Hotel, Car, BookOpen,
+  Megaphone, X, Hotel, Car, BookOpen, GalleryHorizontal, CalendarCheck, Mail,
 } from 'lucide-react';
 import { useAuth }     from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -17,8 +17,10 @@ import { cn }          from '@/lib/utils';
 
 const navItems = [
   { key: 'admin.nav.dashboard',   href: '/admin',              icon: LayoutDashboard },
+  { key: 'admin.nav.hero',        href: '/admin/hero',         icon: GalleryHorizontal },
   { key: 'admin.nav.events',      href: '/admin/events',       icon: Calendar        },
   { key: 'admin.nav.restaurants', href: '/admin/restaurants',  icon: Utensils        },
+  { key: 'admin.nav.restaurantReservations', href: '/admin/restaurant-reservations', icon: CalendarCheck },
   { key: 'admin.nav.articles',    href: '/admin/articles',     icon: Globe           },
   { key: 'admin.nav.cinema',      href: '/admin/cinema',       icon: Film            },
   { key: 'admin.nav.talents',     href: '/admin/talents',      icon: Star            },
@@ -32,6 +34,7 @@ const navItems = [
   { key: 'admin.nav.carRentals',    href: '/admin/car-rentals',    icon: Car        },
   { key: 'admin.nav.users',         href: '/admin/users',          icon: Users      },
   { key: 'admin.nav.messages',      href: '/admin/messages',       icon: MessageSquare },
+  { key: 'admin.nav.newsletter',    href: '/admin/newsletter',     icon: Mail       },
   { key: 'admin.nav.analytics',     href: '/admin/analytics',      icon: BarChart3  },
   { key: 'admin.nav.settings',      href: '/admin/settings',       icon: Settings   },
 ];

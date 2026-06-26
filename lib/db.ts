@@ -144,6 +144,8 @@ export function toTalent(row: any): Talent {
     youtube:    row.youtube,
     isFeatured: row.is_featured ?? false,
     tags:       row.tags || [],
+    tagline:    row.tagline,
+    qaPairs:    (row.qa_pairs || []).map((p: any) => ({ question: p.question ?? p.q ?? '', answer: p.answer ?? p.a ?? '' })),
     createdAt:  row.created_at,
   };
 }
@@ -496,6 +498,42 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     totalUsers:       totalUsers ?? 0,
     totalRevenue,
   };
+}
+
+/* ── Hero carousel slides ───────────────────────────────────────── */
+
+export interface HeroSlide {
+  _id: string;
+  image: string;
+  title?: string;
+  titleFr?: string;
+  subtitle?: string;
+  subtitleFr?: string;
+  sortOrder: number;
+  isActive: boolean;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function toHeroSlide(row: any): HeroSlide {
+  return {
+    _id:        row.id,
+    image:      row.image,
+    title:      row.title,
+    titleFr:    row.title_fr,
+    subtitle:   row.subtitle,
+    subtitleFr: row.subtitle_fr,
+    sortOrder:  row.sort_order ?? 0,
+    isActive:   row.is_active ?? true,
+  };
+}
+
+export async function getHeroSlides(): Promise<HeroSlide[]> {
+  const { data, error } = await supabase
+    .from('hero_slides').select('*')
+    .eq('is_active', true)
+    .order('sort_order', { ascending: true });
+  if (error) { console.error('getHeroSlides:', error); return []; }
+  return (data || []).map(toHeroSlide);
 }
 
 /* ── Admin CRUD helpers ─────────────────────────────────────────── */

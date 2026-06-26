@@ -111,7 +111,7 @@ export default function HotelsPage() {
                 <motion.div key={hotel.id}
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className="bg-white dark:bg-[#141414] rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-white/5">
+                  className="group bg-white dark:bg-[#141414] rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-white/5">
                   {/* Image */}
                   <div className="relative h-52 bg-gray-100 dark:bg-night-50">
                     {hotel.cover_image ? (
@@ -135,7 +135,7 @@ export default function HotelsPage() {
 
                   {/* Info */}
                   <div className="p-5">
-                    <h3 className="font-display text-lg font-bold text-night dark:text-beige mb-1">{hotel.name}</h3>
+                    <h3 className="font-display text-lg font-bold text-night dark:text-beige group-hover:text-gold transition-colors mb-1">{hotel.name}</h3>
                     {hotel.neighborhood && (
                       <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-beige/50 mb-3">
                         <MapPin size={12} /> {hotel.neighborhood}

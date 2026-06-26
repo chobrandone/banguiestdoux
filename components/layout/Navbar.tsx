@@ -216,11 +216,7 @@ export default function Navbar() {
                     )}
                   </AnimatePresence>
                 </div>
-              ) : (
-                <Link href="/auth/login" className="ml-1 px-4 py-2 bg-gold text-night text-sm font-semibold rounded-xl hover:bg-gold/80 transition-all hover:scale-[1.03] active:scale-[0.97]">
-                  {t('auth.login')}
-                </Link>
-              )}
+              ) : null}
             </div>
 
             {/* Mobile bar actions */}
@@ -350,12 +346,7 @@ export default function Navbar() {
                       <LogOut className="w-4 h-4" /> {t('nav.logout')}
                     </button>
                   </div>
-                ) : (
-                  <Link href="/auth/login" onClick={closeMobile}
-                    className="w-full flex items-center justify-center gap-2 py-3 bg-gold text-night font-semibold text-sm rounded-xl hover:bg-gold/80 transition-all">
-                    {t('auth.login')}
-                  </Link>
-                )}
+                ) : null}
 
                 {/* Social links */}
                 <div className="flex items-center justify-center gap-5 pt-1">

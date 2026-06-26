@@ -240,6 +240,14 @@ p { line-height: 1.7; }
   color: rgb(var(--accent-text));  /* resolves to yellow in dark mode */
 }
 
+/* Hero accent words sit on a permanently dark photo/video overlay,
+   regardless of site light/dark mode — always use the bright
+   electric green/yellow (#e3fc02), never the light-mode amber. */
+.text-hero-accent,
+.dark .text-hero-accent {
+  color: #e3fc02;
+}
+
 /* ─── PWA / Mobile ──────────────────────────────── */
 @media (display-mode: standalone) {
   body { padding-top: env(safe-area-inset-top); }

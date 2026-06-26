@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 import { FaTiktok, FaWhatsapp } from 'react-icons/fa';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { supabase } from '@/lib/supabase';
+import toast from 'react-hot-toast';
 
 const socialLinks = [
   { icon: Instagram, href: 'https://instagram.com/banguiestdoux', label: 'Instagram', color: 'hover:text-pink-400' },
@@ -60,10 +62,22 @@ export default function Footer() {
   const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) { setSubscribed(true); setEmail(''); }
+    if (!email) return;
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.from('newsletter_subscribers').insert([{ email }]);
+      if (error && error.code !== '23505') throw error; // ignore duplicate email
+      setSubscribed(true);
+      setEmail('');
+    } catch {
+      toast.error(t('footer.newsletter.error') || 'Erreur, veuillez réessayer');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const columns = [
@@ -138,7 +152,8 @@ export default function Footer() {
                   />
                   <button
                     type="submit"
-                    className="px-4 py-2.5 bg-gold hover:bg-gold/80 text-night rounded-r-xl transition-colors"
+                    disabled={submitting}
+                    className="px-4 py-2.5 bg-gold hover:bg-gold/80 text-night rounded-r-xl transition-colors disabled:opacity-50"
                   >
                     <Send className="w-4 h-4" />
                   </button>

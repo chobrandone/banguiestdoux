@@ -18,7 +18,7 @@ const translations: Record<Lang, Record<string, string>> = {
     'nav.home':         'Accueil',
     'nav.events':       'Événements',
     'nav.restaurants':  'Restaurants & Nightlife',
-    'nav.cinema':       'Cinéma & Culture',
+    'nav.cinema':       'Cinéma  &  Culture',
     'nav.discover':     'Découvrir Bangui',
     'nav.practical':    'Infos Pratiques',
     'nav.hotels':       'Hôtels',
@@ -365,6 +365,9 @@ const translations: Record<Lang, Record<string, string>> = {
     'admin.nav.messages':      'Messages',
     'admin.nav.analytics':     'Analytiques',
     'admin.nav.settings':      'Paramètres',
+    'admin.nav.hero':              'Carrousel Accueil',
+    'admin.nav.restaurantReservations': 'Réservations Resto',
+    'admin.nav.newsletter':        'Newsletter',
     'admin.nav.viewSite':    'Voir le site',
     'admin.nav.logout':      'Déconnexion',
 
@@ -749,6 +752,9 @@ const translations: Record<Lang, Record<string, string>> = {
     'admin.nav.messages':      'Messages',
     'admin.nav.analytics':     'Analytics',
     'admin.nav.settings':    'Settings',
+    'admin.nav.hero':              'Homepage Carousel',
+    'admin.nav.restaurantReservations': 'Restaurant Reservations',
+    'admin.nav.newsletter':        'Newsletter',
     'admin.nav.viewSite':    'View site',
     'admin.nav.logout':      'Logout',
 

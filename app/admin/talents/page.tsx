@@ -1,12 +1,15 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Pencil, Trash2, Star, Search, X, UserCircle, Instagram, Facebook } from 'lucide-react';
+import { Plus, Pencil, Trash2, Star, Search, X, UserCircle, Instagram, Facebook, FileUp, Trash } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
 import { getTalents, deleteRow, toTalent } from '@/lib/db';
+import { parseQAFromText } from '@/lib/parseQA';
 import ImageUpload from '@/components/admin/ImageUpload';
+
+type QAPair = { question: string; answer: string };
 
 interface Talent {
   _id: string;
@@ -20,12 +23,15 @@ interface Talent {
   videoUrl?: string;
   isFeatured: boolean;
   isPublished: boolean;
+  tagline?: string;
+  qaPairs?: QAPair[];
   createdAt: string;
 }
 
 type FormData = {
   name: string;
   title: string;
+  tagline: string;
   category: string;
   bio: string;
   image: string;
@@ -34,11 +40,13 @@ type FormData = {
   videoUrl: string;
   isFeatured: boolean;
   isPublished: boolean;
+  qaPairs: QAPair[];
 };
 
 const EMPTY_FORM: FormData = {
   name: '',
   title: '',
+  tagline: '',
   category: 'artist',
   bio: '',
   image: '',
@@ -47,6 +55,7 @@ const EMPTY_FORM: FormData = {
   videoUrl: '',
   isFeatured: false,
   isPublished: true,
+  qaPairs: [],
 };
 
 const CATEGORIES = [
@@ -92,6 +101,8 @@ export default function TalentsAdminPage() {
   const [form, setForm] = useState<FormData>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [parsing, setParsing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const ic = 'w-full px-4 py-3 bg-[#0A0A0A] border border-white/10 rounded-xl text-sm text-beige placeholder:text-beige/30 outline-none focus:border-gold/50 transition-all';
   const lc = 'block text-xs font-semibold text-beige/50 uppercase tracking-wider mb-1.5';
@@ -121,6 +132,7 @@ export default function TalentsAdminPage() {
     setForm({
       name: item.name,
       title: item.title || '',
+      tagline: item.tagline || '',
       category: item.category,
       bio: item.bio || '',
       image: item.image || '',
@@ -129,6 +141,7 @@ export default function TalentsAdminPage() {
       videoUrl: item.videoUrl || '',
       isFeatured: item.isFeatured,
       isPublished: item.isPublished,
+      qaPairs: item.qaPairs || [],
     });
     setShowModal(true);
   };
@@ -143,11 +156,39 @@ export default function TalentsAdminPage() {
     name: f.name, title: f.title || null,
     slug: f.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
     category: f.category, bio: f.bio || null,
+    tagline: f.tagline || null,
     image: f.image || null, instagram: f.instagram || null,
     facebook: f.facebook || null, video_url: f.videoUrl || null,
     is_featured: f.isFeatured, is_published: f.isPublished,
+    qa_pairs: f.qaPairs.filter(p => p.question.trim() || p.answer.trim()),
     gallery: [], tags: [],
   });
+
+  const addQAPair = () => setForm(p => ({ ...p, qaPairs: [...p.qaPairs, { question: '', answer: '' }] }));
+  const updateQAPair = (i: number, field: 'question' | 'answer', value: string) =>
+    setForm(p => ({ ...p, qaPairs: p.qaPairs.map((qa, idx) => idx === i ? { ...qa, [field]: value } : qa) }));
+  const removeQAPair = (i: number) => setForm(p => ({ ...p, qaPairs: p.qaPairs.filter((_, idx) => idx !== i) }));
+
+  const handleWordUpload = async (file: File) => {
+    setParsing(true);
+    try {
+      const mammoth = (await import('mammoth')).default;
+      const arrayBuffer = await file.arrayBuffer();
+      const { value: text } = await mammoth.extractRawText({ arrayBuffer });
+      const pairs = parseQAFromText(text);
+      if (pairs.length === 0) {
+        toast.error("Aucune question/réponse détectée dans le fichier");
+        return;
+      }
+      setForm(p => ({ ...p, qaPairs: [...p.qaPairs, ...pairs] }));
+      toast.success(`${pairs.length} question(s)/réponse(s) importée(s) !`);
+    } catch (err: unknown) {
+      toast.error((err as Error)?.message || 'Erreur de lecture du fichier Word');
+    } finally {
+      setParsing(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -423,6 +464,16 @@ export default function TalentsAdminPage() {
                   </div>
 
                   <div className="col-span-2">
+                    <label className={lc}>Tagline (phrase d&apos;accroche)</label>
+                    <input
+                      value={form.tagline}
+                      onChange={e => setForm(p => ({ ...p, tagline: e.target.value }))}
+                      placeholder="Ex: Bangui m'a tout donné"
+                      className={ic}
+                    />
+                  </div>
+
+                  <div className="col-span-2">
                     <label className={lc}>Biographie</label>
                     <textarea
                       value={form.bio}
@@ -470,6 +521,68 @@ export default function TalentsAdminPage() {
                       placeholder="https://youtube.com/... ou https://..."
                       className={ic}
                     />
+                  </div>
+
+                  <div className="col-span-2 bg-[#0A0A0A] rounded-xl p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className={lc}>Questions / Réponses de l&apos;interview</p>
+                        <p className="text-xs text-beige/30">Affichées sur la page &quot;Voir l&apos;interview&quot; du talent</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={parsing}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-gold/10 text-gold text-xs font-semibold rounded-lg hover:bg-gold/20 transition-all disabled:opacity-50"
+                        >
+                          <FileUp size={13} /> {parsing ? 'Lecture...' : 'Importer Word'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={addQAPair}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 text-beige/70 text-xs font-semibold rounded-lg hover:bg-white/10 transition-all"
+                        >
+                          <Plus size={13} /> Ajouter
+                        </button>
+                      </div>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".docx"
+                        className="hidden"
+                        onChange={e => e.target.files?.[0] && handleWordUpload(e.target.files[0])}
+                      />
+                    </div>
+
+                    {form.qaPairs.length === 0 ? (
+                      <p className="text-xs text-beige/20 italic">Aucune question ajoutée. Cliquez sur &quot;Ajouter&quot; ou importez un fichier Word (.docx) avec des lignes &quot;Q: ...&quot; / &quot;A: ...&quot;.</p>
+                    ) : (
+                      <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                        {form.qaPairs.map((qa, i) => (
+                          <div key={i} className="flex gap-2 items-start bg-white/[0.03] rounded-lg p-2.5">
+                            <div className="flex-1 space-y-1.5">
+                              <input
+                                value={qa.question}
+                                onChange={e => updateQAPair(i, 'question', e.target.value)}
+                                placeholder={`Question ${i + 1}`}
+                                className="w-full px-2.5 py-1.5 bg-[#0A0A0A] border border-white/10 rounded-lg text-xs text-beige placeholder:text-beige/30 outline-none focus:border-gold/50"
+                              />
+                              <textarea
+                                value={qa.answer}
+                                onChange={e => updateQAPair(i, 'answer', e.target.value)}
+                                placeholder="Réponse"
+                                rows={2}
+                                className="w-full px-2.5 py-1.5 bg-[#0A0A0A] border border-white/10 rounded-lg text-xs text-beige placeholder:text-beige/30 outline-none focus:border-gold/50 resize-none"
+                              />
+                            </div>
+                            <button type="button" onClick={() => removeQAPair(i)} className="p-1.5 text-beige/30 hover:text-red-400 transition-colors flex-shrink-0">
+                              <Trash size={14} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex items-center justify-between bg-[#0A0A0A] rounded-xl p-4">
