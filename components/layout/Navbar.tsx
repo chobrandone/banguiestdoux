@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -38,6 +39,8 @@ const navLinks = [
 export default function Navbar() {
   const { t, lang, setLang } = useLanguage();
   const { theme, setTheme }  = useTheme();
+  const pathname = usePathname();
+  const isHome = pathname === '/';
   const { user, isAdmin, logout } = useAuth();
   const { itemCount, toggleCart } = useCart();
 
@@ -83,7 +86,11 @@ export default function Navbar() {
     dropdownTimer.current = setTimeout(() => setActiveDropdown(null), 150);
   };
 
-  const isTransparent = !isScrolled && !isMobileOpen;
+  // Only the homepage has a permanent dark hero behind the header, so only
+  // it gets the transparent/white-text treatment before scrolling. Every
+  // other route gets the solid, theme-aware header from the first paint —
+  // otherwise white-on-white text disappears in light mode.
+  const isTransparent = isHome && !isScrolled && !isMobileOpen;
   const closeMobile   = () => { setIsMobileOpen(false); setExpandedMobile(null); };
 
   return (
